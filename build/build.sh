@@ -8,7 +8,7 @@ set -o pipefail
 
 imach="pm" #system name, pm for perlmutter
 
-doclean_all=false #true if compiled different configure options
+doclean_all=true #true if compiled different configure options
 
 doclean=true
 
@@ -19,9 +19,10 @@ docompile=true
 debug=false
 
 # WRF directories
+mversion="4.5.1"
 script_dir="/global/homes/h/hross/codes/WRF1996_Hannah/build/"
+
 export WRF_DIR="/global/homes/h/hross/codes/WRF1996_Hannah/"
-#jeanius_build/scripts/build/model/pm/Hannah/WRF"
 
 #Modules --------------------------------------------------------------------
 modversion="2023-09"  #denotes the time of major system update
@@ -148,7 +149,6 @@ if [ "$docompile" = true ]; then
     module list &> ${bldlog}
     
     ./compile em_real &>> ${bldlog}
-#    ./compile  em_seabreeze2d_x & >> ${bldlog}
     #./compile em_les &>> ${bldlog}
     
     set +e 
