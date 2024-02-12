@@ -127,8 +127,12 @@ if [ "$runconf" = true ]; then
         echo "editing configure.wrf"
         #need to remove -cc=$(SCC) in DM_CC
         sed -i 's/-cc=\$(SCC)/ /' ${configfile}
-        sed -i 's/mpif90/ftn/' ${configfile}
-        sed -i 's/mpicc/cc/' ${configfile}
+ 
+#	sed -i 's/mpif90/ftn/' ${configfile}
+#        sed -i 's/mpicc/cc/' ${configfile}
+ 
+	sed -i 's/gfortran/ftn/' ${configfile}
+        sed -i 's/gcc/cc/' ${configfile}
         
         #also add (uncomment) "-DRSL0_ONLY" to CFLAGS_LOCAL to supress 
         #rsl.err.xxxx and rsl.out.xxxx files and write only rsl.err.0000 and rsl.out.000
@@ -148,7 +152,9 @@ if [ "$docompile" = true ]; then
     #save modules into a log file
     module list &> ${bldlog}
     
-    ./compile em_real &>> ${bldlog}
+    #./compile em_real &>> ${bldlog}
+    
+    ./compile em_seabreeze2d_x &>> ${bldlog} 
     #./compile em_les &>> ${bldlog}
     
     set +e 
