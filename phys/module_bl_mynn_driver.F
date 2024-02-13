@@ -263,62 +263,9 @@ MODULE module_bl_mynn_driver
         onethird  , twothirds , tkmin      , t0c       , &
         tice      , kind_phys
 
-  use module_bl_mynn_1D
+  use module_bl_mynn_1d
 
   IMPLICIT NONE
-
-!===================================================================
-! From here on, these are MYNN-specific parameters:
-! The parameters below depend on stability functions of module_sf_mynn.
-  real(kind_phys), parameter :: cphm_st=5.0, cphm_unst=16.0, &
-                                cphh_st=5.0, cphh_unst=16.0
-
-! Closure constants
-  real(kind_phys), parameter ::  &
-       &pr  =  0.74,             &
-       &g1  =  0.235,            &  ! NN2009 = 0.235
-       &b1  = 24.0,              &
-       &b2  = 15.0,              &  ! CKmod     NN2009
-       &c2  =  0.729,            &  ! 0.729, & !0.75, &
-       &c3  =  0.340,            &  ! 0.340, & !0.352, &
-       &c4  =  0.0,              &
-       &c5  =  0.2,              &
-       &a1  = b1*( 1.0-3.0*g1 )/6.0, &
-!       &c1  = g1 -1.0/( 3.0*a1*b1**(1.0/3.0) ), &
-       &c1  = g1 -1.0/( 3.0*a1*2.88449914061481660), &
-       &a2  = a1*( g1-c1 )/( g1*pr ), &
-       &g2  = b2/b1*( 1.0-c3 ) +2.0*a1/b1*( 3.0-2.0*c2 )
-
-  real(kind_phys), parameter ::  &
-       &cc2 =  1.0-c2,           &
-       &cc3 =  1.0-c3,           &
-       &e1c =  3.0*a2*b2*cc3,    &
-       &e2c =  9.0*a1*a2*cc2,    &
-       &e3c =  9.0*a2*a2*cc2*( 1.0-c5 ), &
-       &e4c = 12.0*a1*a2*cc2,    &
-       &e5c =  6.0*a1*a1
-
-! Constants for min tke in elt integration (qmin), max z/L in els (zmax), 
-! and factor for eddy viscosity for TKE (Kq = Sqfac*Km):
-  real(kind_phys), parameter :: qmin=0.0, zmax=1.0, Sqfac=3.0
-! Note that the following mixing-length constants are now specified in mym_length
-!      &cns=3.5, alp1=0.23, alp2=0.3, alp3=3.0, alp4=10.0, alp5=0.2
-
-  real(kind_phys), parameter :: gpw=5./3., qcgmin=1.e-8, qkemin=1.e-12
-  real(kind_phys), parameter :: tliq = 269. !all hydrometeors are liquid when T > tliq
-
-! Constants for cloud PDF (mym_condensation)
-  real(kind_phys), parameter :: rr2=0.7071068, rrp=0.3989423
-
-  !>Use Canuto/Kitamura mod (remove Ric and negative TKE) (1:yes, 0:no)
-  !!For more info, see Canuto et al. (2008 JAS) and Kitamura (Journal of the 
-  !!Meteorological Society of Japan, Vol. 88, No. 5, pp. 857-864, 2010).
-  !!Note that this change required further modification of other parameters
-  !!above (c2, c3). If you want to remove this option, set c2 and c3 constants 
-  !!(above) back to NN2009 values (see commented out lines next to the
-  !!parameters above). This only removes the negative TKE problem
-  !!but does not necessarily improve performance - neutral impact.
-  real(kind_phys), parameter :: CKmod=1.
 
   !>Use Ito et al. (2015, BLM) scale-aware (0: no, 1: yes). Note that this also has impacts
   !!on the cloud PDF and mass-flux scheme, using LES-derived similarity function.
@@ -332,9 +279,6 @@ MODULE module_bl_mynn_driver
 
   !>Option to activate heating due to dissipation of TKE (to activate, set to 1.0)
   integer, parameter :: dheat_opt = 1
-
-  !Option to activate environmental subsidence in mass-flux scheme
-  logical, parameter :: env_subs = .false.
 
   !Option to switch flux-profile relationship for surface (from Puhales et al. 2020)
   !0: use original Dyer-Hicks, 1: use Cheng-Brustaert and Blended COARE
@@ -1208,7 +1152,7 @@ CONTAINS
                &cldfra_bl1D,bl_mynn_mixlength,           &
                &edmf_w1,edmf_a1,                         &
                &TKEprodTD,                               &
-               &spp_pbl,rstoch_col                       )
+               &spp_pbl,rstoch_col,debug_code            )
 
 !>  - Call mym_predict() to solve TKE and 
 !! \f$\theta^{'2}, q^{'2}, and \theta^{'}q^{'}\f$
@@ -1273,7 +1217,7 @@ CONTAINS
                &bl_mynn_mixqt,                           &
                &bl_mynn_edmf,                            &
                &bl_mynn_edmf_mom,                        &
-               &bl_mynn_mixscalars                       )
+               &bl_mynn_mixscalars,debug_code            )
 
 
        if ( mix_chem ) then

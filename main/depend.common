@@ -312,12 +312,17 @@ module_bl_gfsedmf.o: \
 	module_gfs_physcons.o 
 
 
-module_bl_mynn.o: \
-	module_bl_mynn_common.o 
+module_bl_mynn_1d.o: \
+	module_bl_mynn_common.o
+
+
+module_bl_mynn_driver.o: \
+	module_bl_mynn_common.o \
+	module_bl_mynn_1d.o
 
 
 module_bl_mynn_wrapper.o: \
-	module_bl_mynn.o \
+	module_bl_mynn_driver.o \
 	module_bl_mynn_common.o 
 
 
@@ -381,7 +386,7 @@ module_bl_camuwpbl_driver.o: \
 
 module_sf_mynn.o: \
 	module_sf_sfclay.o \
-	module_bl_mynn.o \
+	module_bl_mynn_wrapper.o \
 	../share/module_model_constants.o \
 	../frame/module_wrf_error.o 
 
@@ -939,7 +944,7 @@ module_physics_init.o: \
 	module_bl_acm.o \
 	module_bl_myjpbl.o \
 	module_bl_qnsepbl.o \
-	module_bl_mynn.o \
+	module_bl_mynn_driver.o \
 	module_bl_mynn_wrapper.o \
 	module_bl_myjurb.o \
 	module_bl_boulac.o \
@@ -1114,7 +1119,7 @@ module_pbl_driver.o: \
 	module_bl_camuwpbl_driver.o \
 	module_bl_gfs.o \
 	module_bl_gfsedmf.o \
-	module_bl_mynn.o \
+	module_bl_mynn_driver.o \
 	module_bl_mynn_wrapper.o \
 	module_bl_fogdes.o \
 	module_bl_gwdo.o \

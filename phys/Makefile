@@ -4,8 +4,10 @@ LN      =       ln -sf
 MAKE    =       make -i -r
 RM      =       rm -f
 
+#module_bl_mynn.o : helloworld.o
 
 MODULES = \
+	helloworld.o \
 	ccpp_kind_types.o \
 	module_bep_bem_helper.o \
 	complex_number_module.o \
@@ -44,7 +46,8 @@ MODULES = \
 	module_bl_qnsepbl.o \
 	module_bl_acm.o \
         module_bl_mynn_common.o \
-        module_bl_mynn.o \
+        module_bl_mynn_1d.o \
+        module_bl_mynn_driver.o \
         module_bl_mynn_wrapper.o \
 	module_bl_fogdes.o \
 	module_bl_gwdo.o \
