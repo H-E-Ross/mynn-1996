@@ -8,7 +8,6 @@
 
 MODULE module_fdda_spnudging
 
-  USE module_dm , ONLY : ntasks_x, ntasks_y, local_communicator_x, local_communicator_y, data_order_xzy
   USE module_wrf_error , ONLY : wrf_err_message
 
 CONTAINS
@@ -589,73 +588,15 @@ IF(guv > 0. ) then
 
 
 
+     CALL spectral_nudging_filter_3dx( grid%dif_analysis, xwavenum,     &
+                                ids, ide, jds, jde, kds, kde,       &
+                                ims, ime, jms, jme, kms, kme,       &
+                                ips, ipe, jps, jpe, kps, MIN(kde-1,kpe) )
 
-
-
-
-
-
-  call trans_z2x ( ntasks_x, local_communicator_x, 1, 4, 4, DATA_ORDER_XZY , &
-                   grid%dif_analysis, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%dif_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x ) 
-
-
-     CALL spectral_nudging_filter_3dx( grid%dif_xxx, xwavenum,    &
-                                ids, ide, jds, jde, kds, kde,         &
-                                imsx, imex, jmsx, jmex, kmsx, kmex,     &
-                                ipsx, ipex, jpsx, jpex, kpsx, MIN(kde-1,kpex) ) 
-
-
-
-
-
-
-
-  call trans_x2y ( ntasks_y, local_communicator_y, 1, 4, 4, DATA_ORDER_XZY , &
-                   grid%dif_xxx, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x, &
-                   grid%dif_yyy, &  
-                   grid%sp31y, grid%ep31y, grid%sp32y, grid%ep32y, grid%sp33y, grid%ep33y, &
-                   grid%sm31y, grid%em31y, grid%sm32y, grid%em32y, grid%sm33y, grid%em33y ) 
-
-
-     CALL spectral_nudging_filter_3dy( grid%dif_yyy, ywavenum,    &
-                                ids, ide, jds, jde, kds, kde,         &
-                                imsy, imey, jmsy, jmey, kmsy, kmey,     &
-                                ipsy, ipey, jpsy, jpey, kpsy, MIN(kde-1,kpey) )
-
-
-
-
-
-
-
-  call trans_x2y ( ntasks_y, local_communicator_y, 0, 4, 4, DATA_ORDER_XZY , &
-                   grid%dif_xxx, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x, &
-                   grid%dif_yyy, &  
-                   grid%sp31y, grid%ep31y, grid%sp32y, grid%ep32y, grid%sp33y, grid%ep33y, &
-                   grid%sm31y, grid%em31y, grid%sm32y, grid%em32y, grid%sm33y, grid%em33y ) 
-  call trans_z2x ( ntasks_x, local_communicator_x, 0, 4, 4, DATA_ORDER_XZY , &
-                   grid%dif_analysis, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%dif_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x)
-
-
-
+     CALL spectral_nudging_filter_3dy( grid%dif_analysis, ywavenum,      &
+                                ids, ide, jds, jde, kds, kde,       &
+                                ims, ime, jms, jme, kms, kme,       &
+                                ips, ipe, jps, jpe, kps, MIN(kde-1,kpe) )
 
 
 
@@ -694,71 +635,15 @@ IF(guv > 0. ) then
 
 
 
+     CALL spectral_nudging_filter_3dx( grid%dif_analysis, xwavenum,    &
+                                ids, ide, jds, jde, kds, kde,       &
+                                ims, ime, jms, jme, kms, kme,       &
+                                ips, ipe, jps, jpe, kps, MIN(kde-1,kpe) )
 
-
-
-
-
-
-  call trans_z2x ( ntasks_x, local_communicator_x, 1, 4, 4, DATA_ORDER_XZY , &
-                   grid%dif_analysis, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%dif_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x ) 
-
-     CALL spectral_nudging_filter_3dx( grid%dif_xxx, xwavenum,     &
-                                ids, ide, jds, jde, kds, kde,         &
-                                imsx, imex, jmsx, jmex, kmsx, kmex,     &
-                                ipsx, ipex, jpsx, jpex, kpsx, MIN(kde-1,kpex) )
-
-
-
-
-
-
-
-  call trans_x2y ( ntasks_y, local_communicator_y, 1, 4, 4, DATA_ORDER_XZY , &
-                   grid%dif_xxx, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x, &
-                   grid%dif_yyy, &  
-                   grid%sp31y, grid%ep31y, grid%sp32y, grid%ep32y, grid%sp33y, grid%ep33y, &
-                   grid%sm31y, grid%em31y, grid%sm32y, grid%em32y, grid%sm33y, grid%em33y ) 
-
-     CALL spectral_nudging_filter_3dy( grid%dif_yyy, ywavenum,   &
-                                ids, ide, jds, jde, kds, kde-1,         &
-                                imsy, imey, jmsy, jmey, kmsy, kmey,     &
-                                ipsy, ipey, jpsy, jpey, kpsy, MIN(kde-1,kpey) )
-
-
-
-
-
-
-
-  call trans_x2y ( ntasks_y, local_communicator_y, 0, 4, 4, DATA_ORDER_XZY , &
-                   grid%dif_xxx, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x, &
-                   grid%dif_yyy, &  
-                   grid%sp31y, grid%ep31y, grid%sp32y, grid%ep32y, grid%sp33y, grid%ep33y, &
-                   grid%sm31y, grid%em31y, grid%sm32y, grid%em32y, grid%sm33y, grid%em33y ) 
-  call trans_z2x ( ntasks_x, local_communicator_x, 0, 4, 4, DATA_ORDER_XZY , &
-                   grid%dif_analysis, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%dif_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x)
-
-
-
+     CALL spectral_nudging_filter_3dy( grid%dif_analysis, ywavenum,    &
+                                ids, ide, jds, jde, kds, kde,       &
+                                ims, ime, jms, jme, kms, kme,       &
+                                ips, ipe, jps, jpe, kps, MIN(kde-1,kpe) )
 
 
 
@@ -802,73 +687,15 @@ IF(gt > 0. ) then
 
 
 
+     CALL spectral_nudging_filter_3dx( grid%dif_analysis, xwavenum,     &
+                                ids, ide, jds, jde, kds, kde,       &
+                                ims, ime, jms, jme, kms, kme,       &
+                                ips, ipe, jps, jpe, kps, MIN(kde-1,kpe) )
 
-
-
-
-
-
-  call trans_z2x ( ntasks_x, local_communicator_x, 1, 4, 4, DATA_ORDER_XZY , &
-                   grid%dif_analysis, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%dif_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x ) 
-
-
-     CALL spectral_nudging_filter_3dx( grid%dif_xxx, xwavenum,    &
-                                ids, ide, jds, jde, kds, kde,         &
-                                imsx, imex, jmsx, jmex, kmsx, kmex,     &
-                                ipsx, ipex, jpsx, jpex, kpsx, MIN(kde-1,kpex) )
-
-
-
-
-
-
-
-  call trans_x2y ( ntasks_y, local_communicator_y, 1, 4, 4, DATA_ORDER_XZY , &
-                   grid%dif_xxx, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x, &
-                   grid%dif_yyy, &  
-                   grid%sp31y, grid%ep31y, grid%sp32y, grid%ep32y, grid%sp33y, grid%ep33y, &
-                   grid%sm31y, grid%em31y, grid%sm32y, grid%em32y, grid%sm33y, grid%em33y ) 
-
-
-     CALL spectral_nudging_filter_3dy( grid%dif_yyy, ywavenum,    &
-                                ids, ide, jds, jde, kds, kde,         &
-                                imsy, imey, jmsy, jmey, kmsy, kmey,     &
-                                ipsy, ipey, jpsy, jpey, kpsy, MIN(kde-1,kpey) )
-
-
-
-
-
-
-
-  call trans_x2y ( ntasks_y, local_communicator_y, 0, 4, 4, DATA_ORDER_XZY , &
-                   grid%dif_xxx, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x, &
-                   grid%dif_yyy, &  
-                   grid%sp31y, grid%ep31y, grid%sp32y, grid%ep32y, grid%sp33y, grid%ep33y, &
-                   grid%sm31y, grid%em31y, grid%sm32y, grid%em32y, grid%sm33y, grid%em33y ) 
-  call trans_z2x ( ntasks_x, local_communicator_x, 0, 4, 4, DATA_ORDER_XZY , &
-                   grid%dif_analysis, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%dif_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x)
-
-
-
+     CALL spectral_nudging_filter_3dy( grid%dif_analysis, ywavenum,      &
+                                ids, ide, jds, jde, kds, kde,       &
+                                ims, ime, jms, jme, kms, kme,       &
+                                ips, ipe, jps, jpe, kps, MIN(kde-1,kpe) )
 
 
 
@@ -912,73 +739,15 @@ IF(gph > 0. ) then
 
 
 
+     CALL spectral_nudging_filter_3dx( grid%dif_analysis, xwavenum,     &
+                                ids, ide, jds, jde, kds, kde,       &
+                                ims, ime, jms, jme, kms, kme,       &
+                                ips, ipe, jps, jpe, kps, kpe )
 
-
-
-
-
-
-  call trans_z2x ( ntasks_x, local_communicator_x, 1, 4, 4, DATA_ORDER_XZY , &
-                   grid%dif_analysis, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%dif_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x ) 
-
-
-     CALL spectral_nudging_filter_3dx( grid%dif_xxx, xwavenum,    &
-                                ids, ide, jds, jde, kds, kde,         &
-                                imsx, imex, jmsx, jmex, kmsx, kmex,     &
-                                ipsx, ipex, jpsx, jpex, kpsx, kpex  )
-
-
-
-
-
-
-
-  call trans_x2y ( ntasks_y, local_communicator_y, 1, 4, 4, DATA_ORDER_XZY , &
-                   grid%dif_xxx, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x, &
-                   grid%dif_yyy, &  
-                   grid%sp31y, grid%ep31y, grid%sp32y, grid%ep32y, grid%sp33y, grid%ep33y, &
-                   grid%sm31y, grid%em31y, grid%sm32y, grid%em32y, grid%sm33y, grid%em33y ) 
-
-
-     CALL spectral_nudging_filter_3dy( grid%dif_yyy, ywavenum,    &
-                                ids, ide, jds, jde, kds, kde,         &
-                                imsy, imey, jmsy, jmey, kmsy, kmey,     &
-                                ipsy, ipey, jpsy, jpey, kpsy, kpey  )
-
-
-
-
-
-
-
-  call trans_x2y ( ntasks_y, local_communicator_y, 0, 4, 4, DATA_ORDER_XZY , &
-                   grid%dif_xxx, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x, &
-                   grid%dif_yyy, &  
-                   grid%sp31y, grid%ep31y, grid%sp32y, grid%ep32y, grid%sp33y, grid%ep33y, &
-                   grid%sm31y, grid%em31y, grid%sm32y, grid%em32y, grid%sm33y, grid%em33y ) 
-  call trans_z2x ( ntasks_x, local_communicator_x, 0, 4, 4, DATA_ORDER_XZY , &
-                   grid%dif_analysis, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%dif_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x)
-
-
-
+     CALL spectral_nudging_filter_3dy( grid%dif_analysis, ywavenum,      &
+                                ids, ide, jds, jde, kds, kde,       &
+                                ims, ime, jms, jme, kms, kme,       &
+                                ips, ipe, jps, jpe, kps, kpe  )
 
 
 
@@ -1023,73 +792,15 @@ IF(gq > 0. ) then
 
 
 
+     CALL spectral_nudging_filter_3dx( grid%dif_analysis, xwavenum,     &
+                                ids, ide, jds, jde, kds, kde,       &
+                                ims, ime, jms, jme, kms, kme,       &
+                                ips, ipe, jps, jpe, kps, kpe )
 
-
-
-
-
-
-  call trans_z2x ( ntasks_x, local_communicator_x, 1, 4, 4, DATA_ORDER_XZY , &
-                   grid%dif_analysis, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%dif_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x ) 
-
-
-     CALL spectral_nudging_filter_3dx( grid%dif_xxx, xwavenum,    &
-                                ids, ide, jds, jde, kds, kde,         &
-                                imsx, imex, jmsx, jmex, kmsx, kmex,     &
-                                ipsx, ipex, jpsx, jpex, kpsx, kpex  )
-
-
-
-
-
-
-
-  call trans_x2y ( ntasks_y, local_communicator_y, 1, 4, 4, DATA_ORDER_XZY , &
-                   grid%dif_xxx, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x, &
-                   grid%dif_yyy, &  
-                   grid%sp31y, grid%ep31y, grid%sp32y, grid%ep32y, grid%sp33y, grid%ep33y, &
-                   grid%sm31y, grid%em31y, grid%sm32y, grid%em32y, grid%sm33y, grid%em33y ) 
-
-
-     CALL spectral_nudging_filter_3dy( grid%dif_yyy, ywavenum,    &
-                                ids, ide, jds, jde, kds, kde,         &
-                                imsy, imey, jmsy, jmey, kmsy, kmey,     &
-                                ipsy, ipey, jpsy, jpey, kpsy, kpey  )
-
-
-
-
-
-
-
-  call trans_x2y ( ntasks_y, local_communicator_y, 0, 4, 4, DATA_ORDER_XZY , &
-                   grid%dif_xxx, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x, &
-                   grid%dif_yyy, &  
-                   grid%sp31y, grid%ep31y, grid%sp32y, grid%ep32y, grid%sp33y, grid%ep33y, &
-                   grid%sm31y, grid%em31y, grid%sm32y, grid%em32y, grid%sm33y, grid%em33y ) 
-  call trans_z2x ( ntasks_x, local_communicator_x, 0, 4, 4, DATA_ORDER_XZY , &
-                   grid%dif_analysis, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%dif_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x)
-
-
-
+     CALL spectral_nudging_filter_3dy( grid%dif_analysis, ywavenum,      &
+                                ids, ide, jds, jde, kds, kde,       &
+                                ims, ime, jms, jme, kms, kme,       &
+                                ips, ipe, jps, jpe, kps, kpe  )
 
 
 
@@ -1142,7 +853,7 @@ SUBROUTINE spectral_nudging_filter_3dx( f, nwave,            &
   
   IF ((its /= ids) .OR. (ite /= ide)) THEN
      WRITE ( wrf_err_message , * ) 'module_spectral_nudging: 3d: (its /= ids) or (ite /= ide)',its,ids,ite,ide
-     CALL wrf_error_fatal3("<stdin>",1145,&
+     CALL wrf_error_fatal3("<stdin>",856,&
 TRIM( wrf_err_message ) )
   END IF
 
@@ -1197,7 +908,7 @@ SUBROUTINE spectral_nudging_filter_3dy( f, nwave,   &
   
   IF ((jts /= jds) .OR. (jte /= jde)) THEN
      WRITE ( wrf_err_message , * ) 'module_spectral_nudging: 3d: (jts /= jds) or (jte /= jde)',jts,jds,jte,jde
-     CALL wrf_error_fatal3("<stdin>",1200,&
+     CALL wrf_error_fatal3("<stdin>",911,&
 TRIM( wrf_err_message ) )
   END IF
 
@@ -1358,7 +1069,7 @@ END SUBROUTINE spectralnudgingfilterfft2dncar
            'D0',id,' Spectral nudging for wind is turned on and Guv= ', guv,' xwave= ',xwavenum,' ywavenum= ',ywavenum
        CALL wrf_message(TRIM(wrf_err_message))
      ELSE IF( guv < 0.0 ) THEN
-       CALL wrf_error_fatal3("<stdin>",1361,&
+       CALL wrf_error_fatal3("<stdin>",1072,&
 'In grid FDDA, Guv must be positive.')
      ELSE
        WRITE(wrf_err_message,'(a,i1,a,e12.4)') &
@@ -1371,7 +1082,7 @@ END SUBROUTINE spectralnudgingfilterfft2dncar
            'D0',id,' Spectral nudging for temperature is turned on and Gt= ', gt,' xwave= ',xwavenum,' ywavenum= ',ywavenum
        CALL wrf_message(TRIM(wrf_err_message))
      ELSE IF( gt < 0.0 ) THEN
-       CALL wrf_error_fatal3("<stdin>",1374,&
+       CALL wrf_error_fatal3("<stdin>",1085,&
 'In grid FDDA, Gt must be positive.')
      ELSE
        WRITE(wrf_err_message,'(a,i1,a,e12.4)') &
@@ -1384,7 +1095,7 @@ END SUBROUTINE spectralnudgingfilterfft2dncar
          'D0',id,' Spectral nudging for geopotential is turned on and Gph= ', gph,' xwave= ',xwavenum,' ywavenum= ',ywavenum
        CALL wrf_message(TRIM(wrf_err_message))
      ELSE IF( gph < 0.0 ) THEN
-       CALL wrf_error_fatal3("<stdin>",1387,&
+       CALL wrf_error_fatal3("<stdin>",1098,&
 'In grid FDDA, Gph must be positive.')
      ELSE
        WRITE(wrf_err_message,'(a,i1,a,e12.4)') &
@@ -1397,7 +1108,7 @@ END SUBROUTINE spectralnudgingfilterfft2dncar
          'D0',id,' Spectral nudging for water vapor mixing ratio is turned on and Gq= ', gq,' xwave= ',xwavenum,' ywavenum= ',ywavenum
        CALL wrf_message(TRIM(wrf_err_message))
      ELSE IF( gq < 0.0 ) THEN
-       CALL wrf_error_fatal3("<stdin>",1400,&
+       CALL wrf_error_fatal3("<stdin>",1111,&
 'In grid FDDA, Gq must be positive.')
      ELSE
        WRITE(wrf_err_message,'(a,i1,a,e12.4)') &
@@ -1409,13 +1120,13 @@ END SUBROUTINE spectralnudgingfilterfft2dncar
         WRITE(wrf_err_message,'(a,i1,a)') &
            'D0',id,' Spectral nudging for wind is turned off within the PBL.'
         CALL wrf_message(TRIM(wrf_err_message))
-             IF( dk_zfac_uv < 1 ) CALL wrf_error_fatal3("<stdin>",1412,&
+             IF( dk_zfac_uv < 1 ) CALL wrf_error_fatal3("<stdin>",1123,&
 'In spectral nudging, dk_zfac_uv must be greater or equal than 1.')
      ELSEIF( guv > 0.0 .AND. if_zfac_uv == 1 ) THEN
         WRITE(wrf_err_message,'(a,i1,a,i3)') &
            'D0',id,' Spectral nudging for wind is turned off below layer', k_zfac_uv
         CALL wrf_message(TRIM(wrf_err_message))
-             IF( dk_zfac_uv < 1 ) CALL wrf_error_fatal3("<stdin>",1418,&
+             IF( dk_zfac_uv < 1 ) CALL wrf_error_fatal3("<stdin>",1129,&
 'In spectral nudging, dk_zfac_uv must  be greater or equal than 1.')       
      ENDIF
 
@@ -1424,13 +1135,13 @@ END SUBROUTINE spectralnudgingfilterfft2dncar
         WRITE(wrf_err_message,'(a,i1,a)') &
            'D0',id,' Spectral nudging for temperature is turned off within the PBL.'
         CALL wrf_message(TRIM(wrf_err_message))
-             IF( dk_zfac_t < 1 ) CALL wrf_error_fatal3("<stdin>",1427,&
+             IF( dk_zfac_t < 1 ) CALL wrf_error_fatal3("<stdin>",1138,&
 'In spectral nudging, dk_zfac_t must be greater or equal than 1.')
      ELSEIF( gt > 0.0 .AND. if_zfac_t == 1 ) THEN
         WRITE(wrf_err_message,'(a,i1,a,i3)') &
            'D0',id,' Spectral nudging for temperature is turned off below layer', k_zfac_t
         CALL wrf_message(TRIM(wrf_err_message))
-            IF( dk_zfac_t < 1 ) CALL wrf_error_fatal3("<stdin>",1433,&
+            IF( dk_zfac_t < 1 ) CALL wrf_error_fatal3("<stdin>",1144,&
 'In spectral nudging, dk_zfac_t must be greater or equal than 1.')
      ENDIF
 
@@ -1439,14 +1150,14 @@ END SUBROUTINE spectralnudgingfilterfft2dncar
         WRITE(wrf_err_message,'(a,i1,a)') &
          'D0',id,' Spectral nudging for geopotential is turned off within the PBL.'
         CALL wrf_message(TRIM(wrf_err_message))
-            IF( dk_zfac_ph < 1 ) CALL wrf_error_fatal3("<stdin>",1442,&
+            IF( dk_zfac_ph < 1 ) CALL wrf_error_fatal3("<stdin>",1153,&
 'In spectral nudging, dk_zfac_ph must be greater or equal than 1.')
      ELSEIF( gph > 0.0 .AND. if_zfac_ph == 1 ) THEN
         WRITE(wrf_err_message,'(a,i1,a,i3)') &
           'D0',id,' Spectral nudging for geopotential is turned off below layer', &
            k_zfac_ph
         CALL wrf_message(TRIM(wrf_err_message))
-            IF( dk_zfac_ph < 1 ) CALL wrf_error_fatal3("<stdin>",1449,&
+            IF( dk_zfac_ph < 1 ) CALL wrf_error_fatal3("<stdin>",1160,&
 'In spectral nudging, dk_zfac_ph must be greater or equal than 1.')
      ENDIF
 
@@ -1454,13 +1165,13 @@ END SUBROUTINE spectralnudgingfilterfft2dncar
         WRITE(wrf_err_message,'(a,i1,a)') &
            'D0',id,' Spectral nudging for water vapor mixing ratio is turned off within the PBL.'
         CALL wrf_message(TRIM(wrf_err_message))
-             IF( dk_zfac_t < 1 ) CALL wrf_error_fatal3("<stdin>",1457,&
+             IF( dk_zfac_t < 1 ) CALL wrf_error_fatal3("<stdin>",1168,&
 'In spectral nudging, dk_zfac_t must be greater or equal than 1.')
      ELSEIF( gq > 0.0 .AND. if_zfac_q == 1 ) THEN
         WRITE(wrf_err_message,'(a,i1,a,i3)') &
            'D0',id,' Spectral nudging for water vapor mixing ratio is turned off below layer', k_zfac_q
         CALL wrf_message(TRIM(wrf_err_message))
-            IF( dk_zfac_q < 1 ) CALL wrf_error_fatal3("<stdin>",1463,&
+            IF( dk_zfac_q < 1 ) CALL wrf_error_fatal3("<stdin>",1174,&
 'In spectral nudging, dk_zfac_q must be greater or equal than 1.')
      ENDIF
 
@@ -1473,7 +1184,7 @@ END SUBROUTINE spectralnudgingfilterfft2dncar
 
 
      IF ( ktrop > FLOAT(kde) ) THEN
-       CALL wrf_error_fatal3("<stdin>",1476,&
+       CALL wrf_error_fatal3("<stdin>",1187,&
 'KTROP is set above the model top.')
      ENDIF
 

@@ -111,8 +111,6 @@ contains
     USE module_configure
     USE module_domain, ONLY : domain
     USE module_wrf_error
-    USE module_dm, ONLY : local_communicator, mytask, ntasks, ntasks_x, ntasks_y, local_communicator_periodic, &
-                          wrf_dm_maxval, wrf_err_message, local_communicator_x, local_communicator_y, data_order_xzy
 
       IMPLICIT NONE
 
@@ -281,7 +279,7 @@ IF (grid%sppt_on==1) then
          IF ( ierr .NE. OPEN_OK ) THEN
            WRITE(message,FMT='(A)') &
            'module_stoch.F: INITIALIZE_STOCH: open failure for STOCHPERT.TBL'
-           CALL wrf_error_fatal3("<stdin>",284,&
+           CALL wrf_error_fatal3("<stdin>",282,&
 message )
          END IF
          REWIND(stochpert_unit)
@@ -345,7 +343,7 @@ message )
              case default
                WRITE(message,FMT='(A)') &
                    'module_stoch.F: Invalid entry in STOCHPERT.TBL'
-               CALL wrf_error_fatal3("<stdin>",348,&
+               CALL wrf_error_fatal3("<stdin>",346,&
 message )
     
            end select
@@ -1115,8 +1113,6 @@ message )
 
     USE module_domain, ONLY : domain
 
-    USE module_dm, ONLY : local_communicator, mytask, ntasks, ntasks_x, ntasks_y, local_communicator_periodic, &
-                          wrf_dm_maxval, wrf_err_message, local_communicator_x, local_communicator_y, data_order_xzy
 
 
       IMPLICIT NONE
@@ -1234,231 +1230,14 @@ message )
 
 
           
-
-
-
-
-
-
-
-        gridsp32x=grid%sp32x
-        gridsm32x=grid%sm32x
-        gridep32x=grid%ep32x
-        gridem32x=grid%em32x
-        gridsp32 =grid%sp32
-        gridsm32 =grid%sm32
-        gridep32 =grid%ep32
-        gridem32 =grid%em32
-
-
-
-
-
-        grid%sp32x=min(kpsx,grid%num_stoch_levels)
-        grid%sm32x=min(kmsx,grid%num_stoch_levels)
-        grid%ep32x=min(kpex,grid%num_stoch_levels)
-        grid%em32x=min(kmex,grid%num_stoch_levels)
-        grid%sp32 =min(kps ,grid%num_stoch_levels)
-        grid%sm32 =min(kms ,grid%num_stoch_levels)
-        grid%ep32 =min(kpe ,grid%num_stoch_levels)
-        grid%em32 =min(kme ,grid%num_stoch_levels)
-
-
-
-
-
-
-
-  call trans_z2x ( ntasks_x, local_communicator_x, 1, 4, 4, DATA_ORDER_XZY , &
-                   grid%rand_real, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%rand_real_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x ) 
-
-
-
-
-
-
-
-  call trans_z2x ( ntasks_x, local_communicator_x, 1, 4, 4, DATA_ORDER_XZY , &
-                   grid%rand_imag, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%rand_imag_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x ) 
-
-        call do_fftback_along_x(grid%RAND_REAL_xxx,grid%RAND_IMAG_xxx,                  &
+        call do_fftback_along_x(grid%RAND_REAL,grid%RAND_IMAG,                          &
                               ids,ide,jds,jde,                                          &
-                              imsx,imex,jmsx,jmex,kmsx,min(kmex,grid%num_stoch_levels), &
-                              ipsx,ipex,jpsx,jpex,kpsx,min(kpex,grid%num_stoch_levels))  
-
-
-
-
-
-
-  call trans_z2x ( ntasks_x, local_communicator_x, 0, 4, 4, DATA_ORDER_XZY , &
-                   grid%rand_real, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%rand_real_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x ) 
-
-
-
-
-
-
-
-  call trans_z2x ( ntasks_x, local_communicator_x, 0, 4, 4, DATA_ORDER_XZY , &
-                   grid%rand_imag, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%rand_imag_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x ) 
-
-
-
-
-
-
-
-
-        gridsp32y=grid%sp32y
-        gridsm32y=grid%sm32y
-        gridep32y=grid%ep32y
-        gridem32y=grid%em32y
-
-
-
-
-        grid%sp32y=min(kpsy,grid%num_stoch_levels)
-        grid%sm32y=min(kmsy,grid%num_stoch_levels)
-        grid%ep32y=min(kpey,grid%num_stoch_levels)
-        grid%em32y=min(kmey,grid%num_stoch_levels)
-
-
-
-
-
-
-
-  call trans_z2x ( ntasks_x, local_communicator_x, 1, 4, 4, DATA_ORDER_XZY , &
-                   grid%rand_real, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%rand_real_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x )
-  call trans_x2y ( ntasks_y, local_communicator_y, 1, 4, 4, DATA_ORDER_XZY , &
-                   grid%rand_real_xxx, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x, &
-                   grid%rand_real_yyy, &  
-                   grid%sp31y, grid%ep31y, grid%sp32y, grid%ep32y, grid%sp33y, grid%ep33y, &
-                   grid%sm31y, grid%em31y, grid%sm32y, grid%em32y, grid%sm33y, grid%em33y ) 
-
-
-
-
-
-
-
-  call trans_z2x ( ntasks_x, local_communicator_x, 1, 4, 4, DATA_ORDER_XZY , &
-                   grid%rand_imag, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%rand_imag_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x )
-  call trans_x2y ( ntasks_y, local_communicator_y, 1, 4, 4, DATA_ORDER_XZY , &
-                   grid%rand_imag_xxx, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x, &
-                   grid%rand_imag_yyy, &  
-                   grid%sp31y, grid%ep31y, grid%sp32y, grid%ep32y, grid%sp33y, grid%ep33y, &
-                   grid%sm31y, grid%em31y, grid%sm32y, grid%em32y, grid%sm33y, grid%em33y ) 
-
-        call do_fftback_along_y(grid%RAND_REAL_yyy,grid%RAND_IMAG_yyy,                  &
+                              ims,ime,jms,jme,kms,min(kme,grid%num_stoch_levels),       &
+                              ips,ipe,jps,jpe,kps,min(kpe,grid%num_stoch_levels))   
+        call do_fftback_along_y(grid%RAND_REAL,grid%RAND_IMAG,                          &
                               ids,ide,jds,jde,                                          &
-                              imsy,imey,jmsy,jmey,kmsy,min(kmey,grid%num_stoch_levels), &
-                              ipsy,ipey,jpsy,jpey,kpsy,min(kpey,grid%num_stoch_levels))
-
-
-
-
-
-
-  call trans_x2y ( ntasks_y, local_communicator_y, 0, 4, 4, DATA_ORDER_XZY , &
-                   grid%rand_real_xxx, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x, &
-                   grid%rand_real_yyy, &  
-                   grid%sp31y, grid%ep31y, grid%sp32y, grid%ep32y, grid%sp33y, grid%ep33y, &
-                   grid%sm31y, grid%em31y, grid%sm32y, grid%em32y, grid%sm33y, grid%em33y ) 
-  call trans_z2x ( ntasks_x, local_communicator_x, 0, 4, 4, DATA_ORDER_XZY , &
-                   grid%rand_real, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%rand_real_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x)
-
-
-
-
-
-
-
-  call trans_x2y ( ntasks_y, local_communicator_y, 0, 4, 4, DATA_ORDER_XZY , &
-                   grid%rand_imag_xxx, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x, &
-                   grid%rand_imag_yyy, &  
-                   grid%sp31y, grid%ep31y, grid%sp32y, grid%ep32y, grid%sp33y, grid%ep33y, &
-                   grid%sm31y, grid%em31y, grid%sm32y, grid%em32y, grid%sm33y, grid%em33y ) 
-  call trans_z2x ( ntasks_x, local_communicator_x, 0, 4, 4, DATA_ORDER_XZY , &
-                   grid%rand_imag, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%rand_imag_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x)
-
-
-
-
-        grid%sp32x=gridsp32x
-        grid%sm32x=gridsm32x
-        grid%ep32x=gridep32x
-        grid%em32x=gridem32x
-        grid%sp32y=gridsp32y
-        grid%sm32y=gridsm32y
-        grid%ep32y=gridep32y
-        grid%em32y=gridem32y
-        grid%sp32 =gridsp32
-        grid%sm32 =gridsm32
-        grid%ep32 =gridep32
-        grid%em32 =gridem32
-
+                              ims,ime,jms,jme,kms,min(kme,grid%num_stoch_levels),       &
+                              ips,ipe,jps,jpe,kps,min(kpe,grid%num_stoch_levels))
 
 
       thresh=thresh_fact*gridpt_stddev

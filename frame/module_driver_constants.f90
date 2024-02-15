@@ -108,7 +108,7 @@ INTEGER , PARAMETER :: model_data_order   = DATA_ORDER_XZY
 
    
 
-   INTEGER , PARAMETER :: max_comms       =   1024
+   INTEGER , PARAMETER :: max_comms       =   1
 
    
 

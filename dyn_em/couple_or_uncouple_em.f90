@@ -27,8 +27,7 @@ nba_mij,nba_rij,sbmradar,chem &
    USE module_driver_constants
    USE module_machine
    USE module_tiles
-   USE module_dm, ONLY : local_communicator, mytask, ntasks, ntasks_x, ntasks_y, local_communicator_periodic
-   USE module_comm_dm, ONLY : halo_em_couple_a_sub,halo_em_couple_b_sub,period_em_couple_a_sub,period_em_couple_b_sub
+   USE module_dm
    USE module_bc
 
 
@@ -177,33 +176,6 @@ real      ,DIMENSION(grid%sm31:grid%em31,grid%sm32:grid%em32,grid%sm33:grid%em33
                              ips,ipe, jps,jpe   )
    ENDIF
 
-
-
-
-
-
-
-
-CALL HALO_EM_COUPLE_A_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL PERIOD_EM_COUPLE_A_sub ( grid, &
-  config_flags, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
 
 
    
@@ -556,49 +528,6 @@ CALL PERIOD_EM_COUPLE_A_sub ( grid, &
      ENDIF
 
    ENDIF
-
-
-
-
-
-
-
-CALL HALO_EM_COUPLE_B_sub ( grid, &
-  num_moist, &
-  moist, &
-  num_chem, &
-  chem, &
-  num_tracer, &
-  tracer, &
-  num_scalar, &
-  scalar, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL PERIOD_EM_COUPLE_B_sub ( grid, &
-  config_flags, &
-  num_moist, &
-  moist, &
-  num_chem, &
-  chem, &
-  num_tracer, &
-  tracer, &
-  num_scalar, &
-  scalar, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
 
 
 END SUBROUTINE couple_or_uncouple_em

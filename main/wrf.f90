@@ -17,7 +17,6 @@ PROGRAM wrf
 
    IMPLICIT NONE
 
-  CALL setfeenv()
 
   
   CALL wrf_init

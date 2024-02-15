@@ -160,8 +160,6 @@ SUBROUTINE microphysics_driver(                                          &
                     ,MORR_TM_AERO, JENSEN_ISHMAEL, SPRINKLER, NTU 
    USE module_state_description, ONLY : WSM6RSCHEME
 
-  USE module_dm, ONLY : &
-                 local_communicator, mytask,  wrf_dm_min_real, wrf_dm_max_real
 
 
    USE module_model_constants
@@ -712,8 +710,6 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
    IF ( .true. ) THEN
       wmax = maxval( w(ips:ipe,kps:kpe,jps:jpe) )
       wmin = minval( w(ips:ipe,kps:kpe,jps:jpe) )
-      wmax = wrf_dm_max_real ( wmax )
-      wmin = wrf_dm_min_real ( wmin )
       WRITE( wrf_err_message , * ) 'microphysics_driver: GLOBAL w max/min = ', wmax, wmin
       CALL wrf_message ( wrf_err_message )
    ENDIF
@@ -788,7 +784,7 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
 
        ELSEIF ( progn==1 .AND. mp_physics/=LINSCHEME .AND. mp_physics/=MORR_TWO_MOMENT &
                 .AND. .not. (mp_physics==NSSL_2MOM .and. config_flags%nssl_2moment_on==1) ) THEN
-             call wrf_error_fatal3("<stdin>",791,&
+             call wrf_error_fatal3("<stdin>",787,&
              "SETTINGS ERROR: Prognostic cloud droplet number can only be used with the mp_physics=LINSCHEME or MORRISON or NSSL_2MOM.")
        END IF
        END IF
@@ -817,7 +813,7 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
                  ,ITS=its,ITE=ite, JTS=jts,JTE=jte, KTS=kts,KTE=kte &
                                                                     )
              ELSE
-                CALL wrf_error_fatal3("<stdin>",820,&
+                CALL wrf_error_fatal3("<stdin>",816,&
 'arguments not present for calling kessler' )
              ENDIF
 
@@ -912,7 +908,7 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
                     ,ims, ime, jms, jme, kms, kme, its, ite, jts, jte, kts, kte                       )
               ENDIF
              ELSE
-                CALL wrf_error_fatal3("<stdin>",915,&
+                CALL wrf_error_fatal3("<stdin>",911,&
 'arguments not present for calling thompson_et_al' )
              ENDIF
 
@@ -977,7 +973,7 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
                  IMS=ims,IME=ime, JMS=jms,JME=jme, KMS=kms,KME=kme, &
                  ITS=its,ITE=ite, JTS=jts,JTE=jte, KTS=kts,KTE=kte)
              ELSE
-                CALL wrf_error_fatal3("<stdin>",980,&
+                CALL wrf_error_fatal3("<stdin>",976,&
 'arguments not present for calling thompson_et_al' )
              ENDIF
 
@@ -1053,7 +1049,7 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
               end if
 
              ELSE
-                CALL wrf_error_fatal3("<stdin>",1056,&
+                CALL wrf_error_fatal3("<stdin>",1052,&
 'arguments not present for calling thompson_et_al' )
              ENDIF
         CASE (NTU)
@@ -1079,7 +1075,7 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
                      IMS=ims,IME=ime,JMS=jms,JME=jme,KMS=kms,KME=kme,   &
                      ITS=its,ITE=ite,JTS=jts,JTE=jte,KTS=kts,KTE=kte)
              ELSE
-                Call wrf_error_fatal3("<stdin>",1082,&
+                Call wrf_error_fatal3("<stdin>",1078,&
 'arguments not present for calling ntu')
              ENDIF
        CASE (FAST_KHAIN_LYNN_SHPUND)
@@ -1249,7 +1245,7 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
              diag_itype_3=itype_3                &
              )
         ELSE
-           Call wrf_error_fatal3("<stdin>",1252,&
+           Call wrf_error_fatal3("<stdin>",1248,&
 'arguments not present for calling jensen_ishamel')
         ENDIF
 
@@ -1307,7 +1303,7 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
                  ,PRECR=precr,PRECI=preci,PRECS=precs,PRECG=precg   & 
                                                                     )
         ELSE
-           Call wrf_error_fatal3("<stdin>",1310,&
+           Call wrf_error_fatal3("<stdin>",1306,&
 'arguments not present for calling morrison two moment')
         ENDIF
 
@@ -1631,7 +1627,7 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
                   ITS=its,ITE=ite, JTS=jts,JTE=jte, KTS=kts,KTE=kte  &
                                                                     )
         ELSE
-           Call wrf_error_fatal3("<stdin>",1634,&
+           Call wrf_error_fatal3("<stdin>",1630,&
 'arguments not present for calling milbrandt2mom')
         ENDIF
 
@@ -1759,7 +1755,7 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
                                                                     )
 
         ELSE
-           Call wrf_error_fatal3("<stdin>",1762,&
+           Call wrf_error_fatal3("<stdin>",1758,&
 'arguments not present for calling nssl_2mom')
         ENDIF
 
@@ -1803,7 +1799,7 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
 
 
              ELSE
-                CALL wrf_error_fatal3("<stdin>",1806,&
+                CALL wrf_error_fatal3("<stdin>",1802,&
 'arguments not present for calling GSFCGCE' )
              ENDIF
 
@@ -1875,7 +1871,7 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
                end do
 
              ELSE
-                CALL wrf_error_fatal3("<stdin>",1878,&
+                CALL wrf_error_fatal3("<stdin>",1874,&
 'arguments not present for calling NUWRF4ICESFCGCE' )
              ENDIF
 
@@ -1916,7 +1912,7 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
                  ,QNDROP=qndrop_curr                                &
                                                                     )
              ELSE
-                CALL wrf_error_fatal3("<stdin>",1919,&
+                CALL wrf_error_fatal3("<stdin>",1915,&
 'arguments not present for calling lin_et_al' )
              ENDIF
 
@@ -1958,7 +1954,7 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
 
                                                                      )
              ELSE
-                CALL wrf_error_fatal3("<stdin>",1961,&
+                CALL wrf_error_fatal3("<stdin>",1957,&
 'arguments not present for calling sbu_ylin' )
              ENDIF
 
@@ -1995,7 +1991,7 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
                  ,ITS=its,ITE=ite, JTS=jts,JTE=jte, KTS=kts,KTE=kte &
                                                                     )
              ELSE
-                CALL wrf_error_fatal3("<stdin>",1998,&
+                CALL wrf_error_fatal3("<stdin>",1994,&
 'arguments not present for calling wsm3' )
              ENDIF
 
@@ -2036,7 +2032,7 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
                  ,ITS=its,ITE=ite, JTS=jts,JTE=jte, KTS=kts,KTE=kte &
                                                                     )
              ELSE
-                CALL wrf_error_fatal3("<stdin>",2039,&
+                CALL wrf_error_fatal3("<stdin>",2035,&
 'arguments not present for calling wsm5' )
              ENDIF
 
@@ -2079,7 +2075,7 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
                  ,ITS=its,ITE=ite, JTS=jts,JTE=jte, KTS=kts,KTE=kte &
                                                                     )
              ELSE
-                CALL wrf_error_fatal3("<stdin>",2082,&
+                CALL wrf_error_fatal3("<stdin>",2078,&
 'arguments not present for calling wsm6' )
              ENDIF
 
@@ -2102,7 +2098,7 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
                  ,ITS=its,ITE=ite, JTS=jts,JTE=jte, KTS=kts,KTE=kte &
                                                                     )
              ELSE
-                CALL wrf_error_fatal3("<stdin>",2105,&
+                CALL wrf_error_fatal3("<stdin>",2101,&
 'arguments not present for calling wsm6r' )
              ENDIF
 
@@ -2148,7 +2144,7 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
                  ,ITS=its,ITE=ite, JTS=jts,JTE=jte, KTS=kts,KTE=kte &
                                                                     )
              ELSE
-                CALL wrf_error_fatal3("<stdin>",2151,&
+                CALL wrf_error_fatal3("<stdin>",2147,&
 'arguments not present for calling wsm7' )
              ENDIF
 
@@ -2194,7 +2190,7 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
                  ,ITS=its,ITE=ite, JTS=jts,JTE=jte, KTS=kts,KTE=kte &
                                                                     )
              ELSE
-                CALL wrf_error_fatal3("<stdin>",2197,&
+                CALL wrf_error_fatal3("<stdin>",2193,&
 'arguments not present for calling wdm5')
              ENDIF
 
@@ -2244,7 +2240,7 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
                  ,ITS=its,ITE=ite, JTS=jts,JTE=jte, KTS=kts,KTE=kte &
                                                                     )
              ELSE
-               CALL wrf_error_fatal3("<stdin>",2247,&
+               CALL wrf_error_fatal3("<stdin>",2243,&
 'arguments not present for calling wdm6')
              ENDIF
 
@@ -2297,7 +2293,7 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
                  ,ITS=its,ITE=ite, JTS=jts,JTE=jte, KTS=kts,KTE=kte &
                                                                     )
              ELSE
-               CALL wrf_error_fatal3("<stdin>",2300,&
+               CALL wrf_error_fatal3("<stdin>",2296,&
 'arguments not present for calling wdm7')
              ENDIF
 
@@ -2328,7 +2324,7 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
                  ,TBPVS_STATE=tbpvs_state,TBPVS0_STATE=tbpvs0_state &
                                                                     )
              ELSE
-                CALL wrf_error_fatal3("<stdin>",2331,&
+                CALL wrf_error_fatal3("<stdin>",2327,&
 'arguments not present for calling etampnew' )
              ENDIF
         CASE (FER_MP_HIRES)    
@@ -2361,7 +2357,7 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
                   ,ITS=its,ITE=ite, JTS=jts,JTE=jte, KTS=kts,KTE=kte &
                                                                      )
              ELSE
-                CALL wrf_error_fatal3("<stdin>",2364,&
+                CALL wrf_error_fatal3("<stdin>",2360,&
 'arguments not present for calling fer_hires' )
              ENDIF
 
@@ -2394,7 +2390,7 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
                   ,ITS=its,ITE=ite, JTS=jts,JTE=jte, KTS=kts,KTE=kte &
                                                                      )
              ELSE
-                CALL wrf_error_fatal3("<stdin>",2397,&
+                CALL wrf_error_fatal3("<stdin>",2393,&
 'arguments not present for calling fer_hires' )
              ENDIF
 
@@ -2436,7 +2432,7 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
                      ,XLAND=XLAND,SNOWH=SNOWH                                     &
                      )
              ELSE
-                CALL wrf_error_fatal3("<stdin>",2439,&
+                CALL wrf_error_fatal3("<stdin>",2435,&
 'arguments not present for calling CAMMGMP SCHEME' )
              ENDIF
 
@@ -2448,7 +2444,7 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
       CASE DEFAULT
 
          WRITE( wrf_err_message , * ) 'The microphysics option does not exist: mp_physics = ', mp_physics
-         CALL wrf_error_fatal3("<stdin>",2451,&
+         CALL wrf_error_fatal3("<stdin>",2447,&
 wrf_err_message )
 
       END SELECT micro_select

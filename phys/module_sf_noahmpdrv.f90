@@ -2433,8 +2433,6 @@ SUBROUTINE PEDOTRANSFER_SR2006(nsoil,sand,clay,orgm,parameters)
                             LCZ_7_TABLE,LCZ_8_TABLE,LCZ_9_TABLE,LCZ_10_TABLE,LCZ_11_TABLE
   USE module_sf_noahmp_groundwater, ONLY : LATERALFLOW
   USE module_domain, only: domain
-    USE module_dm        , ONLY : ntasks_x,ntasks_y,local_communicator,mytask,ntasks
-    USE module_comm_dm , ONLY : halo_em_hydro_noahmp_sub
 
 
   IMPLICIT NONE
@@ -2513,19 +2511,6 @@ SUBROUTINE PEDOTRANSFER_SR2006(nsoil,sand,clay,orgm,parameters)
 
 
 
-
-
-
-CALL HALO_EM_HYDRO_NOAHMP_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
 IF(NCOUNT.GT.0.OR.NITER.eq.1)THEN
     QLAT = 0.
     CALL LATERALFLOW(ISLTYP,WTD,QLAT,FDEPTH,TOPO,LANDMASK,DELTAT,AREA       &
@@ -2547,19 +2532,6 @@ IF(NCOUNT.GT.0.OR.NITER.eq.1)THEN
 ENDIF
 
  ENDDO
-
-
-
-
-
-
-
-CALL HALO_EM_HYDRO_NOAHMP_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
 
 
 EQWTD=WTD

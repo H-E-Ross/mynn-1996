@@ -214,14 +214,11 @@ SUBROUTINE calc_ts_locations( grid )
                ts_xlong = grid%xlong(grid%itsloc(k),grid%jtsloc(k))
                ts_hgt   = grid%ht(grid%itsloc(k),grid%jtsloc(k))
             END IF
-            ts_xlat  = wrf_dm_min_real(ts_xlat)
-            ts_xlong = wrf_dm_min_real(ts_xlong)
-            ts_hgt   = wrf_dm_min_real(ts_hgt)
    
             IF ( wrf_dm_on_monitor() ) THEN
                iunit = get_unused_unit()
                IF ( iunit <= 0 ) THEN
-                  CALL wrf_error_fatal3("<stdin>",224,&
+                  CALL wrf_error_fatal3("<stdin>",221,&
 'Error in calc_ts_locations: could not find a free Fortran unit.')
                END IF
                WRITE(grid%ts_filename(k),'(A)') TRIM(grid%nametsloc(grid%id_tsloc(k)))//'.d00.TS'
@@ -254,7 +251,7 @@ SUBROUTINE calc_ts_locations( grid )
                   
                   iunit = get_unused_unit()
                   IF ( iunit <= 0 ) THEN
-                     CALL wrf_error_fatal3("<stdin>",257,&
+                     CALL wrf_error_fatal3("<stdin>",254,&
 'Error in calc_ts_locations: could not find a free Fortran unit.')
                   END IF
                   i = LEN_TRIM(ts_profile_filename)
@@ -584,205 +581,12 @@ SUBROUTINE write_ts( grid )
 
    IF ( grid%dfi_opt /= DFI_NODFI .AND. grid%dfi_stage /= DFI_FST ) RETURN
 
-   ALLOCATE(ts_buf(grid%ts_buf_size,grid%max_ts_locs))
-
-   ts_buf(:,:) = grid%ts_hour(:,:)
-   CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_hour(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-   DO k=1,grid%max_ts_level
-   ts_buf(:,:) = grid%ts_u_profile(:,:,k)
-   CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_u_profile(:,:,k),grid%ts_buf_size*grid%max_ts_locs)
-   END DO
- 
-   DO k=1,grid%max_ts_level
-   ts_buf(:,:) = grid%ts_v_profile(:,:,k)
-   CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_v_profile(:,:,k),grid%ts_buf_size*grid%max_ts_locs)
-   END DO
- 
-   DO k=1,grid%max_ts_level
-   ts_buf(:,:) = grid%ts_w_profile(:,:,k)
-   CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_w_profile(:,:,k),grid%ts_buf_size*grid%max_ts_locs)
-   END DO
-
-   DO k=1,grid%max_ts_level
-   ts_buf(:,:) = grid%ts_gph_profile(:,:,k)
-   CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_gph_profile(:,:,k),grid%ts_buf_size*grid%max_ts_locs)
-   END DO
-
-   DO k=1,grid%max_ts_level
-   ts_buf(:,:) = grid%ts_th_profile(:,:,k)
-   CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_th_profile(:,:,k),grid%ts_buf_size*grid%max_ts_locs)
-   END DO
-
-   DO k=1,grid%max_ts_level
-   ts_buf(:,:) = grid%ts_qv_profile(:,:,k)
-   CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_qv_profile(:,:,k),grid%ts_buf_size*grid%max_ts_locs)
-   END DO
-
-   DO k=1,grid%max_ts_level
-   ts_buf(:,:) = grid%ts_p_profile(:,:,k)
-   CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_p_profile(:,:,k),grid%ts_buf_size*grid%max_ts_locs)
-   END DO
-   ts_buf(:,:) = grid%ts_u(:,:)
-   CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_u(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-   ts_buf(:,:) = grid%ts_v(:,:)
-   CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_v(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-   ts_buf(:,:) = grid%ts_t(:,:)
-   CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_t(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-   ts_buf(:,:) = grid%ts_q(:,:)
-   CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_q(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-   ts_buf(:,:) = grid%ts_psfc(:,:)
-   CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_psfc(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-   ts_buf(:,:) = grid%ts_glw(:,:)
-   CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_glw(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-   ts_buf(:,:) = grid%ts_gsw(:,:)
-   CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_gsw(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-   ts_buf(:,:) = grid%ts_hfx(:,:)
-   CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_hfx(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-   ts_buf(:,:) = grid%ts_lh(:,:)
-   CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_lh(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-   ts_buf(:,:) = grid%ts_clw(:,:)
-   CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_clw(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-   ts_buf(:,:) = grid%ts_rainc(:,:)
-   CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_rainc(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-   ts_buf(:,:) = grid%ts_rainnc(:,:)
-   CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_rainnc(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-   IF ( model_config_rec%process_time_series == 2 ) THEN
-      
-      ts_buf(:,:) = grid%ts_cldfrac2d(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_cldfrac2d(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-      ts_buf(:,:) = grid%ts_wvp(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_wvp(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-      ts_buf(:,:) = grid%ts_lwp(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_lwp(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-      ts_buf(:,:) = grid%ts_iwp(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_iwp(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-      ts_buf(:,:) = grid%ts_swp(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_swp(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-      ts_buf(:,:) = grid%ts_wp_sum(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_wp_sum(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-      ts_buf(:,:) = grid%ts_lwp_tot(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_lwp_tot(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-      ts_buf(:,:) = grid%ts_iwp_tot(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_iwp_tot(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-      ts_buf(:,:) = grid%ts_wp_tot_sum(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_wp_tot_sum(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-      ts_buf(:,:) = grid%ts_re_qc(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_re_qc(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-      ts_buf(:,:) = grid%ts_re_qi(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_re_qi(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-      ts_buf(:,:) = grid%ts_re_qs(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_re_qs(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-      ts_buf(:,:) = grid%ts_re_qc_tot(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_re_qc_tot(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-      ts_buf(:,:) = grid%ts_re_qi_tot(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_re_qi_tot(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-      ts_buf(:,:) = grid%ts_tau_qc(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_tau_qc(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-      ts_buf(:,:) = grid%ts_tau_qi(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_tau_qi(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-      ts_buf(:,:) = grid%ts_tau_qs(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_tau_qs(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-      ts_buf(:,:) = grid%ts_tau_qc_tot(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_tau_qc_tot(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-      ts_buf(:,:) = grid%ts_tau_qi_tot(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_tau_qi_tot(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-      ts_buf(:,:) = grid%ts_cbaseht(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_cbaseht(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-      ts_buf(:,:) = grid%ts_ctopht(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_ctopht(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-      ts_buf(:,:) = grid%ts_cbaseht_tot(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_cbaseht_tot(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-      ts_buf(:,:) = grid%ts_ctopht_tot(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_ctopht_tot(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-      ts_buf(:,:) = grid%ts_clrnidx(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_clrnidx(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-      ts_buf(:,:) = grid%ts_sza(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_sza(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-      ts_buf(:,:) = grid%ts_ghi_accum(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_ghi_accum(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-      ts_buf(:,:) = grid%ts_swdown(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_swdown(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-      ts_buf(:,:) = grid%ts_swddni(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_swddni(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-      ts_buf(:,:) = grid%ts_swddif(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_swddif(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-      ts_buf(:,:) = grid%ts_swdownc(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_swdownc(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-      ts_buf(:,:) = grid%ts_swddnic(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_swddnic(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-      ts_buf(:,:) = grid%ts_swdown2(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_swdown2(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-      ts_buf(:,:) = grid%ts_swddni2(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_swddni2(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-      ts_buf(:,:) = grid%ts_swddif2(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_swddif2(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-      ts_buf(:,:) = grid%ts_swdownc2(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_swdownc2(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-      ts_buf(:,:) = grid%ts_swddnic2(:,:)
-      CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_swddnic2(:,:),grid%ts_buf_size*grid%max_ts_locs)
-   END IF
-
-   ts_buf(:,:) = grid%ts_tsk(:,:)
-   CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_tsk(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-   ts_buf(:,:) = grid%ts_tslb(:,:)
-   CALL wrf_dm_min_reals(ts_buf(:,:),grid%ts_tslb(:,:),grid%ts_buf_size*grid%max_ts_locs)
-
-   DEALLOCATE(ts_buf)
 
    IF ( wrf_dm_on_monitor() ) THEN
 
       iunit = get_unused_unit()
       IF ( iunit <= 0 ) THEN
-         CALL wrf_error_fatal3("<stdin>",785,&
+         CALL wrf_error_fatal3("<stdin>",589,&
 'Error in write_ts: could not find a free Fortran unit.')
       END IF
 
@@ -880,7 +684,7 @@ SUBROUTINE write_ts( grid )
          
          iunit = get_unused_unit()
             IF ( iunit <= 0 ) THEN
-            CALL wrf_error_fatal3("<stdin>",883,&
+            CALL wrf_error_fatal3("<stdin>",687,&
 'Error in write_ts: could not find a free Fortran unit.')
             END IF
          
@@ -902,7 +706,7 @@ SUBROUTINE write_ts( grid )
          
          iunit = get_unused_unit()
             IF ( iunit <= 0 ) THEN
-            CALL wrf_error_fatal3("<stdin>",905,&
+            CALL wrf_error_fatal3("<stdin>",709,&
 'Error in write_ts: could not find a free Fortran unit.')
             END IF
          
@@ -921,7 +725,7 @@ SUBROUTINE write_ts( grid )
 
          iunit = get_unused_unit()
             IF ( iunit <= 0 ) THEN
-            CALL wrf_error_fatal3("<stdin>",924,&
+            CALL wrf_error_fatal3("<stdin>",728,&
 'Error in write_ts: could not find a free Fortran unit.')
             END IF
          k = LEN_TRIM(ts_profile_filename)
@@ -940,7 +744,7 @@ SUBROUTINE write_ts( grid )
          
          iunit = get_unused_unit()
             IF ( iunit <= 0 ) THEN
-            CALL wrf_error_fatal3("<stdin>",943,&
+            CALL wrf_error_fatal3("<stdin>",747,&
 'Error in write_ts: could not find a free Fortran unit.')
             END IF
          
@@ -960,7 +764,7 @@ SUBROUTINE write_ts( grid )
          
          iunit = get_unused_unit()
             IF ( iunit <= 0 ) THEN
-            CALL wrf_error_fatal3("<stdin>",963,&
+            CALL wrf_error_fatal3("<stdin>",767,&
 'Error in write_ts: could not find a free Fortran unit.')
             END IF
          
@@ -980,7 +784,7 @@ SUBROUTINE write_ts( grid )
          
          iunit = get_unused_unit()
             IF ( iunit <= 0 ) THEN
-            CALL wrf_error_fatal3("<stdin>",983,&
+            CALL wrf_error_fatal3("<stdin>",787,&
 'Error in write_ts: could not find a free Fortran unit.')
             END IF
          
@@ -1000,7 +804,7 @@ SUBROUTINE write_ts( grid )
          
          iunit = get_unused_unit()
             IF ( iunit <= 0 ) THEN
-            CALL wrf_error_fatal3("<stdin>",1003,&
+            CALL wrf_error_fatal3("<stdin>",807,&
 'Error in write_ts: could not find a free Fortran unit.')
             END IF
          

@@ -26,7 +26,6 @@ CONTAINS
     USE module_model_constants
     USE module_utility
     USE module_streams, ONLY: history_alarm, auxhist2_alarm
-    USE module_dm, ONLY: wrf_dm_sum_real, wrf_dm_maxval
 
     IMPLICIT NONE
 
@@ -161,7 +160,7 @@ CONTAINS
                 "potential temperature appear to be bad. If you do not want this check, " // &
                 "set afwa_bad_data_check=0. i=",i,", j=",j,", k=",k,", u_phy=",u_phy(i,k,j), &
                 ", v_phy=", v_phy(i,k,j),", th_phy=",th_phy(i,k,j)
-                CALL wrf_error_fatal3("<stdin>",164,&
+                CALL wrf_error_fatal3("<stdin>",163,&
 message )
               ENDIF
             ENDDO

@@ -43,15 +43,6 @@ CONTAINS
 
       USE module_configure, ONLY : grid_config_rec_type
 
-      
-      
-
-      USE module_dm, ONLY : &
-                  local_communicator, mytask, ntasks, ntasks_x, ntasks_y                   &
-                 ,local_communicator_periodic, wrf_dm_maxval
-
-      USE module_comm_dm, ONLY : &
-                  halo_em_phys_w_sub, halo_em_phys_hcw_sub
 
       
       
@@ -130,35 +121,6 @@ CONTAINS
                               ipsx,ipex,jpsx,jpex,kpsx,kpex,    &
                               imsy,imey,jmsy,jmey,kmsy,kmey,    &
                               ipsy,ipey,jpsy,jpey,kpsy,kpey
-
-      
-      
-      
-
-
-
-
-
-
-CALL HALO_EM_PHYS_W_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL HALO_EM_PHYS_HCW_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
 
 
       

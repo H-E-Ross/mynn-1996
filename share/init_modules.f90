@@ -12,8 +12,7 @@ SUBROUTINE init_modules( phase )
  USE module_tiles               , ONLY : init_module_tiles
  USE module_io_wrf              , ONLY : init_module_io_wrf
  USE module_io                  , ONLY : init_module_io
- USE module_wrf_quilt           , ONLY : init_module_wrf_quilt
- USE module_dm                  , ONLY : init_module_dm, split_communicator,hwrf_coupler_init
+ USE module_dm                  , ONLY : init_module_dm
  USE module_ext_internal        , ONLY : init_module_ext_internal
  USE module_wrf_error           , ONLY : init_module_wrf_error
 
@@ -59,10 +58,6 @@ IF ( phase == 1 ) THEN
  CALL init_module_machine
 
  CALL init_module_ext_internal  
-
- CALL split_communicator
- CALL init_module_wrf_quilt    
-
  CALL init_module_dm
 ELSE
  CALL init_module_wrf_error 

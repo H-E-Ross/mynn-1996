@@ -4592,6 +4592,8 @@ SUBROUTINE cupSlopeSigma(dx, psfc, p, rho, dz8w, z, ht,                 &
 
 
 
+
+
   integer, intent(in) :: kpbl, sf_sfclay_physics, &
                          kms, kme, kts, kte
 
@@ -4741,7 +4743,7 @@ SUBROUTINE cupSlopeSigma(dx, psfc, p, rho, dz8w, z, ht,                 &
 
 
 
-   if( kpbl == 0 ) call wrf_error_fatal3("<stdin>",4744,&
+   if( kpbl == 0 ) call wrf_error_fatal3("<stdin>",4746,&
 "CuP ERROR: kpbl==0")
 
    

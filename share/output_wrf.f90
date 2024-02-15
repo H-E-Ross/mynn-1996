@@ -535,13 +535,8 @@ wrf_err_message )
              write(alarmname,'("WRF_ALARM_SECS_TIL_NEXT_RING_",i2)')i
            ENDIF
 
-           if(wrf_dm_on_monitor()) then
              CALL WRFU_TimeIntervalGet(interval,S=seconds)
              CALL WRFU_TimeIntervalGet(tmpinterval,S=seconds2)
-           endif
-
-           call wrf_dm_bcast_integer(seconds, 1)
-           call wrf_dm_bcast_integer(seconds2, 1)
            IF ( seconds .GE. 1700000000 .OR. seconds .LE. -1700000000 ) THEN   
              CALL wrf_put_dom_ti_integer( fid, TRIM(alarmname), seconds, 1, ierr )
            ELSE

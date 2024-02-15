@@ -220,14 +220,12 @@ RECURSIVE SUBROUTINE adapt_timestep(grid, config_flags)
      
         num_small_steps = CEILING( grid%parents(1)%ptr%dt / dt )
 
-        call wrf_dm_maxval(num_small_steps, idex, jdex)
         dtInterval = domain_get_time_step(grid%parents(1)%ptr) / &
              num_small_steps
      else
 
         num_small_steps = FLOOR( grid%parents(1)%ptr%dt / dt )
 
-        call wrf_dm_minval(num_small_steps, idex, jdex)
         if (num_small_steps < 1) then
            num_small_steps = 1
         endif
@@ -242,15 +240,6 @@ RECURSIVE SUBROUTINE adapt_timestep(grid, config_flags)
   
   dt = real_time(dtInterval)
 
-  call wrf_dm_mintile_double(dt, tile)
-  CALL WRFU_TimeIntervalGet(dtInterval,Sn=dt_num,Sd=dt_den,S=dt_whole)
-  call wrf_dm_tile_val_int(dt_num, tile)
-  call wrf_dm_tile_val_int(dt_den, tile)
-  call wrf_dm_tile_val_int(dt_whole, tile)
-  CALL WRFU_TimeIntervalSet(dtInterval, Sn = dt_whole*dt_den + dt_num, Sd = dt_den)
-
-  call wrf_dm_maxtile_real(grid%max_vert_cfl, tile)
-  call wrf_dm_maxtile_real(grid%max_horiz_cfl, tile)
 
   if ((grid%nested) .and. (grid%adapt_step_using_child)) then 
 

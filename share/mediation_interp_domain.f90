@@ -218,61 +218,6 @@ real      ,DIMENSION(grid%sm31:grid%em31,grid%sm32:grid%em32,grid%sm33:grid%em33
 
 
 
-  CALL wrf_dm_nestexchange_init
-
-  CALL model_to_grid_config_rec ( nested_grid%id , model_config_rec , config_flags )
-  grid => nested_grid%intermediate_grid
-
-  grid => parent_grid
-
-  CALL model_to_grid_config_rec ( grid%id , model_config_rec , config_flags )
-  CALL interp_domain_em_part1 ( grid , nested_grid%intermediate_grid, nested_grid, config_flags   &
-
-
-
-
-
-
-
-,grid%moist,grid%moist_bxs,grid%moist_bxe,grid%moist_bys,grid%moist_bye,grid%moist_btxs,grid%moist_btxe,grid%moist_btys, &
-grid%moist_btye,grid%dfi_moist,grid%dfi_moist_bxs,grid%dfi_moist_bxe,grid%dfi_moist_bys,grid%dfi_moist_bye,grid%dfi_moist_btxs, &
-grid%dfi_moist_btxe,grid%dfi_moist_btys,grid%dfi_moist_btye,grid%scalar,grid%scalar_bxs,grid%scalar_bxe,grid%scalar_bys, &
-grid%scalar_bye,grid%scalar_btxs,grid%scalar_btxe,grid%scalar_btys,grid%scalar_btye,grid%dfi_scalar,grid%dfi_scalar_bxs, &
-grid%dfi_scalar_bxe,grid%dfi_scalar_bys,grid%dfi_scalar_bye,grid%dfi_scalar_btxs,grid%dfi_scalar_btxe,grid%dfi_scalar_btys, &
-grid%dfi_scalar_btye,grid%aerod,grid%aerocu,grid%ozmixm,grid%aerosolc_1,grid%aerosolc_2,grid%fdda3d,grid%fdda2d,grid%advh_t, &
-grid%advz_t,grid%tracer,grid%tracer_bxs,grid%tracer_bxe,grid%tracer_bys,grid%tracer_bye,grid%tracer_btxs,grid%tracer_btxe, &
-grid%tracer_btys,grid%tracer_btye,grid%pert3d,grid%nba_mij,grid%nba_rij,grid%sbmradar,grid%chem &
-
-
-                                )
-  IF ( nested_grid%active_this_task ) THEN
-  grid => nested_grid%intermediate_grid
-  CALL model_to_grid_config_rec ( grid%id , model_config_rec , config_flags )
-  
-  CALL interp_domain_em_part2 ( grid, nested_grid, parent_grid, config_flags   &
-
-
-
-
-
-
-
-,grid%moist,grid%moist_bxs,grid%moist_bxe,grid%moist_bys,grid%moist_bye,grid%moist_btxs,grid%moist_btxe,grid%moist_btys, &
-grid%moist_btye,grid%dfi_moist,grid%dfi_moist_bxs,grid%dfi_moist_bxe,grid%dfi_moist_bys,grid%dfi_moist_bye,grid%dfi_moist_btxs, &
-grid%dfi_moist_btxe,grid%dfi_moist_btys,grid%dfi_moist_btye,grid%scalar,grid%scalar_bxs,grid%scalar_bxe,grid%scalar_bys, &
-grid%scalar_bye,grid%scalar_btxs,grid%scalar_btxe,grid%scalar_btys,grid%scalar_btye,grid%dfi_scalar,grid%dfi_scalar_bxs, &
-grid%dfi_scalar_bxe,grid%dfi_scalar_bys,grid%dfi_scalar_bye,grid%dfi_scalar_btxs,grid%dfi_scalar_btxe,grid%dfi_scalar_btys, &
-grid%dfi_scalar_btye,grid%aerod,grid%aerocu,grid%ozmixm,grid%aerosolc_1,grid%aerosolc_2,grid%fdda3d,grid%fdda2d,grid%advh_t, &
-grid%advz_t,grid%tracer,grid%tracer_bxs,grid%tracer_bxe,grid%tracer_bys,grid%tracer_bye,grid%tracer_btxs,grid%tracer_btxe, &
-grid%tracer_btys,grid%tracer_btye,grid%pert3d,grid%nba_mij,grid%nba_rij,grid%sbmradar,grid%chem &
-
-
-                                )
-  ENDIF
-
-  grid => nested_grid%intermediate_grid
-  CALL model_to_grid_config_rec ( grid%id , model_config_rec , config_flags )
-
 
 
    RETURN
@@ -479,55 +424,6 @@ real      ,DIMENSION(grid%sm31:grid%em31,grid%sm32:grid%em32,grid%sm33:grid%em33
 
 
 
-  CALL model_to_grid_config_rec ( nested_grid%id , model_config_rec , config_flags )
-  grid => nested_grid%intermediate_grid
-
-  grid => parent_grid
-
-  CALL model_to_grid_config_rec ( grid%id , model_config_rec , config_flags )
-  CALL interp_domain_em_small_part1 ( grid , nested_grid%intermediate_grid, nested_grid, config_flags   &
-
-
-
-
-
-
-
-,grid%moist,grid%moist_bxs,grid%moist_bxe,grid%moist_bys,grid%moist_bye,grid%moist_btxs,grid%moist_btxe,grid%moist_btys, &
-grid%moist_btye,grid%dfi_moist,grid%dfi_moist_bxs,grid%dfi_moist_bxe,grid%dfi_moist_bys,grid%dfi_moist_bye,grid%dfi_moist_btxs, &
-grid%dfi_moist_btxe,grid%dfi_moist_btys,grid%dfi_moist_btye,grid%scalar,grid%scalar_bxs,grid%scalar_bxe,grid%scalar_bys, &
-grid%scalar_bye,grid%scalar_btxs,grid%scalar_btxe,grid%scalar_btys,grid%scalar_btye,grid%dfi_scalar,grid%dfi_scalar_bxs, &
-grid%dfi_scalar_bxe,grid%dfi_scalar_bys,grid%dfi_scalar_bye,grid%dfi_scalar_btxs,grid%dfi_scalar_btxe,grid%dfi_scalar_btys, &
-grid%dfi_scalar_btye,grid%aerod,grid%aerocu,grid%ozmixm,grid%aerosolc_1,grid%aerosolc_2,grid%fdda3d,grid%fdda2d,grid%advh_t, &
-grid%advz_t,grid%tracer,grid%tracer_bxs,grid%tracer_bxe,grid%tracer_bys,grid%tracer_bye,grid%tracer_btxs,grid%tracer_btxe, &
-grid%tracer_btys,grid%tracer_btye,grid%pert3d,grid%nba_mij,grid%nba_rij,grid%sbmradar,grid%chem &
-
-
-                                )
-  grid => nested_grid%intermediate_grid
-  CALL model_to_grid_config_rec ( grid%id , model_config_rec , config_flags )
-  CALL interp_domain_em_small_part2 ( grid, nested_grid, config_flags   &
-
-
-
-
-
-
-
-,grid%moist,grid%moist_bxs,grid%moist_bxe,grid%moist_bys,grid%moist_bye,grid%moist_btxs,grid%moist_btxe,grid%moist_btys, &
-grid%moist_btye,grid%dfi_moist,grid%dfi_moist_bxs,grid%dfi_moist_bxe,grid%dfi_moist_bys,grid%dfi_moist_bye,grid%dfi_moist_btxs, &
-grid%dfi_moist_btxe,grid%dfi_moist_btys,grid%dfi_moist_btye,grid%scalar,grid%scalar_bxs,grid%scalar_bxe,grid%scalar_bys, &
-grid%scalar_bye,grid%scalar_btxs,grid%scalar_btxe,grid%scalar_btys,grid%scalar_btye,grid%dfi_scalar,grid%dfi_scalar_bxs, &
-grid%dfi_scalar_bxe,grid%dfi_scalar_bys,grid%dfi_scalar_bye,grid%dfi_scalar_btxs,grid%dfi_scalar_btxe,grid%dfi_scalar_btys, &
-grid%dfi_scalar_btye,grid%aerod,grid%aerocu,grid%ozmixm,grid%aerosolc_1,grid%aerosolc_2,grid%fdda3d,grid%fdda2d,grid%advh_t, &
-grid%advz_t,grid%tracer,grid%tracer_bxs,grid%tracer_bxe,grid%tracer_bys,grid%tracer_bye,grid%tracer_btxs,grid%tracer_btxe, &
-grid%tracer_btys,grid%tracer_btye,grid%pert3d,grid%nba_mij,grid%nba_rij,grid%sbmradar,grid%chem &
-
-
-                                )
-
-  grid => nested_grid%intermediate_grid
-  CALL model_to_grid_config_rec ( grid%id , model_config_rec , config_flags )
 
 
 

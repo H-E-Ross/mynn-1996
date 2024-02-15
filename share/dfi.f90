@@ -3107,13 +3107,6 @@ nba_mij,nba_rij,sbmradar,chem &
       USE module_state_description
       USE module_model_constants
       USE module_driver_constants
-   USE module_dm
-   USE module_comm_dm, ONLY : &
-                           HALO_EM_INIT_1_sub   &
-                          ,HALO_EM_INIT_2_sub   &
-                          ,HALO_EM_INIT_3_sub   &
-                          ,HALO_EM_INIT_4_sub   &
-                          ,HALO_EM_INIT_5_sub   
 
 
       IMPLICIT NONE
@@ -3360,79 +3353,6 @@ real      ,DIMENSION(grid%sm31:grid%em31,grid%sm32:grid%em32,grid%sm33:grid%em33
         ENDDO  
 
       ips = its ; ipe = ite ; jps = jts ; jpe = jte ; kps = kts ; kpe = kte
-
-
-
-
-
-
-CALL HALO_EM_INIT_1_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL HALO_EM_INIT_2_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL HALO_EM_INIT_3_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL HALO_EM_INIT_4_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL HALO_EM_INIT_5_sub ( grid, &
-  num_moist, &
-  moist, &
-  num_chem, &
-  chem, &
-  num_scalar, &
-  scalar, &
-  num_tracer, &
-  tracer, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
    END SUBROUTINE rebalance_dfi
 
 

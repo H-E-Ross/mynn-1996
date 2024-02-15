@@ -563,7 +563,6 @@ CONTAINS
 
    CALL get_current_grid_name( grid_str )
 
-   IF ( wrf_dm_on_monitor() ) THEN
      WRITE(outstring,*) grid_str,'Domain average of dpsdt, dmudt (mb/3h): ', xtime, &
            dpsdt_sum/no_points*108., &
            dmudt_sum/no_points*108.
@@ -595,7 +594,6 @@ CONTAINS
            lh_sum/no_points
      CALL wrf_message ( TRIM(outstring) )
      ENDIF
-   ENDIF
 
    ENDIF
 

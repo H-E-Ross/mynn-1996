@@ -725,7 +725,7 @@ CONTAINS
           ENDDO
        ENDIF
 
-       DO i=ITS,ITF
+       DO i=ITS,ITF !this is where we go from 2d to 1d
           if (FLAG_QI ) then
              sqi(:)=sqi3D(i,:)
           else

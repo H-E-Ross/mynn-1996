@@ -220,7 +220,6 @@ CONTAINS
      INTEGER                                :: ntiles
      INTEGER                                :: one
      INTEGER                                :: nt
-     INTEGER , EXTERNAL        :: omp_get_max_threads
      CHARACTER*255              :: mess
      CHARACTER*255              :: envval
      INTEGER                   :: tnum_tiles, istat
@@ -265,9 +264,7 @@ CONTAINS
        verbose = .true.
        CALL nl_get_numtiles( 1, num_tiles )
        IF ( num_tiles .EQ. 1 ) THEN
-         num_tiles = omp_get_max_threads()
-         WRITE(mess,'("WRF NUMBER OF TILES FROM OMP_GET_MAX_THREADS = ",I3)')num_tiles
-         CALL WRF_MESSAGE ( mess )
+         num_tiles = 1
          CALL get_environment_variable("WRF_NUM_TILES",envval, status=istat)
          IF ( envval .NE. "" .and. istat .eq. 0) THEN
            READ (envval,*) tnum_tiles

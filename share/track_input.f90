@@ -235,10 +235,6 @@ have_input_file : &
 
        ENDIF master_proc
 
-       CALL wrf_dm_bcast_integer(grid%track_loc, 1)
-       CALL wrf_dm_bcast_real(grid%track_time_in, grid%track_loc)
-       CALL wrf_dm_bcast_real(grid%track_lat_in, grid%track_loc)
-       CALL wrf_dm_bcast_real(grid%track_lon_in, grid%track_loc)
 
     grid%track_have_input = .TRUE.
 

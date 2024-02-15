@@ -205,8 +205,6 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
    USE module_io_domain
    USE module_configure , ONLY : grid_config_rec_type
    USE module_utility
-   USE module_dm, ONLY : local_communicator,                                     &
-                         mpi_comm_to_mom, mpi_comm_to_kid, which_kid
   
 
    IMPLICIT NONE
@@ -477,9 +475,6 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
        CALL pop_communicators_for_domain
      ENDIF
 
-     CALL push_communicators_for_domain( parent%id )
-     CALL MPI_Barrier( local_communicator, ierr )     
-     CALL pop_communicators_for_domain
 
      IF ( parent%active_this_task ) THEN
      CALL push_communicators_for_domain( parent%id )
@@ -550,7 +545,7 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
      CALL open_r_dataset ( fid , TRIM(rstname) , nest , nest_config_flags , "DATASET=RESTART", ierr )
      IF ( ierr .NE. 0 ) THEN
        WRITE( message , '("program wrf: error opening ",A32," for reading")') TRIM(rstname)
-       CALL wrf_error_fatal3("<stdin>",553,&
+       CALL wrf_error_fatal3("<stdin>",548,&
 message )
      ENDIF
      CALL input_restart ( fid,   nest , nest_config_flags , ierr )
@@ -891,7 +886,7 @@ SUBROUTINE med_hist_out ( grid , stream, config_flags )
 
    IF ( stream .LT. first_history .OR. stream .GT. last_auxhist ) THEN
      WRITE(message,*)'med_hist_out: invalid history stream ',stream
-     CALL wrf_error_fatal3("<stdin>",894,&
+     CALL wrf_error_fatal3("<stdin>",889,&
 message )
    ENDIF
 
@@ -1239,7 +1234,7 @@ SUBROUTINE med_auxinput_in ( grid , stream, config_flags )
 
    IF ( stream .LT. first_auxinput .OR. stream .GT. last_auxinput ) THEN
      WRITE(message,*)'med_auxinput_in: invalid input stream ',stream
-     CALL wrf_error_fatal3("<stdin>",1242,&
+     CALL wrf_error_fatal3("<stdin>",1237,&
 message )
    ENDIF
 
@@ -1577,12 +1572,12 @@ SUBROUTINE med_filter_out ( grid , config_flags )
      CALL open_w_dataset ( fid, TRIM(outname), grid ,  &
                            config_flags , output_input , "DATASET=INPUT", ierr )
      IF ( ierr .NE. 0 ) THEN
-       CALL wrf_error_fatal3("<stdin>",1580,&
+       CALL wrf_error_fatal3("<stdin>",1575,&
 message )
      ENDIF
 
      IF ( ierr .NE. 0 ) THEN
-       CALL wrf_error_fatal3("<stdin>",1585,&
+       CALL wrf_error_fatal3("<stdin>",1580,&
 message )
      ENDIF
 
@@ -1847,7 +1842,7 @@ integer myproc,i,j,k
           CALL open_r_dataset ( grid%lbc_fid, TRIM(bdyname) , grid , config_flags , "DATASET=BOUNDARY", ierr )
           IF ( ierr .NE. 0 ) THEN
             WRITE( message, * ) 'med_latbound_in: error opening ',TRIM(bdyname), ' for reading. IERR = ',ierr
-            CALL wrf_error_fatal3("<stdin>",1850,&
+            CALL wrf_error_fatal3("<stdin>",1845,&
 message )
           ENDIF
        ELSE
@@ -1876,7 +1871,7 @@ message )
 
        IF ( ierr .NE. 0 .and. ierr .NE. WRF_WARN_NETCDF ) THEN
          WRITE( message, * ) 'med_latbound_in: error reading ',TRIM(bdyname), ' IERR = ',ierr
-         CALL wrf_error_fatal3("<stdin>",1879,&
+         CALL wrf_error_fatal3("<stdin>",1874,&
 message )
        ENDIF
        IF ( currentTime .EQ. grid%this_bdy_time ) grid%dtbc = 0.
@@ -1986,7 +1981,7 @@ SUBROUTINE open_aux_u ( grid , config_flags, stream, alarm_id, &
 
    IF ( stream .LT. first_stream .OR. stream .GT. last_stream ) THEN
      WRITE(message,*)'open_aux_u: invalid input stream ',stream
-     CALL wrf_error_fatal3("<stdin>",1989,&
+     CALL wrf_error_fatal3("<stdin>",1984,&
 message )
    ENDIF
 
@@ -2058,7 +2053,7 @@ SUBROUTINE open_hist_w ( grid , config_flags, stream, alarm_id, &
 
    IF ( stream .LT. first_history .OR. stream .GT. last_history ) THEN
      WRITE(message,*)'open_hist_w: invalid history stream ',stream
-     CALL wrf_error_fatal3("<stdin>",2061,&
+     CALL wrf_error_fatal3("<stdin>",2056,&
 message )
    ENDIF
 
@@ -2140,7 +2135,6 @@ SUBROUTINE med_read_qna_emissions ( grid , config_flags )
    USE module_configure , ONLY : grid_config_rec_type
   
    USE module_bc_time_utilities
-   USE module_dm
    USE module_date_time
    USE module_utility
 
@@ -2190,7 +2184,7 @@ SUBROUTINE med_read_qna_emissions ( grid , config_flags )
                               "DATASET=AUXINPUT17", ierr )
         IF ( ierr .NE. 0 ) THEN
            WRITE( message , * ) 'med_read_qna_emissions: error opening ', TRIM( inpname )
-           CALL wrf_error_fatal3("<stdin>",2193,&
+           CALL wrf_error_fatal3("<stdin>",2187,&
 TRIM( message ) )
         ENDIF
 

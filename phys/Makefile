@@ -4,7 +4,8 @@ LN      =       ln -sf
 MAKE    =       make -i -r
 RM      =       rm -f
 
-#module_bl_mynn.o : helloworld.o
+#cc -c module_bl_mynn_1d_cc.cpp
+#module_bl_mynn_driver.o : module_bl_mynn_1d_cc.o
 
 MODULES = \
 	helloworld.o \

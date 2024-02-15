@@ -17,12 +17,6 @@ RECURSIVE SUBROUTINE integrate ( grid )
    USE module_utility
    USE module_cpl, ONLY : coupler_on, cpl_snd, cpl_defdomain
 
-
-
-
-
-   USE module_dm, ONLY:  domain_active_this_task 
-
    IMPLICIT NONE
 
    
@@ -292,7 +286,6 @@ END IF
                CALL med_pre_nest_initial ( grid , nestid , config_flags )
                CALL alloc_and_configure_domain ( domain_id  = nestid ,   &
 
-                                           active_this_task = domain_active_this_task( nestid ), &
                                                  grid       = new_nest , &
                                                  parent     = grid ,     &
                                                  kid        = kid        )

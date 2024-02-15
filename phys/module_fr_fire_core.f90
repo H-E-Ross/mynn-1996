@@ -824,8 +824,6 @@ subroutine prop_ls_rk3(id,               &
                    )
 
 
-    USE module_dm        , ONLY : ntasks_x,ntasks_y,local_communicator,mytask,ntasks
-    USE module_comm_dm , ONLY : halo_fire_lfn_1_sub, halo_fire_lfn_2_sub, halo_fire_lfn_0_sub
 USE module_domain , only: domain
 
 implicit none
@@ -938,19 +936,6 @@ call message(msg)
     enddo
 
 
-
-
-
-
-
-CALL HALO_FIRE_LFN_0_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
     id1 = id  
     if(id1.ne.0)id1=id1+1000
     call tend_ls(id1,    &
@@ -970,19 +955,6 @@ CALL HALO_FIRE_LFN_0_sub ( grid, &
             lfn_1(i,j) = lfn_0(i,j) + (dt/3.0)*tend(i,j) 
         enddo
     enddo
-
-
-
-
-
-
-
-CALL HALO_FIRE_LFN_1_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
 
 
 
@@ -1013,19 +985,6 @@ CALL HALO_FIRE_LFN_1_sub ( grid, &
 
 
 
-
-CALL HALO_FIRE_LFN_2_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
     if(id1.ne.0)id1=id1+1000
     call tend_ls(id1,    &
     ifds,ifde,jfds,jfde, &                      
@@ -1045,19 +1004,6 @@ CALL HALO_FIRE_LFN_2_sub ( grid, &
             lfn_2(i,j) = lfn_out(i,j) 
         enddo
     enddo     
-
-
-
-
-
-
-
-CALL HALO_FIRE_LFN_2_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
 
 
 
@@ -1099,8 +1045,6 @@ subroutine reinit_ls_rk3(id,                       &
                 ) 
 
 
-    USE module_dm        , ONLY : ntasks_x,ntasks_y,local_communicator,mytask,ntasks
-    USE module_comm_dm , ONLY : halo_fire_lfn_s1_sub,halo_fire_lfn_s2_sub,halo_fire_lfn_s3_sub
 USE module_domain , only: domain
 USE module_configure, only: grid_config_rec_type
 
@@ -1152,19 +1096,6 @@ threshold_HLu=fire_lsm_band_ngp*dx
         enddo
     enddo
 
-
-
-
-
-
-CALL HALO_FIRE_LFN_S3_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
     call continue_at_boundary(1,1,fire_lfn_ext_up, &   
     ifms,ifme,jfms,jfme, &                             
     ifds,ifde,jfds,jfde, &                             
@@ -1186,19 +1117,6 @@ do nts=1,fire_lsm_reinit_iter
     lfn_s0,lfn_s3,lfn_s3,lfn_s1,1.0/3.0)   
 
 
-
-
-
-
-
-CALL HALO_FIRE_LFN_S1_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
     call continue_at_boundary(1,1,fire_lfn_ext_up, & 
     ifms,ifme,jfms,jfme, &                          
     ifds,ifde,jfds,jfde, &                           
@@ -1217,19 +1135,6 @@ CALL HALO_FIRE_LFN_S1_sub ( grid, &
     lfn_s0,lfn_s3,lfn_s1,lfn_s2,1.0/2.0)
 
 
-
-
-
-
-
-CALL HALO_FIRE_LFN_S2_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
     call continue_at_boundary(1,1,fire_lfn_ext_up, &  
     ifms,ifme,jfms,jfme, &              
     ifds,ifde,jfds,jfde, &                 
@@ -1246,19 +1151,6 @@ CALL HALO_FIRE_LFN_S2_sub ( grid, &
     ifts,ifte,jfts,jfte,    &
     dx,dy,dt_s,bdy_eno1,threshold_HLu, &
     lfn_s0,lfn_s3,lfn_s2,lfn_s3,1.0)  
-
-
-
-
-
-
-
-CALL HALO_FIRE_LFN_S3_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
 
 
     call continue_at_boundary(1,1,fire_lfn_ext_up, &  

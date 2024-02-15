@@ -13,7 +13,6 @@ MODULE module_firebrand_spotting
     USE module_domain,       ONLY : get_ijk_from_grid, domain               
     USE module_configure,    ONLY : grid_config_rec_type                    
     USE module_symbols_util, ONLY : WRFU_TimeInterval, WRFU_TimeIntervalGet, WRFU_TimeIntervalSet
-    USE MPI 
 
     IMPLICIT NONE
 
@@ -175,7 +174,6 @@ CONTAINS
         fs_frac_landed)
 
 
-        USE module_firebrand_spotting_mpi,            ONLY: fs_mpi_init
         
         
         
@@ -284,7 +282,6 @@ CONTAINS
         ENDIF
 
 
-        CALL fs_mpi_init(grid)
 
     END SUBROUTINE firebrand_spotting_em_init
 
@@ -708,14 +705,14 @@ END FUNCTION order_val
 
                 
                 IF ( .NOT. flag_true(ii) ) THEN 
-                    CALL wrf_error_fatal3("<stdin>",711,&
+                    CALL wrf_error_fatal3("<stdin>",708,&
 'SPFire_generate_firebrands: Did not find free index to release brands! Did you pack fs_p_x, fs_p_y, fs_p_id, etc?') 
                 ENDIF
 
                 
                 IF (INT(release_i(br)) == 0 .OR. &
                     INT(release_j(br)) == 0 ) &
-                    CALL wrf_error_fatal3("<stdin>",718,&
+                    CALL wrf_error_fatal3("<stdin>",715,&
 'SPFire_generate_firebrands: release_ijk is zero! Positions cannot be zero.')
 
                 IF (fs_gen_idmax + 10 >= HUGE(1)) fs_gen_idmax = 0
@@ -1524,29 +1521,9 @@ END FUNCTION order_val
         USE module_domain_type,       ONLY: HISTORY_ALARM, restart_alarm, AUXHIST23_ALARM
         USE module_state_description, ONLY: p_qv, num_moist, param_first_scalar
         USE module_utility,           ONLY: WRFU_Alarm 
-        USE module_firebrand_spotting_mpi,  ONLY: fs_mpi_init, &
-                                            fs_mpi_sendbuff1_int,      &
-                                            fs_mpi_sendbuff1_real,     &
-                                            fs_mpi_recvbuff1_int,      &
-                                            fs_mpi_recvbuff1_real,     &
-                                            fs_mpi_nothing2send,       &
-                                            fs_mpi_send2neighbors,     &
-                                            fs_mpi_sendbuffsize,       &
-                                            fs_mpi_sendbuff_int,       &
-                                            fs_mpi_sendbuff_real,      &
-                                            fs_mpi_recvbuffsize,       &
-                                            fs_mpi_recvfrompatch_int,  &
-                                            fs_mpi_recvfrompatch_real, &
-                                            fs_mpi_sendbuff_real,      &
-                                            fs_mpi_checkreceive,       &
-                                            fs_mpi_recv
-        USE module_firebrand_spotting_mpi,  ONLY: neighbors, my_id, task_id, mpiprocs,  &
-                                            left_id, right_id, up_id, down_id, &
-                                            upleft_id, upright_id, downleft_id, downright_id
 
 
         IMPLICIT NONE
-        LOGICAL, EXTERNAL :: wrf_dm_on_monitor
         
         
         
@@ -1676,15 +1653,9 @@ END FUNCTION order_val
         
 
 
-        IF (mpiprocs == 0) & 
-            CALL fs_mpi_init(grid) 
-
-        ntiles = mpiprocs
-        myprocid = my_id * 1000000
-        IF ( wrf_dm_on_monitor() ) THEN 
-            IamMaster = .TRUE. 
-            MasterId = my_id
-        ENDIF
+        IamMaster = .TRUE.  
+        ntiles = 1 
+        myprocid = 1* 1000000
 
         hist_flag = .FALSE. 
         IF ( Is_alarm_tstep(grid%domain_clock, grid%alarms(HISTORY_ALARM)) ) hist_flag = .TRUE. 
@@ -1896,18 +1867,6 @@ END FUNCTION order_val
             ENDIF 
             
 
-            IF (.NOT. (IamMaster)) THEN
-
-
-                
-                CALL fs_mpi_sendbuff1_int(sendto=MasterId, nbr=Ngrdpts) 
-
-                IF (Ngrdpts > 0) THEN
-                    CALL fs_mpi_sendbuff1_real(sendto=MasterId, nbr=MeanPot) 
-
-
-                ENDIF
-            ENDIF
 
             
             
@@ -1942,16 +1901,6 @@ END FUNCTION order_val
                 
 
 
-                DO kk=2, mpiprocs 
-                    np_Ngrdpts(kk) = fs_mpi_recvbuff1_int(fromid=kk-1)  
-
-                    IF (np_Ngrdpts(kk) > 0) THEN 
-                        np_MeanPot(kk) = fs_mpi_recvbuff1_real(fromid=kk-1)
-
-
-                    ENDIF
-                ENDDO
-
                 DO kk=1, ntiles 
                    TotPot = np_MeanPot(kk) * REAL(np_Ngrdpts(kk)) + TotPot 
                 ENDDO
@@ -1984,14 +1933,6 @@ END FUNCTION order_val
                     
                     
 
-
-                    DO kk=2, mpiprocs 
-                        IF (np_Ngrdpts(kk) > 0) THEN
-                            CALL fs_mpi_sendbuff1_real(sendto=kk-1, nbr=PotThr)
-
-
-                        ENDIF
-                    ENDDO
                 ENDIF 
                 
 
@@ -2008,12 +1949,6 @@ END FUNCTION order_val
                 
                 
 
-                IF (.NOT.(IamMaster)) THEN
-                    PotThr = ZERO_dp 
-                    PotThr = fs_mpi_recvbuff1_real(fromid=MasterId) 
-
-
-                ENDIF
 
                 
                 
@@ -2141,7 +2076,7 @@ END FUNCTION order_val
                 ENDIF
                 
 
-                IF (active_br /= COUNT( fs_p_id > 0 ) ) CALL wrf_error_fatal3("<stdin>",2144,&
+                IF (active_br /= COUNT( fs_p_id > 0 ) ) CALL wrf_error_fatal3("<stdin>",2079,&
 'SPFire_driver: Active brands do not match!')
 
             ENDIF 
@@ -2167,20 +2102,6 @@ END FUNCTION order_val
         
         
 
-        IF ((active_br == 0))  THEN
-
-            CALL fs_mpi_nothing2send(sendto=left_id)
-            CALL fs_mpi_nothing2send(sendto=right_id)
-            CALL fs_mpi_nothing2send(sendto=up_id)
-            CALL fs_mpi_nothing2send(sendto=down_id)
-
-            CALL fs_mpi_nothing2send(sendto=upleft_id)
-            CALL fs_mpi_nothing2send(sendto=upright_id)
-            CALL fs_mpi_nothing2send(sendto=downleft_id)
-            CALL fs_mpi_nothing2send(sendto=downright_id)
-
-
-        ENDIF
         
         
 
@@ -2471,19 +2392,6 @@ END FUNCTION order_val
             
             
 
-            CALL fs_mpi_send2neighbors(task_id=task_id,&
-                    mask=sparse_mask,&
-                    p_x  = fs_p_x,   &
-                    p_y  = fs_p_y,   &
-                    p_z  = fs_p_z,   &
-                    p_id = fs_p_id,  &
-                    p_src = fs_p_src,  &
-                    p_dt = fs_p_dt,  &
-                    fs_p_m = fs_p_mass, &
-                    fs_p_d = fs_p_diam, &
-                    fs_p_e = fs_p_effd, &
-                    fs_p_t = fs_p_temp, &
-                    fs_p_v = fs_p_tvel)
             
             
             
@@ -2527,7 +2435,7 @@ END FUNCTION order_val
         
         
         
-        IF (active_br /= COUNT( fs_p_id > 0 ) ) CALL wrf_error_fatal3("<stdin>",2530,&
+        IF (active_br /= COUNT( fs_p_id > 0 ) ) CALL wrf_error_fatal3("<stdin>",2438,&
 'SPFire_driver: Active brands do not match!')
 
         
@@ -2664,20 +2572,11 @@ END FUNCTION order_val
                     landing_cnt = PACK(fs_count_landed_hist(is:ie,js:je), landing_mask(is:ie,js:je))
                     landed_risk = PACK(fs_fuel_spotting_risk(is:ie,js:je), landing_mask(is:ie,js:je))
 
-                    IF (.NOT. (IamMaster)) THEN
-
-                        CALL fs_mpi_sendbuffsize(sendto=MasterId, nbr=ndep) 
-                        CALL fs_mpi_sendbuff_int(sendto=MasterId, bsz=ndep, buff=landing_cnt(1:ndep))
-                        CALL fs_mpi_sendbuff_real(sendto=MasterId, bsz=ndep, buff=landed_risk(1:ndep))
-                            
-                    ENDIF
                 ENDIF 
             ENDIF 
 
             
 
-            IF ((ndep == 0) .AND. .NOT.(IamMaster)) &
-                CALL fs_mpi_nothing2send(sendto=MasterId) 
             
             
             
@@ -2691,11 +2590,6 @@ END FUNCTION order_val
                 np_nlanded(:) = 0
                 np_nlanded(1) = ndep 
 
-                DO kk=2, mpiprocs 
-                    np_nlanded(kk) = fs_mpi_recvbuffsize(fromid=kk-1)  
-
-
-                ENDDO
                 
                 
 
@@ -2716,19 +2610,6 @@ END FUNCTION order_val
 
                     kk1 = ndep + 1 
 
-                    DO kk=2, mpiprocs 
-
-                        IF (np_nlanded(kk) > 0) THEN 
-
-                            kk2 = kk1 + np_nlanded(kk) -1                
-
-
-
-                            np_landed_cnt(kk1:kk2) = fs_mpi_recvfrompatch_int(bsz=np_nlanded(kk), fromid=kk-1) 
-                            np_landed_risk(kk1:kk2)= fs_mpi_recvfrompatch_real(bsz=np_nlanded(kk), fromid=kk-1)
-                            kk1 = kk1 + np_nlanded(kk)
-                        ENDIF
-                    ENDDO
 
                     
                     
@@ -2751,18 +2632,6 @@ END FUNCTION order_val
 
                     kk1 = ndep + 1 
 
-                    DO kk=2, mpiprocs 
-
-                        IF (np_nlanded(kk) > 0) THEN 
-
-                            kk2 = kk1 + np_nlanded(kk) -1                
-
-                            CALL fs_mpi_sendbuff_real(sendto=kk-1, bsz=np_nlanded(kk), buff=np_frac_landed(kk1:kk2))
-                            CALL fs_mpi_sendbuff_real(sendto=kk-1, bsz=np_nlanded(kk), buff=np_lkhd(kk1:kk2))
-
-                            kk1 = kk1 + np_nlanded(kk)
-                        ENDIF
-                    ENDDO
                 ENDIF 
                 
 
@@ -2770,15 +2639,6 @@ END FUNCTION order_val
 
             
 
-            IF (.NOT.(IamMaster) .AND. (ndep > 0)) THEN
-
-                recv_frac_landed = fs_mpi_recvfrompatch_real(bsz=ndep, fromid=MasterId) 
-                fs_frac_landed(is:ie,js:je) = UNPACK(recv_frac_landed, MASK=landing_mask(is:ie,js:je), FIELD=ZERO_dp)
-
-                recv_spot_lkhd = fs_mpi_recvfrompatch_real(bsz=ndep, fromid=MasterId) 
-                fs_spotting_lkhd(is:ie,js:je) = UNPACK(recv_spot_lkhd, MASK=landing_mask(is:ie,js:je), FIELD=ZERO_dp)
-
-            ENDIF
 
             IF ((IamMaster) .AND. (ndep > 0)) THEN
 
@@ -2812,93 +2672,6 @@ END FUNCTION order_val
         
         
 
-
-        ALLOCATE(nbr_id(neighbors))
-        nbr_id(:)=0
-        nbr_id(:)=fs_mpi_checkreceive(task_list=task_id, np=neighbors)
-
-        nbr_sum = SUM(nbr_id)
-        IF (nbr_sum > 0) THEN 
-
-            WRITE (msg,'(16(i4,1x))') ([task_id(ii), nbr_id(ii)], ii=1,neighbors)
-            CALL wrf_debug (wrfdbg,  'SPFire_driver mpi_check_receive (taskID, N): '//msg)
-
-            
-            ALLOCATE(r_x(nbr_sum), r_y(nbr_sum), r_z(nbr_sum), r_id(nbr_sum), r_src(nbr_sum), r_dt(nbr_sum))
-            r_id(:) = 0
-            r_src(:) = 0
-            r_dt(:) = 0
-            r_x(:) = ZERO_dp
-            r_y(:) = ZERO_dp
-            r_z(:) = ZERO_dp
-
-            
-            ALLOCATE(r_p_m(nbr_sum), r_p_d(nbr_sum), r_p_e(nbr_sum), r_p_t(nbr_sum), r_p_v(nbr_sum))
-            ALLOCATE(fb_mdetv(nbr_sum))
-
-            CALL fs_mpi_recv(np_id=nbr_id, task_id=task_id, &
-                                   r_x=r_x, r_y=r_y, r_z=r_z, &
-                                   r_id=r_id, r_src=r_src, r_dt=r_dt, &
-                                   r_p_m=r_p_m, &
-                                   r_p_d=r_p_d, & 
-                                   r_p_e=r_p_e, &
-                                   r_p_t=r_p_t, & 
-                                   r_p_v=r_p_v)
-
-            
-            
-            fb_mdetv  = [(p_properties(r_p_m(kk), r_p_d(kk), r_p_e(kk), r_p_t(kk), r_p_v(kk)), kk=1,nbr_sum)]
-
-            
-
-
-            
-
-            prior_br = active_br + 1 
-            CALL generate_firebrands(&
-                        fs_p_id = fs_p_id, &
-                        fs_p_src = fs_p_src, &
-                        fs_p_dt = fs_p_dt, &
-                        fs_p_z  = fs_p_z,  &
-                        fs_p_x  = fs_p_x,  &
-                        fs_p_y  = fs_p_y,  &
-                        fs_gen_idmax    = fs_gen_idmax,    &
-                        myprocid = myprocid,        &
-                        active_br   = active_br,   &
-                        release_i = r_x, &
-                        release_j = r_y, &
-                        release_k = r_z, &
-                        release_dt = r_dt, &
-                        release_src = r_src, &
-                        release_prop= fb_mdetv, & 
-                        fs_p_prop   = fs_p_prop)
-
-            WRITE (msg,'(2(i8,1x))') active_br, fs_gen_idmax
-            CALL wrf_debug (wrfdbg, 'SPFire_driver mpi recv AFTER : ii, fs_gen_idmax >>> '// msg)
-
-            fs_p_mass (prior_br:active_br) = r_p_m
-            fs_p_diam (prior_br:active_br) = r_p_d
-            fs_p_effd(prior_br:active_br) = r_p_e
-            fs_p_temp (prior_br:active_br) = r_p_t
-            fs_p_tvel (prior_br:active_br) = r_p_v
-
-            
-
-
-            
-
-            DEALLOCATE(r_x, r_y, r_z, r_id, r_src, r_dt)
-            
-            DEALLOCATE(fb_mdetv)
-            DEALLOCATE(r_p_m, r_p_d, r_p_e, r_p_t, r_p_v)
-
-        
-
-        ENDIF
-        DEALLOCATE(nbr_id)
-        
-        
-        
         
         
         

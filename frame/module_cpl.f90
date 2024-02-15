@@ -29,7 +29,7 @@ MODULE module_cpl
    INTEGER :: nlevdbg  = 1        
    INTEGER :: nlevdbg2 = 10       
 
-   INCLUDE 'mpif.h'               
+   INTEGER :: MPI_COMM_NULL = -1  
 
 CONTAINS
 

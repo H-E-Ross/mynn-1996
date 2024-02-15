@@ -21,7 +21,6 @@ CONTAINS
     USE module_model_constants
     USE module_utility
     USE module_streams, ONLY: history_alarm, auxhist2_alarm
-    USE module_dm, ONLY: wrf_dm_sum_real, wrf_dm_maxval
 
     IMPLICIT NONE
 

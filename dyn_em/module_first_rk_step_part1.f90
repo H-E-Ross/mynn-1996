@@ -50,9 +50,6 @@ CONTAINS
     USE module_convtrans_prep
     USE module_big_step_utilities_em, ONLY : phy_prep
 
-    USE module_dm, ONLY : local_communicator, mytask, ntasks, ntasks_x, ntasks_y, local_communicator_periodic, wrf_dm_maxval
-    USE module_comm_dm, ONLY : halo_em_phys_a_sub,halo_em_fdda_sfc_sub,halo_pwp_sub,halo_em_chem_e_3_sub, &
-    halo_em_chem_e_5_sub, halo_em_hydro_noahmp_sub
     USE module_utility
     IMPLICIT NONE
 
@@ -186,19 +183,6 @@ CONTAINS
 
 
 
-
-
-
-
-
-CALL HALO_EM_PHYS_A_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
       !$OMP PARALLEL DO   &
       !$OMP PRIVATE ( ij )
       DO ij = 1 , grid%num_tiles
@@ -229,7 +213,7 @@ CALL HALO_EM_PHYS_A_sub ( grid, &
                             current_timestr=mesg )
      CALL WRFU_TimeGet( currentTime, YY=yr, dayOfYear=day, H=hr, M=minute, S=sec, rc=rc)
          IF( rc/= WRFU_SUCCESS)THEN
-         CALL wrf_error_fatal3("<stdin>",232,&
+         CALL wrf_error_fatal3("<stdin>",216,&
 'WRFU_TimeGet failed')
          ENDIF
 
@@ -330,23 +314,6 @@ CALL radiation_driver(p_top=grid%p_top,ACFRCV=grid%acfrcv,ACFRST=grid%acfrst,ALB
 
 
 
-  IF ( ( config_flags%sf_surface_physics.eq.NOAHMPSCHEME ) .and. ( config_flags%opt_run.eq.5 ) ) THEN
-       IF ( mod(grid%itimestep,grid%STEPWTD).eq.0 )  THEN
-
-
-
-
-
-
-CALL HALO_EM_HYDRO_NOAHMP_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-       ENDIF
-  ENDIF
 
 
 
@@ -357,20 +324,6 @@ CALL HALO_EM_HYDRO_NOAHMP_sub ( grid, &
       CALL nl_get_iswater(grid%id, iswater)
       CALL nl_get_isurban(grid%id, isurban)
       call nl_get_mminlu(grid%id, mminlu)
-
-
-
-
-
-
-
-CALL HALO_PWP_sub ( grid, &
-  config_flags, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
 
 
       CALL wrf_debug ( 200 , ' call surface_driver' )
@@ -917,19 +870,6 @@ CALL cumulus_driver(grid,U=grid%u_phy,V=grid%v_phy,TH=th_phy,T=grid%t_phy,W=grid
      &             ,IPS=ips,IPE=ipe, JPS=jps,JPE=jpe, KPS=kps,KPE=kpe     &
      &             ,KTS=k_start, KTE=min(k_end,kde-1)                     &
      &              )
-
-
-
-
-
-
-
-CALL HALO_EM_FDDA_SFC_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
 
       CALL wrf_debug ( 200 , ' call fddagd_driver' )
 

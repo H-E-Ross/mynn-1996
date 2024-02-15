@@ -21,7 +21,7 @@ MODULE module_wrf_top
 
    USE module_nesting
 
-   USE module_dm, ONLY : wrf_dm_initialize,wrf_get_hostid,domain_active_this_task,mpi_comm_allcompute
+   USE module_dm, ONLY : domain_active_this_task
 
 
    USE module_cpl, ONLY : coupler_on, cpl_finalize, cpl_defdomain
@@ -46,10 +46,6 @@ MODULE module_wrf_top
    INTEGER :: debug_level
    LOGICAL :: input_from_file
 
-   INTEGER                 :: nbytes
-   INTEGER, PARAMETER      :: configbuflen = 4* 65536
-   INTEGER                 :: configbuf( configbuflen )
-   LOGICAL , EXTERNAL      :: wrf_dm_on_monitor
 
    CHARACTER (LEN=256)     :: rstname
    CHARACTER (LEN=80)      :: message
@@ -101,14 +97,13 @@ CONTAINS
 
 
 
-     use omp_lib
      LOGICAL, OPTIONAL, INTENT(IN) :: no_init1
      INTEGER i, myproc, nproc, hostid, loccomm, ierr, buddcounter, mydevice, save_comm
      INTEGER, ALLOCATABLE :: hostids(:), budds(:)
      CHARACTER*512 hostname
      CHARACTER*512 mminlu_loc
    CHARACTER (LEN=*), PARAMETER :: release_version = 'V4.5.2'
-    CHARACTER (LEN=*), PARAMETER :: commit_version = 'git commit 9ab3ea651380480b845326d29276a99b9a8204ad'
+    CHARACTER (LEN=*), PARAMETER :: commit_version = 'git commit ec80580efa07361dc236b55273b7d23388b43007 7783 files changed, 88 insertions(+), 8438228 deletions(-)'
 
 
 
@@ -150,16 +145,7 @@ CONTAINS
 
 
 
-   CALL wrf_get_dm_communicator( save_comm )
-   CALL wrf_set_dm_communicator( mpi_comm_allcompute )
-   IF ( wrf_dm_on_monitor() ) THEN
-     CALL initial_config
-   ENDIF
-   CALL get_config_as_buffer( configbuf, configbuflen, nbytes )
-   CALL wrf_dm_bcast_bytes( configbuf, nbytes )
-   CALL set_config_as_buffer( configbuf, configbuflen )
-   CALL wrf_dm_initialize
-   CALL wrf_set_dm_communicator( save_comm )
+   CALL initial_config
 
    CALL setup_physics_suite
    CALL set_derived_rconfigs
@@ -198,6 +184,8 @@ CONTAINS
 
    CALL nl_get_max_dom( 1, max_dom )
    IF ( max_dom > 1 ) THEN
+   CALL wrf_error_fatal3("<stdin>",187,&
+     'nesting requires either an MPI build or use of the -DSTUBMPI option' ) 
    END IF
 
 
@@ -232,12 +220,6 @@ CONTAINS
    CALL       wrf_debug ( 100 , 'wrf: calling init_wrfio' )
    CALL init_wrfio
 
-   CALL wrf_get_dm_communicator( save_comm )
-   CALL wrf_set_dm_communicator( mpi_comm_allcompute )
-   CALL get_config_as_buffer( configbuf, configbuflen, nbytes )
-   CALL wrf_dm_bcast_bytes( configbuf, nbytes )
-   CALL set_config_as_buffer( configbuf, configbuflen )
-   CALL wrf_set_dm_communicator( save_comm )
 
 
    
@@ -454,7 +436,7 @@ CONTAINS
    
             CASE DEFAULT
                wrf_err_message = 'Unrecognized DFI_OPT in namelist'
-               CALL wrf_error_fatal3("<stdin>",457,&
+               CALL wrf_error_fatal3("<stdin>",439,&
 TRIM(wrf_err_message))
    
          END SELECT

@@ -56,11 +56,6 @@ subroutine fire_driver_em ( grid , config_flags                    &
 
 
 
-    USE module_dm        , ONLY : ntasks_x,ntasks_y,local_communicator,mytask,ntasks
-    USE module_comm_dm , ONLY : halo_fire_fuel_sub, halo_fire_tign_sub, halo_fire_wind_f_sub, &
-halo_fire_wind_a_sub, halo_fire_ph_sub, halo_fire_zsf_sub, halo_fire_longlat_sub, &
-halo_fire_phb_sub, halo_fire_z0_sub, halo_fire_lfn_sub, halo_fire_mfg_sub, &
-halo_fire_mag_sub
 
     implicit none
 
@@ -209,168 +204,6 @@ halo_fire_mag_sub
         
 
 
-       if(fire_run)then
-        if(need_lfn_update)then
-
-
-
-
-
-
-
-CALL HALO_FIRE_LFN_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-        endif
-
-        if(fire_ifun.eq.1)then
-
-
-
-
-
-
-
-CALL HALO_FIRE_LONGLAT_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-
-
-
-
-CALL HALO_FIRE_PHB_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-
-CALL HALO_FIRE_Z0_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-        elseif(fire_ifun.eq.2)then
-
-
-
-
-
-
-
-CALL HALO_FIRE_ZSF_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-        elseif(fire_ifun.eq.3)then
-
-
-
-
-
-
-
-CALL HALO_FIRE_WIND_A_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL HALO_FIRE_PH_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-        elseif(fire_ifun.eq.4)then
-
-
-
-
-
-
-
-CALL HALO_FIRE_WIND_F_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-            if(run_fuel_moisture)then
-            
-
-
-
-
-
-
-CALL HALO_FIRE_MFG_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-            endif
-
-        elseif(fire_ifun.eq.6)then
-
-
-
-
-
-
-
-CALL HALO_FIRE_TIGN_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-        endif
-       endif
-
         
         
         call fire_driver_phys ( &
@@ -439,58 +272,6 @@ CALL HALO_FIRE_TIGN_sub ( grid, &
         )
 
    
-          if(fire_run)then
-            if(fire_ifun.eq.2)then
-
-
-
-
-
-
-
-CALL HALO_FIRE_FUEL_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-                call message('halo exchange on lfn width 2')
-
-
-
-
-
-
-CALL HALO_FIRE_LFN_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-          endif
-          if(run_fuel_moisture)then
-            if(fire_ifun.eq.3)then
-                     
-
-
-
-
-
-
-CALL HALO_FIRE_MAG_sub ( grid, &
-  config_flags, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-                endif
-            endif
-            endif
 
 
      if(fire_ifun.eq.6 .AND. config_flags%tracer_opt.eq.3)then
@@ -1128,9 +909,6 @@ if (ifun.eq.3)then
         do ij=1,num_tiles
             ignited_patch(i)=ignited_patch(i)+ignited_tile(i,ij)
         enddo
-        call message('fire_driver_phys: checking ignitions, collect counts')
-        call wrf_dm_maxval(ignited_patch(i),idex,jdex)
-        call message('fire_driver_phys: collected')
         if(ignited_patch(i).eq.0)then
             call crash('fire_driver_phys: Ignition failed, no nodes ignited. Bad coordinates?')
         endif

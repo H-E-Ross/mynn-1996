@@ -149,8 +149,6 @@ CONTAINS
 
    USE module_cu_kf     ,  ONLY : kfcps
    USE module_cu_bmj    ,  ONLY : bmjdrv
-   USE module_dm        , ONLY : ntasks_x,ntasks_y,local_communicator,mytask,ntasks 
-   USE module_comm_dm   ,  ONLY : halo_cup_g3_in_sub, halo_cup_g3_out_sub
    USE module_domain    , ONLY: domain
    USE module_cu_kfeta  , ONLY : kf_eta_cps
    USE module_cu_mskf   , ONLY : mskf_cps
@@ -816,19 +814,6 @@ CONTAINS
 
       IF ( cu_physics == G3SCHEME .OR.  cu_physics == GFSCHEME .OR.     &
            cu_physics == KFETASCHEME .OR. cu_physics == MSKFSCHEME) THEN 
-
-
-
-
-
-
-CALL HALO_CUP_G3_IN_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
       ENDIF
 
 
@@ -1065,7 +1050,7 @@ CALL HALO_CUP_G3_IN_sub ( grid, &
                                                                                                                                            
           IF ( adapt_step_flag_pass ) THEN
             WRITE( wrf_err_message , * ) 'The SAS cumulus option will not work properly with an adaptive time step'
-            CALL wrf_error_fatal3("<stdin>",1068,&
+            CALL wrf_error_fatal3("<stdin>",1053,&
 wrf_err_message )
           END IF
           CALL wrf_debug(100,'in cu_sas')
@@ -1096,7 +1081,7 @@ wrf_err_message )
 
           IF ( adapt_step_flag_pass ) THEN
             WRITE( wrf_err_message , * ) 'The SCALE-AWARE SAS cumulus option will not work properly with an adaptive time step'
-            CALL wrf_error_fatal3("<stdin>",1099,&
+            CALL wrf_error_fatal3("<stdin>",1084,&
 wrf_err_message )
           END IF
           CALL wrf_debug(100,'in cu_scalesas')
@@ -1128,7 +1113,7 @@ wrf_err_message )
                                                                                                                                            
           IF ( adapt_step_flag_pass ) THEN
             WRITE( wrf_err_message , * ) 'The SAS cumulus option will not work properly with an adaptive time step'
-            CALL wrf_error_fatal3("<stdin>",1131,&
+            CALL wrf_error_fatal3("<stdin>",1116,&
 wrf_err_message )
           END IF
           CALL wrf_debug(100,'in cu_osas')
@@ -1227,7 +1212,7 @@ wrf_err_message )
           CALL wrf_debug(100,'in camzm_cps')
       IF(.not.f_qi)THEN
          WRITE( wrf_err_message , * ) 'This cumulus option requires ice microphysics option: f_qi = ', f_qi
-         CALL wrf_error_fatal3("<stdin>",1230,&
+         CALL wrf_error_fatal3("<stdin>",1215,&
 wrf_err_message )
       ENDIF
           CALL CAMZM_DRIVER(                                        &
@@ -1276,7 +1261,7 @@ wrf_err_message )
                ,LENGATH2D=lengath2d                                 )
           ELSE
              WRITE( wrf_err_message , * ) 'Insufficient arguments to call CAMZM cu scheme'
-             CALL wrf_error_fatal3("<stdin>",1279,&
+             CALL wrf_error_fatal3("<stdin>",1264,&
 wrf_err_message )
           ENDIF
 
@@ -1305,7 +1290,7 @@ wrf_err_message )
                ,F_QI=f_qi,F_QS=f_qs                             &
                                                              )
         ELSE
-          CALL wrf_error_fatal3("<stdin>",1308,&
+          CALL wrf_error_fatal3("<stdin>",1293,&
 'Lacking arguments for CU_TIEDTKE in cumulus driver')
         ENDIF
 
@@ -1365,7 +1350,7 @@ wrf_err_message )
                ,ITS=its,ITE=ite,JTS=jts,JTE=jte,KTS=kts,KTE=kte &
                                                                 )
         ELSE
-          CALL wrf_error_fatal3("<stdin>",1368,&
+          CALL wrf_error_fatal3("<stdin>",1353,&
 'Lacking arguments for CU_KSAS in cumulus driver')
         ENDIF
 
@@ -1400,7 +1385,7 @@ wrf_err_message )
               ,ITS=its,ITE=ite,JTS=jts,JTE=jte,KTS=kts,KTE=kte &
                                                                 )
         ELSE
-          CALL wrf_error_fatal3("<stdin>",1403,&
+          CALL wrf_error_fatal3("<stdin>",1388,&
 'Lacking arguments for CU_NSAS in cumulus driver')
         ENDIF
 
@@ -1476,7 +1461,7 @@ wrf_err_message )
      CASE DEFAULT 
 
          WRITE( wrf_err_message , * ) 'The cumulus option does not exist: cu_physics = ', cu_physics
-         CALL wrf_error_fatal3("<stdin>",1479,&
+         CALL wrf_error_fatal3("<stdin>",1464,&
 wrf_err_message )
 
    END SELECT cps_select
@@ -1484,19 +1469,6 @@ wrf_err_message )
       ENDDO
       !$OMP END PARALLEL DO
    IF(cu_physics .eq. 5 )then
-
-
-
-
-
-
-CALL HALO_CUP_G3_OUT_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
       !$OMP PARALLEL DO   &
       !$OMP PRIVATE ( ij ,its,ite,jts,jte, i,j,k)
       DO ij = 1 , num_tiles
@@ -1786,7 +1758,7 @@ SUBROUTINE aer_p_int_cu(p ,pin_cu, levsiz_cu, aerotcu, aerocu, no_src_cu, pf, &
       end do
 
       if (kount.gt.ncol) then
-         call wrf_error_fatal3("<stdin>",1789,&
+         call wrf_error_fatal3("<stdin>",1761,&
 'AER_P_INT: Bad aerosol data: non-monotonicity suspected')
       end if
 35    continue

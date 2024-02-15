@@ -79,10 +79,7 @@ SUBROUTINE pxft ( grid                          &
                  ,ipsx,ipex,jpsx,jpex,kpsx,kpex )
    USE module_state_description
    USE module_domain, ONLY : domain
-   USE module_dm, ONLY : local_communicator, mytask, ntasks, ntasks_x, ntasks_y &
-                       , local_communicator_periodic, itrace                    &
-                       , local_communicator_x
-   USE module_driver_constants
+   USE module_dm
    IMPLICIT NONE
    
    TYPE(domain) , TARGET          :: grid
@@ -113,6 +110,7 @@ integer myproc, i, j, k
    LOGICAL piggyback_mu, piggyback_mut
    INTEGER ij, k_end
 
+   INTEGER itrace
 
 
    piggyback_mu  = flag_mu .EQ. 1
@@ -163,80 +161,20 @@ call wrf_get_myproc(myproc)
        grid%u_2(ips:ipe,kde,jps:jpe) = grid%mu_2(ips:ipe,jps:jpe)
      ENDIF
 
-
-
-
-
-
-  call trans_z2x ( ntasks_x, local_communicator_x, 1, 4, 4, DATA_ORDER_XZY , &
-                   grid%v_2, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%v_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x ) 
-
-
-     CALL polar_filter_3d( grid%v_xxx, grid%clat_xxx, .false.,     &
-                                fft_filter_lat, dclat,                 &
-                                ids, ide, jds, jde, kds, kde-1,         &
-                                imsx, imex, jmsx, jmex, kmsx, kmex,     &
-                                ipsx, ipex, jpsx, jpex, kpsx, MIN(kde-1,kpex ) )
-
-
-
-
-
-
-
-  call trans_z2x ( ntasks_x, local_communicator_x, 0, 4, 4, DATA_ORDER_XZY , &
-                   grid%v_2, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%v_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x ) 
-
-
-
-
-
-
-
-  call trans_z2x ( ntasks_x, local_communicator_x, 1, 4, 4, DATA_ORDER_XZY , &
-                   grid%u_2, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%u_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x ) 
-
-     k_end = MIN(kde-1,kpex)
-     IF ( piggyback_mu ) k_end = MIN(kde,kpex)
-
-     CALL polar_filter_3d( grid%u_xxx, grid%clat_xxx, piggyback_mu,     &
-                                fft_filter_lat, 0.,                &
+     CALL polar_filter_3d( grid%v_2, grid%clat, .false.,     &
+                                fft_filter_lat, dclat,             &
                                 ids, ide, jds, jde, kds, kde,       &
-                                imsx, imex, jmsx, jmex, kmsx, kmex, &
-                                ipsx, ipex, jpsx, jpex, kpsx, k_end )
+                                ims, ime, jms, jme, kms, kme,       &
+                                ips, ipe, jps, jpe, kps, MIN(kde-1,kpe) )
 
+     k_end = MIN(kde-1,kpe)
+     IF ( piggyback_mu ) k_end = MIN(kde,kpe)
 
-
-
-
-
-
-  call trans_z2x ( ntasks_x, local_communicator_x, 0, 4, 4, DATA_ORDER_XZY , &
-                   grid%u_2, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%u_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x ) 
+     CALL polar_filter_3d( grid%u_2, grid%clat, piggyback_mu,     &
+                                fft_filter_lat, 0.,                &
+                                ids, ide, jds, jde, kds, kde-1,     &
+                                ims, ime, jms, jme, kms, kme,       &
+                                ips, ipe, jps, jpe, kps, k_end )
 
 
      IF ( piggyback_mu ) THEN
@@ -251,53 +189,23 @@ call wrf_get_myproc(myproc)
      IF ( piggyback_mu ) THEN
        grid%t_2(ips:ipe,kde,jps:jpe) = grid%mu_2(ips:ipe,jps:jpe)
      ENDIF
+     k_end = MIN(kde-1,kpe)
+     IF ( piggyback_mu ) k_end = MIN(kde,kpe)
 
-
-
-
-
-
-  call trans_z2x ( ntasks_x, local_communicator_x, 1, 4, 4, DATA_ORDER_XZY , &
-                   grid%t_2, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%t_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x ) 
-
-     k_end = MIN(kde-1,kpex)
-     IF ( piggyback_mu ) k_end = MIN(kde,kpex)
-
-     CALL polar_filter_3d( grid%t_xxx, grid%clat_xxx,piggyback_mu,     &
+     CALL polar_filter_3d( grid%t_2, grid%clat, piggyback_mu,     &
                                 fft_filter_lat, 0.,                &
                                 ids, ide, jds, jde, kds, kde-1,     &
-                                imsx, imex, jmsx, jmex, kmsx, kmex, &
-                                ipsx, ipex, jpsx, jpex, kpsx, k_end )
+                                ims, ime, jms, jme, kms, kme,       &
+                                ips, ipe, jps, jpe, kps, k_end )
 
      IF ( actual_distance_average ) THEN
-        CALL filter_tracer ( grid%t_xxx , grid%clat_xxx , grid%mf_xxx , &
+        CALL filter_tracer ( grid%t_2 , grid%clat , grid%msft , &
                              grid%fft_filter_lat , grid%mf_fft , &
                              pos_def, swap_pole_with_next_j , &
                              ids, ide, jds, jde, kds, kde , &
-                             imsx, imex, jmsx, jmex, kmsx, kmex, &
-                             ipsx, ipex, jpsx, jpex, kpsx, kpex )
+                             ims, ime, jms, jme, kms, kme, &
+                             ips, ipe, jps, jpe, kps, k_end )
      END IF
-
-
-
-
-
-
-
-  call trans_z2x ( ntasks_x, local_communicator_x, 0, 4, 4, DATA_ORDER_XZY , &
-                   grid%t_2, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%t_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x ) 
 
      IF ( piggyback_mu ) THEN
        grid%mu_2(ips:ipe,jps:jpe) = grid%t_2(ips:ipe,kde,jps:jpe)
@@ -310,120 +218,28 @@ call wrf_get_myproc(myproc)
    IF ( flag_wph .EQ. 1 ) THEN
       
 
-
-
-
-
-
-  call trans_z2x ( ntasks_x, local_communicator_x, 1, 4, 4, DATA_ORDER_XZY , &
-                   grid%w_2, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%w_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x ) 
-
-      CALL polar_filter_3d( grid%w_xxx, grid%clat_xxx, .false.,     &
+      CALL polar_filter_3d( grid%w_2, grid%clat,  .false.,     &
                                  fft_filter_lat, 0.,                &
                                  ids, ide, jds, jde, kds, kde,       &
-                                 imsx, imex, jmsx, jmex, kmsx, kmex, &
-                                 ipsx, ipex, jpsx, jpex, kpsx, kpex )
+                                 ims, ime, jms, jme, kms, kme, &
+                                 ips, ipe, jps, jpe, kps, kpe )
 
-
-
-
-
-
-
-  call trans_z2x ( ntasks_x, local_communicator_x, 0, 4, 4, DATA_ORDER_XZY , &
-                   grid%w_2, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%w_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x ) 
-
-
-
-
-
-
-
-  call trans_z2x ( ntasks_x, local_communicator_x, 1, 4, 4, DATA_ORDER_XZY , &
-                   grid%ph_2, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%ph_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x ) 
-
-
-      CALL polar_filter_3d( grid%ph_xxx, grid%clat_xxx, .false.,     &
+      CALL polar_filter_3d( grid%ph_2, grid%clat, .false.,     &
                                  fft_filter_lat, 0.,                &
                                  ids, ide, jds, jde, kds, kde,       &
-                                 imsx, imex, jmsx, jmex, kmsx, kmex, &
-                                 ipsx, ipex, jpsx, jpex, kpsx, kpex )
-
-
-
-
-
-
-
-  call trans_z2x ( ntasks_x, local_communicator_x, 0, 4, 4, DATA_ORDER_XZY , &
-                   grid%ph_2, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%ph_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x ) 
-
+                                 ims, ime, jms, jme, kms, kme, &
+                                 ips, ipe, jps, jpe, kps, kpe )
    ENDIF
 
 
 
    IF ( flag_ww .EQ. 1 ) THEN
       
-
-
-
-
-
-
-  call trans_z2x ( ntasks_x, local_communicator_x, 1, 4, 4, DATA_ORDER_XZY , &
-                   grid%ww_m, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%ww_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x ) 
-
-      CALL polar_filter_3d( grid%ww_xxx, grid%clat_xxx, .false.,     &
+      CALL polar_filter_3d( grid%ww_m, grid%clat, .false.,     &
                                  fft_filter_lat, 0.,                &
                                  ids, ide, jds, jde, kds, kde,       &
-                                 imsx, imex, jmsx, jmex, kmsx, kmex, &
-                                 ipsx, ipex, jpsx, jpex, kpsx, kpex )
-
-
-
-
-
-
-
-  call trans_z2x ( ntasks_x, local_communicator_x, 0, 4, 4, DATA_ORDER_XZY , &
-                   grid%ww_m, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%ww_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x ) 
-
+                                 ims, ime, jms, jme, kms, kme, &
+                                 ips, ipe, jps, jpe, kps, kpe )
    ENDIF
 
 
@@ -433,79 +249,20 @@ call wrf_get_myproc(myproc)
        grid%ru_m(ips:ipe,kde,jps:jpe) = grid%mut(ips:ipe,jps:jpe)
      ENDIF
 
-
-
-
-
-
-  call trans_z2x ( ntasks_x, local_communicator_x, 1, 4, 4, DATA_ORDER_XZY , &
-                   grid%rv_m, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%rv_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x ) 
-
-     CALL polar_filter_3d( grid%rv_xxx, grid%clat_xxx, .false.,     &
+     CALL polar_filter_3d( grid%rv_m, grid%clat, .false.,     &
                                 fft_filter_lat, dclat,             &
                                 ids, ide, jds, jde, kds, kde,       &
-                                imsx, imex, jmsx, jmex, kmsx, kmex, &
-                                ipsx, ipex, jpsx, jpex, kpsx, MIN(kpex,kde-1) )
+                                ims, ime, jms, jme, kms, kme, &
+                                ips, ipe, jps, jpe, kps, MIN(kde-1,kpe) )
 
+     k_end = MIN(kde-1,kpe)
+     IF ( piggyback_mut ) k_end = MIN(kde,kpe)
 
-
-
-
-
-
-  call trans_z2x ( ntasks_x, local_communicator_x, 0, 4, 4, DATA_ORDER_XZY , &
-                   grid%rv_m, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%rv_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x ) 
-
-
-
-
-
-
-
-  call trans_z2x ( ntasks_x, local_communicator_x, 1, 4, 4, DATA_ORDER_XZY , &
-                   grid%ru_m, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%ru_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x ) 
-
-     k_end = MIN(kde-1,kpex)
-     IF ( piggyback_mut ) k_end = MIN(kde,kpex)
-
-     CALL polar_filter_3d( grid%ru_xxx, grid%clat_xxx, piggyback_mut,     &
+     CALL polar_filter_3d( grid%ru_m, grid%clat, piggyback_mut,     &
                                 fft_filter_lat, 0.,                &
-                                ids, ide, jds, jde, kds, kde,       &
-                                imsx, imex, jmsx, jmex, kmsx, kmex, &
-                                ipsx, ipex, jpsx, jpex, kpsx, k_end )
-
-
-
-
-
-
-  call trans_z2x ( ntasks_x, local_communicator_x, 0, 4, 4, DATA_ORDER_XZY , &
-                   grid%ru_m, &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%ru_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x ) 
-
+                                ids, ide, jds, jde, kds, kde-1,       &
+                                ims, ime, jms, jme, kms, kme, &
+                                ips, ipe, jps, jpe, kps, k_end )
      IF ( piggyback_mut ) THEN
        grid%mut(ips:ipe,jps:jpe) = grid%ru_m(ips:ipe,kde,jps:jpe)
        piggyback_mut = .FALSE.
@@ -516,210 +273,88 @@ call wrf_get_myproc(myproc)
 
    IF ( flag_moist .GE. PARAM_FIRST_SCALAR ) THEN
      itrace = flag_moist
-
-
-
-
-
-
-  call trans_z2x ( ntasks_x, local_communicator_x, 1, 4, 4, DATA_ORDER_XZY , &
-                   moist(grid%sm31,grid%sm32,grid%sm33,itrace ), &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%fourd_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x ) 
-
-     CALL polar_filter_3d( grid%fourd_xxx, grid%clat_xxx, .false. ,     &
+     CALL polar_filter_3d( moist(ims,kms,jms,itrace), grid%clat, .false.,     &
                            fft_filter_lat, 0.,                &
                            ids, ide, jds, jde, kds, kde,       &
-                           imsx, imex, jmsx, jmex, kmsx, kmex, &
-                           ipsx, ipex, jpsx, jpex, kpsx, MIN(kpex,kde-1) )
+                           ims, ime, jms, jme, kms, kme, &
+                           ips, ipe, jps, jpe, kps, MIN(kpe,kde-1) )
 
      IF ( actual_distance_average ) THEN
-        CALL filter_tracer ( grid%fourd_xxx , grid%clat_xxx , grid%mf_xxx , &
+        CALL filter_tracer ( moist(ims,kms,jms,itrace) , grid%clat , grid%msft , &
                              grid%fft_filter_lat , grid%mf_fft , &
                              pos_def, swap_pole_with_next_j , &
                              ids, ide, jds, jde, kds, kde , &
-                             imsx, imex, jmsx, jmex, kmsx, kmex, &
-                             ipsx, ipex, jpsx, jpex, kpsx, kpex )
+                             ims, ime, jms, jme, kms, kme, &
+                             ips, ipe, jps, jpe, kps, MIN(kpe,kde-1) )
      END IF
-
-
-
-
-
-
-  call trans_z2x ( ntasks_x, local_communicator_x, 0, 4, 4, DATA_ORDER_XZY , &
-                   moist(grid%sm31,grid%sm32,grid%sm33,itrace ), &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%fourd_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x ) 
-
    ENDIF
 
 
 
    IF ( flag_chem .GE. PARAM_FIRST_SCALAR ) THEN
      itrace = flag_chem
-
-
-
-
-
-
-  call trans_z2x ( ntasks_x, local_communicator_x, 1, 4, 4, DATA_ORDER_XZY , &
-                   chem(grid%sm31,grid%sm32,grid%sm33,itrace ), &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%fourd_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x ) 
-
-     CALL polar_filter_3d( grid%fourd_xxx, grid%clat_xxx, .false. ,     &
+     CALL polar_filter_3d( chem(ims,kms,jms,itrace), grid%clat, .false. ,     &
                            fft_filter_lat, 0.,                &
                            ids, ide, jds, jde, kds, kde,       &
-                           imsx, imex, jmsx, jmex, kmsx, kmex, &
-                           ipsx, ipex, jpsx, jpex, kpsx, MIN(kpex,kde-1) )
+                           ims, ime, jms, jme, kms, kme, &
+                           ips, ipe, jps, jpe, kps, MIN(kpe,kde-1) )
 
      IF ( actual_distance_average ) THEN
-        CALL filter_tracer ( grid%fourd_xxx , grid%clat_xxx , grid%mf_xxx , &
+        CALL filter_tracer ( chem(ims,kms,jms,itrace) , grid%clat , grid%msft , &
                              grid%fft_filter_lat , grid%mf_fft , &
                              pos_def, swap_pole_with_next_j , &
                              ids, ide, jds, jde, kds, kde , &
-                             imsx, imex, jmsx, jmex, kmsx, kmex, &
-                             ipsx, ipex, jpsx, jpex, kpsx, kpex )
+                             ims, ime, jms, jme, kms, kme, &
+                             ips, ipe, jps, jpe, kps, MIN(kpe,kde-1) )
      END IF
-
-
-
-
-
-
-  call trans_z2x ( ntasks_x, local_communicator_x, 0, 4, 4, DATA_ORDER_XZY , &
-                   chem(grid%sm31,grid%sm32,grid%sm33,itrace ), &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%fourd_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x ) 
-
    ENDIF
 
 
 
    IF ( flag_tracer .GE. PARAM_FIRST_SCALAR ) THEN
      itrace = flag_tracer
-
-
-
-
-
-
-  call trans_z2x ( ntasks_x, local_communicator_x, 1, 4, 4, DATA_ORDER_XZY , &
-                   tracer(grid%sm31,grid%sm32,grid%sm33,itrace ), &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%fourd_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x ) 
-
-
-     CALL polar_filter_3d( grid%fourd_xxx, grid%clat_xxx, .false. ,     &
+     CALL polar_filter_3d( tracer(ims,kms,jms,itrace), grid%clat, .false. ,     &
                            fft_filter_lat, 0.,                &
                            ids, ide, jds, jde, kds, kde,       &
-                           imsx, imex, jmsx, jmex, kmsx, kmex, &
-                           ipsx, ipex, jpsx, jpex, kpsx, MIN(kpex,kde-1) )
+                           ims, ime, jms, jme, kms, kme, &
+                           ips, ipe, jps, jpe, kps, MIN(kpe,kde-1) )
 
      IF ( actual_distance_average ) THEN
-        CALL filter_tracer ( grid%fourd_xxx , grid%clat_xxx , grid%mf_xxx , &
+        CALL filter_tracer ( tracer(ims,kms,jms,itrace) , grid%clat , grid%msft , &
                              grid%fft_filter_lat , grid%mf_fft , &
                              pos_def, swap_pole_with_next_j , &
                              ids, ide, jds, jde, kds, kde , &
-                             imsx, imex, jmsx, jmex, kmsx, kmex, &
-                             ipsx, ipex, jpsx, jpex, kpsx, kpex )
+                             ims, ime, jms, jme, kms, kme, &
+                             ips, ipe, jps, jpe, kps, MIN(kpe,kde-1) )
      END IF
-
-
-
-
-
-
-
-  call trans_z2x ( ntasks_x, local_communicator_x, 0, 4, 4, DATA_ORDER_XZY , &
-                   tracer(grid%sm31,grid%sm32,grid%sm33,itrace ), &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%fourd_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x ) 
-
    ENDIF
 
 
 
    IF ( flag_scalar .GE. PARAM_FIRST_SCALAR ) THEN
      itrace = flag_scalar
-
-
-
-
-
-
-  call trans_z2x ( ntasks_x, local_communicator_x, 1, 4, 4, DATA_ORDER_XZY , &
-                   scalar(grid%sm31,grid%sm32,grid%sm33,itrace ), &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%fourd_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x ) 
-
-     CALL polar_filter_3d( grid%fourd_xxx , grid%clat_xxx, .false. ,     &
+     CALL polar_filter_3d( scalar(ims,kms,jms,itrace) , grid%clat, .false. ,     &
                            fft_filter_lat, 0.,                &
                            ids, ide, jds, jde, kds, kde,       &
-                           imsx, imex, jmsx, jmex, kmsx, kmex, &
-                           ipsx, ipex, jpsx, jpex, kpsx, MIN(kpex,kde-1) )
+                           ims, ime, jms, jme, kms, kme, &
+                           ips, ipe, jps, jpe, kps, MIN(kpe,kde-1) )
 
      IF ( actual_distance_average ) THEN
-        CALL filter_tracer ( grid%fourd_xxx , grid%clat_xxx , grid%mf_xxx , &
+        CALL filter_tracer ( scalar(ims,kms,jms,itrace) , grid%clat , grid%msft , &
                              grid%fft_filter_lat , grid%mf_fft , &
                              pos_def, swap_pole_with_next_j , &
                              ids, ide, jds, jde, kds, kde , &
-                             imsx, imex, jmsx, jmex, kmsx, kmex, &
-                             ipsx, ipex, jpsx, jpex, kpsx, kpex )
+                             ims, ime, jms, jme, kms, kme, &
+                             ips, ipe, jps, jpe, kps, MIN(kpe,kde-1) )
      END IF
-
-
-
-
-
-
-  call trans_z2x ( ntasks_x, local_communicator_x, 0, 4, 4, DATA_ORDER_XZY , &
-                   scalar(grid%sm31,grid%sm32,grid%sm33,itrace ), &  
-                   grid%sd31, grid%ed31, grid%sd32, grid%ed32, grid%sd33, grid%ed33, &
-                   grid%sp31, grid%ep31, grid%sp32, grid%ep32, grid%sp33, grid%ep33, &
-                   grid%sm31, grid%em31, grid%sm32, grid%em32, grid%sm33, grid%em33, &
-                   grid%fourd_xxx, &  
-                   grid%sp31x, grid%ep31x, grid%sp32x, grid%ep32x, grid%sp33x, grid%ep33x, &
-                   grid%sm31x, grid%em31x, grid%sm32x, grid%em32x, grid%sm33x, grid%em33x ) 
-
    ENDIF
 
    IF ( flag_mu .EQ. 1 .AND. piggyback_mu ) THEN
-      CALL wrf_error_fatal3("<stdin>",718,&
+      CALL wrf_error_fatal3("<stdin>",353,&
 "mu needed to get piggybacked on a transpose and did not")
    ENDIF
    IF ( flag_mut .EQ. 1 .AND. piggyback_mut ) THEN
-      CALL wrf_error_fatal3("<stdin>",722,&
+      CALL wrf_error_fatal3("<stdin>",357,&
 "mut needed to get piggybacked on a transpose and did not")
    ENDIF
 
@@ -761,7 +396,7 @@ SUBROUTINE polar_filter_3d( f, xlat, piggyback, fft_filter_lat, dvlat, &
   
   IF ((its /= ids) .OR. (ite /= ide)) THEN
      WRITE ( wrf_err_message , * ) 'module_polarfft: 3d: (its /= ids) or (ite /= ide)',its,ids,ite,ide
-     CALL wrf_error_fatal3("<stdin>",764,&
+     CALL wrf_error_fatal3("<stdin>",399,&
 TRIM( wrf_err_message ) )
   END IF
 
@@ -1000,7 +635,7 @@ END SUBROUTINE polar_filter_fft_2d_ncar
       
 
       IF ( ( its .NE. ids ) .OR. ( ite .NE. ide ) ) THEN
-         CALL wrf_error_fatal3("<stdin>",1003,&
+         CALL wrf_error_fatal3("<stdin>",638,&
 'filtering assumes all values on X' )
       END IF
 
@@ -1167,7 +802,7 @@ END SUBROUTINE polar_filter_fft_2d_ncar
       
 
       IF ( ( its .NE. ids ) .OR. ( ite .NE. ide ) ) THEN
-         CALL wrf_error_fatal3("<stdin>",1170,&
+         CALL wrf_error_fatal3("<stdin>",805,&
 'filtering assumes all values on X' )
       END IF
 

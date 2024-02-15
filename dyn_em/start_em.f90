@@ -28,9 +28,7 @@ nba_mij,nba_rij,sbmradar,chem &
    USE module_bc_em, ONLY: lbc_fcx_gcx, set_w_surface
    USE module_configure, ONLY : model_to_grid_config_rec, model_config_rec, grid_config_rec_type
    USE module_tiles, ONLY : set_tiles
-   USE module_dm, ONLY : wrf_dm_min_real, wrf_dm_max_real, wrf_dm_maxval, &
-        ntasks_x, ntasks_y, &
-        local_communicator_periodic, local_communicator, mytask, ntasks
+   USE module_dm, ONLY : wrf_dm_min_real, wrf_dm_max_real
    USE module_comm_dm
    USE module_llxy, ONLY : proj_cassini
    USE module_physics_init
@@ -210,7 +208,7 @@ real      ,DIMENSION(grid%sm31:grid%em31,grid%sm32:grid%em32,grid%sm33:grid%em33
       WRITE(message, FMT='(A,I2,":  Both MOD(",I4,"-",I1,",",I2,") and MOD(",I4,"-",I1,",",I2,") must = 0" )') &
          "Nested dimensions are illegal for domain ",grid%id,ide,ids,config_flags%parent_grid_ratio,&
          jde,jds,config_flags%parent_grid_ratio
-      CALL wrf_error_fatal3("<stdin>",213,&
+      CALL wrf_error_fatal3("<stdin>",211,&
 message )
    END IF
 
@@ -220,46 +218,6 @@ message )
 
 
 
-
-     alloc_err_message = ' '
-     alloc_err_message(1:12) = 'NO PROBLEMOS'
-     ALLOCATE( clat_glob(ids:ide,jds:jde), STAT=alloc_status)
-     alloc_err_message = 'Allocation of space for a global field failed.'
-
-     IF ( alloc_status .NE. 0 ) THEN
-        CALL wrf_message ( TRIM(alloc_err_message) )
-        CALL wrf_error_fatal3("<stdin>",231,&
-'Error allocating entire domain size of 2d array CLAT for global domain' )
-     END IF
-
-     CALL wrf_patch_to_global_real ( grid%clat, clat_glob, grid%domdesc, 'xy', 'xy', &
-                                     ids, ide, jds, jde, 1, 1, &
-                                     ims, ime, jms, jme, 1, 1, &
-                                     its, ite, jts, jte, 1, 1 )
-
-     CALL wrf_dm_bcast_real ( clat_glob , (ide-ids+1)*(jde-jds+1) )
-
-     grid%clat_xxx(ipsx:ipex,jpsx:jpex) = clat_glob(ipsx:ipex,jpsx:jpex)
-
-     find_j_index_of_fft_filter : DO j = jds , jde-1
-        IF ( ABS(clat_glob(ids,j)) .LE. config_flags%fft_filter_lat ) THEN
-           j_save = j
-           EXIT find_j_index_of_fft_filter
-        END IF
-     END DO find_j_index_of_fft_filter
-
-     CALL wrf_patch_to_global_real ( grid%msft, clat_glob, grid%domdesc, 'xy', 'xy', &
-                                     ids, ide, jds, jde, 1, 1, &
-                                     ims, ime, jms, jme, 1, 1, &
-                                     its, ite, jts, jte, 1, 1 )
-
-     CALL wrf_dm_bcast_real ( clat_glob , (ide-ids+1)*(jde-jds+1) )
-
-     grid%mf_fft = clat_glob(ids,j_save)
-
-     grid%mf_xxx(ipsx:ipex,jpsx:jpex) = clat_glob(ipsx:ipex,jpsx:jpex)
-
-     DEALLOCATE( clat_glob )
    ENDIF
 
 
@@ -267,7 +225,7 @@ message )
    CALL boundary_condition_check( config_flags, bdyzone, error, grid%id )
 
     IF ((config_flags%topo_wind .EQ. 1) .AND. (.NOT. grid%got_var_sso)) THEN
-      CALL wrf_error_fatal3("<stdin>",270,&
+      CALL wrf_error_fatal3("<stdin>",228,&
 "topo_wind requires VAR_SSO data")
     ENDIF
 
@@ -300,7 +258,6 @@ message )
             max_mf = MAX ( max_mf , grid%msft(i,j) )
          END DO
       END DO
-      max_mf = wrf_dm_max_real ( max_mf )
       WRITE ( a_message , FMT='(A,F5.2,A)' ) 'Max map factor in domain 1 = ',max_mf, &
                                              '. Scale the dt in the model accordingly.'
       CALL wrf_message ( a_message )
@@ -338,7 +295,7 @@ message )
          WRITE (message, * ) 'If you are sure of your settings, set reasonable_time_step_ratio in namelist.input > ' &
                              ,dt_s / (dx_km / max_mf)
          CALL wrf_message ( TRIM(message) ) 
-         CALL wrf_error_fatal3("<stdin>",341,&
+         CALL wrf_error_fatal3("<stdin>",298,&
 '--- ERROR: Time step too large')
       END IF
    END IF
@@ -556,7 +513,7 @@ message )
    IF ( .NOT. grid%this_is_an_ideal_run ) THEN
       CALL nl_get_p_top_requested  ( 1 , p_top_test )
       IF ( grid%p_top .NE. p_top_test ) THEN
-         CALL wrf_error_fatal3("<stdin>",559,&
+         CALL wrf_error_fatal3("<stdin>",516,&
 'start_em: p_top from the namelist does not match p_top from the input file.' )
       END IF
    END IF
@@ -570,7 +527,7 @@ message )
       CALL nl_get_base_pres_strat  ( 1 , p_strat    )
       IF ( ( t00 .LT. 100. .or. p00 .LT. 10000.) .AND. ( .NOT. grid%this_is_an_ideal_run ) ) THEN
          WRITE(wrf_err_message,*) 'start_em: BAD BASE STATE for T00 or P00 in namelist.input file'
-         CALL wrf_error_fatal3("<stdin>",573,&
+         CALL wrf_error_fatal3("<stdin>",530,&
 TRIM(wrf_err_message))
       END IF
 
@@ -586,7 +543,7 @@ TRIM(wrf_err_message))
       IF ( ( t00 .LT. 100. .or. p00 .LT. 10000.) .AND. ( .NOT. grid%this_is_an_ideal_run ) ) THEN
          WRITE(wrf_err_message,*)&
          'start_em: did not find base state parameters in wrfinput. Add use_baseparam_fr_nml = .t. in &dynamics and rerun'
-         CALL wrf_error_fatal3("<stdin>",589,&
+         CALL wrf_error_fatal3("<stdin>",546,&
 TRIM(wrf_err_message))
       ENDIF
 
@@ -598,7 +555,7 @@ TRIM(wrf_err_message))
    IF ( ( tiso_tmp .NE. tiso ) .AND. ( .NOT. grid%this_is_an_ideal_run ) ) THEN
       WRITE(wrf_err_message,*)&
       'start_em: namelist iso_temp is not equal to iso_temp in wrfinput. Reset nml value and rerun'
-      CALL wrf_error_fatal3("<stdin>",601,&
+      CALL wrf_error_fatal3("<stdin>",558,&
 TRIM(wrf_err_message))
    ENDIF
 
@@ -606,7 +563,7 @@ TRIM(wrf_err_message))
         (( config_flags%input_from_hires ) .OR. ( config_flags%input_from_file ))) THEN
 
       IF ( config_flags%map_proj .EQ. 0 ) THEN
-         CALL wrf_error_fatal3("<stdin>",609,&
+         CALL wrf_error_fatal3("<stdin>",566,&
 'start_domain: Idealized case cannot have a separate nested input file' )
       END IF
 
@@ -617,7 +574,7 @@ TRIM(wrf_err_message))
       IF ( grid%c1f(1) .NE. 1. ) THEN
          CALL wrf_debug ( 0 , '---- WARNING : Maybe old non-HVC input, setting default 1d array values for TF' )
          IF ( grid%hybrid_opt .NE. 0 ) THEN
-            CALL wrf_error_fatal3("<stdin>",620,&
+            CALL wrf_error_fatal3("<stdin>",577,&
 '---- Error : Cannot use old input and try to use hybrid vertical coordinate option' )
          END IF
          DO k = 1, kte
@@ -639,7 +596,7 @@ TRIM(wrf_err_message))
       IF ( grid%t_2(its,kte-1,jts) .EQ. 0. ) THEN
          CALL wrf_debug ( 0 , '---- WARNING : Older v3 input data detected' )
          IF ( grid%use_theta_m .NE. 0 ) THEN
-            CALL wrf_error_fatal3("<stdin>",642,&
+            CALL wrf_error_fatal3("<stdin>",599,&
 '---- Error : Cannot use moist theta option with old data' )
          END IF
          DO j = jts, MIN(jte,jde-1)
@@ -1009,8 +966,6 @@ TRIM(wrf_err_message))
 
       grid%max_msftx=MAXVAL(grid%msftx)
       grid%max_msfty=MAXVAL(grid%msfty)
-      CALL wrf_dm_maxval(grid%max_msftx, idex, jdex)
-      CALL wrf_dm_maxval(grid%max_msfty, idex, jdex)
       end if
 
 
@@ -1042,21 +997,6 @@ TRIM(wrf_err_message))
 
 
 
-if(config_flags%sf_surface_physics.eq.NOAHMPSCHEME.and.config_flags%opt_run.eq.5)then
-
-
-
-
-
-
-CALL HALO_EM_HYDRO_NOAHMP_INIT_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-endif
 
     IF ( ( grid%dfi_opt .EQ. DFI_NODFI ) .or. &
           ( ( grid%dfi_stage .NE. DFI_BCK ) .and. &
@@ -1450,186 +1390,6 @@ endif
 
 
 
-
-
-
-
-CALL HALO_EM_INIT_1_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL HALO_EM_INIT_2_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL HALO_EM_INIT_3_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL HALO_EM_INIT_4_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL HALO_EM_INIT_5_sub ( grid, &
-  num_moist, &
-  moist, &
-  num_chem, &
-  chem, &
-  num_scalar, &
-  scalar, &
-  num_tracer, &
-  tracer, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-      IF ( config_flags%sf_ocean_physics .EQ. PWP3DSCHEME ) THEN
-
-
-
-
-
-
-CALL HALO_EM_INIT_6_sub ( grid, &
-  config_flags, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-      END IF
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_INIT_sub ( grid, &
-  config_flags, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_MOIST_sub ( grid, &
-  config_flags, &
-  num_moist, &
-  moist, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_TKE_sub ( grid, &
-  config_flags, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_SCALAR_sub ( grid, &
-  config_flags, &
-  num_scalar, &
-  scalar, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_CHEM_sub ( grid, &
-  config_flags, &
-  num_chem, &
-  chem, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-if(config_flags%sf_surface_physics.eq.NOAHMPSCHEME.and.config_flags%opt_run.eq.5)then
-
-
-
-
-
-
-CALL HALO_EM_HYDRO_NOAHMP_INIT_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-endif
-
-
    CALL set_physical_bc3d( grid%u_1 , 'U' , config_flags ,                  &
                          ids , ide , jds , jde , kds , kde ,        &
                          ims , ime , jms , jme , kms , kme ,        &
@@ -1682,8 +1442,6 @@ endif
          w_min = MIN ( w_min , grid%w_2(i,1,j) )
          END DO
       END DO
-      w_max = wrf_dm_max_real ( w_max )
-      w_min = wrf_dm_min_real ( w_min )
 
       IF ( ( ABS(w_max) .LT. 1.E-6 ) .AND. &
            ( ABS(w_min) .LT. 1.E-6 ) ) THEN
@@ -1946,7 +1704,6 @@ endif
          
       END IF
       ccn_max_val = MAXVAL(scalar(its:MIN(ite,ide-1),kts:kte-1,jts:MIN(jte,jde-1),p_qnn))
-      ccn_max_val = wrf_dm_max_real ( ccn_max_val )
       IF ( ccn_max_val < 1.0 ) THEN 
          DO j=jts,MIN(jte,jde-1)
             DO k=kts,kte
@@ -2045,155 +1802,6 @@ endif
                          its , ite , jts , jte   )
 
       DEALLOCATE(CLDFRA_OLD)
-
-
-
-
-
-
-CALL HALO_EM_INIT_1_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL HALO_EM_INIT_2_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL HALO_EM_INIT_3_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL HALO_EM_INIT_4_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL HALO_EM_INIT_5_sub ( grid, &
-  num_moist, &
-  moist, &
-  num_chem, &
-  chem, &
-  num_scalar, &
-  scalar, &
-  num_tracer, &
-  tracer, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_INIT_sub ( grid, &
-  config_flags, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_MOIST_sub ( grid, &
-  config_flags, &
-  num_moist, &
-  moist, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_TKE_sub ( grid, &
-  config_flags, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_SCALAR_sub ( grid, &
-  config_flags, &
-  num_scalar, &
-  scalar, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_CHEM_sub ( grid, &
-  config_flags, &
-  num_chem, &
-  chem, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
 
 DEALLOCATE(z_at_q)
 
@@ -2487,14 +2095,6 @@ nba_mij,nba_rij,sbmradar,chem &
                                          DATA_ORDER_ZYX, DATA_ORDER_XZY, DATA_ORDER_YZX, &
                                          DATA_ORDER_XY, DATA_ORDER_YX, model_data_order
 
-      USE module_comm_dm, ONLY : &
-                           HALO_EM_INIT_1_sub   &
-                          ,HALO_EM_INIT_2_sub   &
-                          ,HALO_EM_INIT_3_sub   &
-                          ,HALO_EM_INIT_4_sub   &
-                          ,HALO_EM_INIT_5_sub   &
-                          ,HALO_EM_VINTERP_UV_1_sub
-   USE module_dm, ONLY : ntasks_x, ntasks_y, ntasks, mytask, local_communicator
 
       IMPLICIT NONE
 
@@ -2813,79 +2413,6 @@ real      ,DIMENSION(grid%sm31:grid%em31,grid%sm32:grid%em32,grid%sm33:grid%em33
         ENDDO 
 
       ips = its ; ipe = ite ; jps = jts ; jpe = jte ; kps = kts ; kpe = kte
-
-
-
-
-
-
-CALL HALO_EM_INIT_1_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL HALO_EM_INIT_2_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL HALO_EM_INIT_3_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL HALO_EM_INIT_4_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL HALO_EM_INIT_5_sub ( grid, &
-  num_moist, &
-  moist, &
-  num_chem, &
-  chem, &
-  num_scalar, &
-  scalar, &
-  num_tracer, &
-  tracer, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
    END SUBROUTINE rebalance_cycl
 
 

@@ -264,8 +264,41 @@ MODULE module_bl_mynn_driver
         tice      , kind_phys
 
   use module_bl_mynn_1d
+  use iso_c_binding, only: c_double, c_int, c_float
 
   IMPLICIT NONE
+
+!  interface
+!    SUBROUTINE  mym_predict (kts,kte,                                     &
+!       &            closure,                                            &
+!       &            delt,                                               &
+!       &            dz,                                                 &
+!       &            ust, flt, flq, pmz, phh,                            &
+!       &            el,  dfq, rho,                                      &
+!       &            pdk, pdt, pdq, pdc,                                 &
+!       &            qke, tsq, qsq, cov,                                 &
+!       &            s_aw,s_awqke,bl_mynn_edmf_tke,                      &
+!       &            qWT1D, qDISS1D,tke_budget,                          &
+!       &            xlvcp,xlscp)
+!  import c_double,c_int,c_float
+!
+!    real(kind=c_float), intent(in)    :: closure
+!    real(kind=c_float), intent(in)  :: xlvcp, xlscp
+!    integer(kind=c_int), intent(in) :: bl_mynn_edmf_tke,tke_budget
+!    real(kind=c_float), dimension(kts:kte), intent(in) :: dz, dfq, el, rho
+!    real(kind=c_float), dimension(kts:kte), intent(inout) :: pdk, pdt, pdq, pdc
+!    real(kind=c_float), intent(in)    :: flt, flq, pmz, phh
+!    real(kind=c_float), intent(in)    :: ust, delt
+!    real(kind=c_float), dimension(kts:kte), intent(inout) :: qke,tsq, qsq, cov
+!! WA 8/3/15
+!    real(kind=c_float), dimension(kts:kte+1), intent(inout) :: s_awqke,s_aw
+!
+!    !!  TKE budget  (Puhales, 2020, WRF 4.2.1)  << EOB
+!    real(kind=c_float), dimension(kts:kte), intent(out) :: qWT1D, qDISS1D
+!    END SUBROUTINE
+!  end interface
+
+
 
   !>Use Ito et al. (2015, BLM) scale-aware (0: no, 1: yes). Note that this also has impacts
   !!on the cloud PDF and mass-flux scheme, using LES-derived similarity function.
@@ -1163,7 +1196,8 @@ CONTAINS
                &el, dfq, rho1, pdk, pdt, pdq, pdc,       &
                &Qke1, Tsq1, Qsq1, Cov1,                  &
                &s_aw1, s_awqke1, bl_mynn_edmf_tke,       &
-               &qWT1, qDISS1, tke_budget                 )
+               &qWT1, qDISS1, tke_budget                )
+!               xlvcp,xlscp                               )
 
        if (dheat_opt > 0) then
           do k=kts,kte-1

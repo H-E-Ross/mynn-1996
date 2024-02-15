@@ -112,7 +112,8 @@ SUBROUTINE mynnedmf_wrapper_run(                 &
      &  ims,ime,jms,jme,kms,kme,                 &
      &  its,ite,jts,jte,kts,kte                  )
 
-     use module_bl_mynn, only: mynn_bl_driver
+
+     use module_bl_mynn_driver, only: mynn_bl_driver
 
 
      implicit none

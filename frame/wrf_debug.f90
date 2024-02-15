@@ -27,7 +27,13 @@ SUBROUTINE wrf_debug( level , str )
   CALL get_wrf_debug_level( debug_level ) 
   IF ( level .LE. debug_level ) THEN 
   
-  CALL wrf_message( str ) 
+  
+  
+  
+  CALL get_current_time_string( time_str ) 
+  CALL get_current_grid_name( grid_str ) 
+  out_str = TRIM(grid_str)//' '//TRIM(time_str)//' '//TRIM(str) 
+  CALL wrf_message( TRIM(out_str) ) 
   ENDIF 
   RETURN 
 END SUBROUTINE wrf_debug 

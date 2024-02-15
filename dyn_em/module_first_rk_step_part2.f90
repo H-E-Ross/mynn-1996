@@ -36,13 +36,6 @@ CONTAINS
     USE module_domain, ONLY : domain
     USE module_configure, ONLY : grid_config_rec_type, model_config_rec
     USE module_big_step_utilities_em, ONLY : conv_t_tendf_to_moist
-    USE module_dm, ONLY : local_communicator, mytask, ntasks, ntasks_x, ntasks_y, local_communicator_periodic, &
-                          wrf_dm_maxval, wrf_err_message, local_communicator_x, local_communicator_y
-    USE module_comm_dm, ONLY : halo_em_tke_c_sub,halo_em_tke_d_sub,halo_em_tke_e_sub            &
-            ,halo_em_phys_pbl_sub,halo_em_phys_shcu_sub &
-            ,halo_em_fdda_sub,halo_em_phys_diffusion_sub,halo_em_tke_3_sub &
-            ,halo_em_tke_5_sub,halo_obs_nudge_sub,period_bdy_em_a1_sub,period_bdy_em_phy_bc_sub &
-            ,period_bdy_em_fdda_bc_sub,period_bdy_em_chem_sub,halo_em_phys_cu_sub,halo_em_helicity_sub
 
     USE module_driver_constants
     USE module_diffusion_em, ONLY : phy_bc, cal_deform_and_div, compute_diff_metrics, &
@@ -429,33 +422,6 @@ CONTAINS
 
 
 
-
-
-
-
-CALL HALO_EM_TKE_C_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_A1_sub ( grid, &
-  config_flags, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
          !$OMP PARALLEL DO   &
          !$OMP PRIVATE ( ij )
 
@@ -543,19 +509,6 @@ CALL PERIOD_BDY_EM_A1_sub ( grid, &
 
 
 
-
-
-
-
-
-CALL HALO_EM_HELICITY_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
        IF ( ( config_flags%nwp_diagnostics .eq. 1 ) .OR. &
             ( ( config_flags%afwa_diag_opt .eq. 1 ) .AND. ( config_flags%afwa_severe_opt .EQ. 1 ) ) ) THEN
 
@@ -584,19 +537,6 @@ CALL HALO_EM_HELICITY_sub ( grid, &
        !$OMP END PARALLEL DO
 
        ENDIF
-
-
-
-
-
-
-
-CALL HALO_EM_TKE_D_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
 
 
 
@@ -669,68 +609,7 @@ CALL HALO_EM_TKE_D_sub ( grid, &
 
 
 
-
-
-
-
-
-CALL HALO_EM_TKE_E_sub ( grid, &
-  num_moist, &
-  moist, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
        ENDIF
-
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_PHY_BC_sub ( grid, &
-  config_flags, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-       IF ( config_flags%grid_fdda .eq. 1) THEN
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_FDDA_BC_sub ( grid, &
-  config_flags, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-       ENDIF
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_CHEM_sub ( grid, &
-  config_flags, &
-  num_chem, &
-  chem, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
 
 
 
@@ -767,169 +646,6 @@ IF ( ( config_flags%sfs_opt .GT. 0 ) .AND. ( config_flags%diff_opt .eq. 2 ) ) TH
 
 ENDIF
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-       IF ( config_flags%bl_pbl_physics .ge. 1 ) THEN
-
-
-
-
-
-
-CALL HALO_EM_PHYS_PBL_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-       ENDIF
-       IF ( config_flags%shcu_physics .gt. 1 ) THEN
-
-
-
-
-
-
-CALL HALO_EM_PHYS_SHCU_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-       ENDIF
-       IF ( config_flags%cu_physics == SASSCHEME      .or.   &
-            config_flags%cu_physics == TIEDTKESCHEME  .or.   &
-            config_flags%cu_physics == NTIEDTKESCHEME .or.   &
-            config_flags%cu_physics == MSKFSCHEME     .or.   &
-            config_flags%cu_physics == CAMZMSCHEME    .or.   &
-            config_flags%cu_physics == SCALESASSCHEME .or.   &
-            config_flags%cu_physics == NSASSCHEME     .or.   &
-            config_flags%cu_physics == KSASSCHEME ) THEN
-
-
-
-
-
-
-CALL HALO_EM_PHYS_CU_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-       ENDIF
-       IF ( config_flags%grid_fdda .ge. 1) THEN
-
-
-
-
-
-
-CALL HALO_EM_FDDA_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-       ENDIF
-       IF ( config_flags%diff_opt .ge. 1 ) THEN
-
-
-
-
-
-
-CALL HALO_EM_PHYS_DIFFUSION_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-       ENDIF
-
-       IF      ( config_flags%h_sca_adv_order <= 4 ) THEN
-
-
-
-
-
-
-CALL HALO_EM_TKE_3_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-       ELSE IF ( config_flags%h_sca_adv_order <= 6 ) THEN
-
-
-
-
-
-
-CALL HALO_EM_TKE_5_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-       ELSE
-         WRITE(wrf_err_message,*)'solve_em: invalid h_sca_adv_order = ',config_flags%h_sca_adv_order
-         CALL wrf_error_fatal3("<stdin>",930,&
-TRIM(wrf_err_message))
-       ENDIF
 
 
        !$OMP PARALLEL DO   &
@@ -1045,19 +761,6 @@ TRIM(wrf_err_message))
        ENDIF
 
        IF ( grid%obs_nudge_opt .EQ. 1 .AND. grid%xtime <= grid%fdda_end ) THEN
-
-
-
-
-
-
-CALL HALO_OBS_NUDGE_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
 
 
          !$OMP PARALLEL DO   &

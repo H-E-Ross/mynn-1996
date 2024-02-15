@@ -194,7 +194,6 @@ SUBROUTINE write_track( grid )
    integer            :: start(3)
    integer            :: count(3) 
 
-   REAL, ALLOCATABLE, DIMENSION(:,:)   :: track_buf2
 
 
 
@@ -208,64 +207,6 @@ include 'netcdf.inc'
 
    level      = grid%em32 - grid%sm32
    level_stag = grid%em32 - grid%sm32 + 1  
-
-
-   ALLOCATE(track_buf2(grid%track_loc_in, level))
-
-
-
-   track_buf2(:,:) = grid%track_z(:,:)
-   CALL wrf_dm_min_reals(track_buf2(:,:),grid%track_z(:,:),grid%track_loc_in*level)
-
-   track_buf2(:,:) = grid%track_p(:,:)
-   CALL wrf_dm_min_reals(track_buf2(:,:),grid%track_p(:,:),grid%track_loc_in*level)
-
-   track_buf2(:,:) = grid%track_t(:,:)
-   CALL wrf_dm_min_reals(track_buf2(:,:),grid%track_t(:,:),grid%track_loc_in*level)
-
-   track_buf2(:,:) = grid%track_u(:,:)
-   CALL wrf_dm_min_reals(track_buf2(:,:),grid%track_u(:,:),grid%track_loc_in*level)
-
-   track_buf2(:,:) = grid%track_v(:,:)
-   CALL wrf_dm_min_reals(track_buf2(:,:),grid%track_v(:,:),grid%track_loc_in*level)
-
-
-
-
-   track_buf2(:,:) = grid%track_rh(:,:)
-   CALL wrf_dm_min_reals(track_buf2(:,:),grid%track_rh(:,:),grid%track_loc_in*level)
-
-   track_buf2(:,:) = grid%track_alt(:,:)
-   CALL wrf_dm_min_reals(track_buf2(:,:),grid%track_alt(:,:),grid%track_loc_in*level)
-
-   track_buf2(:,:) = grid%track_qcloud(:,:)
-   CALL wrf_dm_min_reals(track_buf2(:,:),grid%track_qcloud(:,:),grid%track_loc_in*level)
-
-   track_buf2(:,:) = grid%track_qrain(:,:)
-   CALL wrf_dm_min_reals(track_buf2(:,:),grid%track_qrain(:,:),grid%track_loc_in*level)
-
-   track_buf2(:,:) = grid%track_qice(:,:)
-   CALL wrf_dm_min_reals(track_buf2(:,:),grid%track_qice(:,:),grid%track_loc_in*level)
-
-   track_buf2(:,:) = grid%track_qsnow(:,:)
-   CALL wrf_dm_min_reals(track_buf2(:,:),grid%track_qsnow(:,:),grid%track_loc_in*level)
-
-   track_buf2(:,:) = grid%track_qgraup(:,:)
-   CALL wrf_dm_min_reals(track_buf2(:,:),grid%track_qgraup(:,:),grid%track_loc_in*level)
-
-   track_buf2(:,:) = grid%track_qvapor(:,:)
-   CALL wrf_dm_min_reals(track_buf2(:,:),grid%track_qvapor(:,:),grid%track_loc_in*level)
-
-
-   DEALLOCATE(track_buf2)
-
-   ALLOCATE(track_buf2(grid%track_loc_in, level_stag))
-
-   track_buf2(:,:) = grid%track_w(:,:)
-   CALL wrf_dm_min_reals(track_buf2(:,:),grid%track_w(:,:),grid%track_loc_in*level_stag)
-
-   DEALLOCATE(track_buf2)
-
 
 
    IF ( wrf_dm_on_monitor() ) THEN
@@ -777,11 +718,6 @@ SUBROUTINE calc_track_locations( grid )
          grid%track_ele(k) = grid%ht(grid%track_i(k),grid%track_j(k))
        ENDIF
 
-       grid%track_ele(k)         = wrf_dm_min_real(grid%track_ele(k))
-       grid%track_lat_domain(k)  = wrf_dm_min_real(grid%track_lat_domain(k))
-       grid%track_lon_domain(k)  = wrf_dm_min_real(grid%track_lon_domain(k))
-
-       call wrf_dm_bcast_string(grid%track_time_domain(k), 19)
      END DO
 
      write(message,*) 'calc_track_locations: valid track locations in the model domain ', grid%track_loc_domain

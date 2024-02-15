@@ -740,7 +740,6 @@ implicit none
 logical, intent(in)::init_fuel_moisture
 logical, external:: wrf_dm_on_monitor
 
-
 integer:: iounit, i, k, io
 character(len=128):: msg
 real:: rat
@@ -752,9 +751,6 @@ namelist /fuel_categories/ fuel_name,windrf,fgi,fgi_lh,fueldepthm,savr, &
     fuelmce,fueldens,st,se,weight,fci_d,fct,ichap,fgi_1h,fgi_10h,fgi_100h,fgi_1000h,fgi_live
 namelist /fuel_moisture/ moisture_classes,drying_lag,wetting_lag,saturation_moisture,saturation_rain,rain_threshold, &
     drying_model,wetting_model, moisture_class_name,fmc_gc_initialization, fmc_1h,fmc_10h,fmc_100h,fmc_1000h,fmc_live
-
-
-
 
 
 IF ( wrf_dm_on_monitor() ) THEN
@@ -878,13 +874,9 @@ implicit none
 logical, intent(in)::init_fuel_moisture
 logical, external:: wrf_dm_on_monitor
 
-
 integer:: i,j,k,ii
 integer:: kk
 character(len=128):: msg
-
-
-
 
 
 

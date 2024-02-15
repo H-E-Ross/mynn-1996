@@ -1400,7 +1400,6 @@ CONTAINS
       REAL,  DIMENSION( ims:ime , kds:kde , spec_bdy_width ), INTENT(IN   ) :: moist_bdy_tend_ys, moist_bdy_tend_ye
 
       
-      INTEGER, EXTERNAL :: omp_get_thread_num
 
       REAL,  DIMENSION( jms:jme , kds:kde , spec_bdy_width ) :: t_bdy_xs, t_bdy_xe
       REAL,  DIMENSION( ims:ime , kds:kde , spec_bdy_width ) :: t_bdy_ys, t_bdy_ye

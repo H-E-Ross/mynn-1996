@@ -20,8 +20,7 @@ nba_mij,nba_rij,sbmradar,chem &
    USE module_domain_type, ONLY : fieldlist
    USE module_timing
    USE module_configure, ONLY : grid_config_rec_type, model_config_rec, model_to_grid_config_rec
-   USE module_dm, ONLY : local_communicator, mytask, ntasks, ntasks_x, ntasks_y, local_communicator_periodic, itrace
-   USE module_comm_dm, ONLY : SHIFT_HALO_sub
+   USE module_dm
    IMPLICIT NONE
   
    INTEGER disp_x, disp_y       
@@ -225,8 +224,7 @@ nba_mij,nba_rij,sbmradar,chem &
    USE module_domain_type, ONLY : fieldlist
    USE module_timing
    USE module_configure, ONLY : grid_config_rec_type, model_config_rec, model_to_grid_config_rec
-   USE module_dm, ONLY : local_communicator, mytask, ntasks, ntasks_x, ntasks_y, local_communicator_periodic, itrace
-   USE module_comm_dm, ONLY : SHIFT_HALO_sub
+   USE module_dm
    IMPLICIT NONE
   
    INTEGER disp_x, disp_y       

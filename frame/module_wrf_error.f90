@@ -11,7 +11,7 @@ MODULE module_wrf_error
   
   
   
-  integer, save :: silence=0
+  integer, PARAMETER :: silence=0 
 
   
   
@@ -32,7 +32,7 @@ MODULE module_wrf_error
   
   
 
-  integer :: stderrlog=1 
+  integer :: stderrlog=0 
 
   INTEGER, PARAMETER :: wrf_log_flush=0, wrf_log_set_buffer_size=1, &
                         wrf_log_write=2
@@ -66,7 +66,6 @@ CONTAINS
   SUBROUTINE init_module_wrf_error(on_io_server)
     IMPLICIT NONE
     LOGICAL,OPTIONAL,INTENT(IN) :: on_io_server
-    LOGICAL, EXTERNAL :: wrf_dm_on_monitor
     LOGICAL :: compute_tasks_silent
     LOGICAL :: io_servers_silent
     INTEGER :: buffer_size,iostat,stderr_logging
@@ -84,7 +83,7 @@ CONTAINS
     
     
     
-    stderr_logging=1
+    stderr_logging=0
 500 format(A)
     
     
@@ -110,21 +109,6 @@ CONTAINS
        stderrlog=0
     endif
 
-    silence=0
-    if(present(on_io_server)) then
-       if(on_io_server) then
-          if(io_servers_silent) &
-               silence=1
-          return
-       endif
-    endif
-    if(compute_tasks_silent) then
-       if(wrf_dm_on_monitor()) then
-          silence=0
-       else
-          silence=1
-       endif
-    endif
   END SUBROUTINE init_module_wrf_error
 
 END MODULE module_wrf_error

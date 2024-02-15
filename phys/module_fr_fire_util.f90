@@ -160,7 +160,6 @@ end subroutine crash
 
 subroutine message(s,level)
 use module_wrf_error
-use OMP_LIB 
 implicit none
 
 character(len=*), intent(in)::s
@@ -179,9 +178,7 @@ endif
 if(fire_print_msg.ge.mlevel)then
       m=0
 !$OMP CRITICAL(FIRE_MESSAGE_CRIT)
-      m=omp_get_thread_num()
-      t=s
-      write(msg,'(a6,i3,a1,a118)')'FIRE:',m,':',t
+      msg='FIRE:'//s
       call wrf_message(msg)
 
 
@@ -198,14 +195,10 @@ integer function open_text_file(filename,rw,allow_fail)
 implicit none
 character(len=*),intent(in):: filename,rw
 logical, intent(in), optional:: allow_fail
-
 character(len=128):: msg
 character(len=1)::act
 integer::iounit,ierr
 logical::op,ok
-
-
-
 
 if(present(allow_fail))then
     ok=allow_fail
@@ -1344,7 +1337,6 @@ end subroutine read_array_2d_integer
         
 
 subroutine read_array_2d_real(filename,a,its,ite,jts,jte,ims,ime,jms,jme)
-use OMP_LIB 
 implicit none
 
 
@@ -1363,7 +1355,6 @@ character(len=128)::fname,msg
 call wrf_get_nproc (nprocs)
 call wrf_get_myproc( myproc )
 mythread=0
-    mythread=omp_get_thread_num()
 if(nprocs.ne.1.or.myproc.ne.0.or.mythread.ne.0) &
    call crash('read_array_2d: parallel execution not supported')
 
@@ -1441,7 +1432,6 @@ subroutine print_chsum( id, &
     istag,kstag,jstag,       &
     a,name)                      
 
-    USE module_dm , only : wrf_dm_bxor_integer
 
 integer, intent(in):: id, &
     ims,ime,kms,kme,jms,jme, &                
@@ -1450,8 +1440,6 @@ integer, intent(in):: id, &
     istag,kstag,jstag
 real, intent(in),dimension(ims:ime,kms:kme,jms:jme)::a
 character(len=*)::name
-
-
 
 
 
@@ -1483,7 +1471,6 @@ enddo
 
 
 thread=0
-
 if(thread.eq.0)psum=0
 !$OMP BARRIER
 !$OMP CRITICAL(CHSUM)
@@ -1493,7 +1480,7 @@ psum=ieor(psum,lsum)
 
 
 if(thread.eq.0)then
-    gsum = wrf_dm_bxor_integer ( psum )
+    gsum = psum
     write(msg,1)id,name,ids,ide+is,kds,kde+ks,jds,jde+js,gsum
 1   format(i6,1x,a10,' dims',6i5,' chsum ',z8.8)
     call message(msg)
@@ -1509,7 +1496,6 @@ real function fun_real(fun,  &
     istag,kstag,jstag,       &                
     a,b)                      
 
-    USE module_dm , only : wrf_dm_sum_real , wrf_dm_max_real
 
 integer, intent(in)::  fun, &
     ims,ime,kms,kme,jms,jme, &                
@@ -1602,8 +1588,7 @@ if(domax)psum=max(psum,lsum)
 
 !$OMP SINGLE
 
-    if(dosum) gsum = wrf_dm_sum_real ( psum )
-    if(domax) gsum = wrf_dm_max_real ( psum )
+    gsum = psum
 if(gsum.ne.gsum)call crash('fun_real: NaN detected')
 !$OMP END SINGLE
 

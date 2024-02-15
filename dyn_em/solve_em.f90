@@ -29,35 +29,6 @@ nba_mij,nba_rij,sbmradar,chem &
    USE module_driver_constants
    USE module_machine
    USE module_tiles, ONLY : set_tiles
-   USE module_dm, ONLY : &
-                  local_communicator, mytask, ntasks, ntasks_x, ntasks_y                   &
-                 ,local_communicator_periodic, wrf_dm_maxval
-   USE module_comm_dm, ONLY : &
-                  halo_em_a_sub,halo_em_b_sub,halo_em_c2_sub,halo_em_chem_e_3_sub          &
-                 ,halo_em_chem_e_5_sub,halo_em_chem_e_7_sub,halo_em_chem_old_e_5_sub       &
-                 ,halo_em_chem_old_e_7_sub,halo_em_c_sub,halo_em_d2_3_sub                  &
-                 ,halo_em_d2_5_sub,halo_em_d3_3_sub,halo_em_d3_5_sub,halo_em_d_sub         &
-                 ,halo_em_e_3_sub,halo_em_e_5_sub,halo_em_hydro_uv_sub                     &
-                 ,halo_em_moist_e_3_sub,halo_em_moist_e_5_sub,halo_em_moist_e_7_sub        &
-                 ,halo_em_moist_old_e_5_sub,halo_em_moist_old_e_7_sub                      &
-                 ,halo_em_scalar_e_3_sub,halo_em_scalar_e_5_sub,halo_em_scalar_e_7_sub     &
-                 ,halo_em_scalar_old_e_5_sub,halo_em_scalar_old_e_7_sub,halo_em_tke_3_sub  &
-                 ,halo_em_tke_5_sub,halo_em_tke_7_sub,halo_em_tke_advect_3_sub             &
-                 ,halo_em_tke_advect_5_sub,halo_em_tke_old_e_5_sub                         &
-                 ,halo_em_tke_old_e_7_sub,halo_em_tracer_e_3_sub,halo_em_tracer_e_5_sub    &
-                 ,halo_em_tracer_e_7_sub,halo_em_tracer_old_e_5_sub                        &
-                 ,halo_em_tracer_old_e_7_sub,halo_em_sbm_sub,period_bdy_em_a_sub                           &
-                 ,period_bdy_em_b3_sub,period_bdy_em_b_sub,period_bdy_em_chem2_sub         &
-                 ,period_bdy_em_chem_old_sub,period_bdy_em_chem_sub,period_bdy_em_d3_sub   &
-                 ,period_bdy_em_d_sub,period_bdy_em_e_sub,period_bdy_em_moist2_sub         &
-                 ,period_bdy_em_moist_old_sub,period_bdy_em_moist_sub                      &
-                 ,period_bdy_em_scalar2_sub,period_bdy_em_scalar_old_sub                   &
-                 ,period_bdy_em_scalar_sub,period_bdy_em_tke_old_sub, period_bdy_em_tke_sub  &
-                 ,period_bdy_em_tracer2_sub,period_bdy_em_tracer_old_sub                   &
-                 ,period_bdy_em_tracer_sub,period_em_da_sub,period_em_hydro_uv_sub         &
-                 ,period_em_f_sub,period_em_g_sub                                          &
-                 ,halo_em_f_1_sub,halo_em_init_4_sub,halo_em_thetam_sub,period_em_thetam_sub &
-                 ,halo_em_d_pv_sub,halo_firebrand_spotting_5_sub
    USE module_utility
 
 
@@ -556,7 +527,6 @@ real      ,DIMENSION(grid%sm31:grid%em31,grid%sm32:grid%em32,grid%sm33:grid%em33
   
      CALL get_wrf_debug_level( debug_level )
      IF ((config_flags%time_step < 0) .AND. (debug_level.GE.50)) THEN
-       CALL wrf_dm_maxval(grid%max_vert_cfl, idex, jdex)
        WRITE(wrf_err_message,*)'variable dt, max horiz cfl, max vert cfl: ',&
             grid%dt, grid%max_horiz_cfl, grid%max_vert_cfl
        CALL wrf_debug ( 0 , wrf_err_message )
@@ -617,37 +587,6 @@ real      ,DIMENSION(grid%sm31:grid%em31,grid%sm32:grid%em32,grid%sm33:grid%em33
      
      
 
-
-
-
-
-
-
-CALL HALO_EM_MOIST_OLD_E_7_sub ( grid, &
-  num_moist, &
-  moist_old, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_MOIST_OLD_sub ( grid, &
-  config_flags, &
-  num_moist, &
-  moist_old, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
      !$OMP PARALLEL DO   &
      !$OMP PRIVATE ( ij )
      DO ij = 1 , grid%num_tiles
@@ -697,7 +636,7 @@ CALL PERIOD_BDY_EM_MOIST_OLD_sub ( grid, &
      IF ( rk_order == 1 ) THEN   
 
        write(wrf_err_message,*)' leapfrog removed, error exit for dynamics_option = ',dynamics_option
-       CALL wrf_error_fatal3("<stdin>",700,&
+       CALL wrf_error_fatal3("<stdin>",639,&
 wrf_err_message )
 
      ELSE IF ( rk_order == 2 ) THEN   
@@ -731,7 +670,7 @@ wrf_err_message )
      ELSE
 
        write(wrf_err_message,*)' unknown solver, error exit for dynamics_option = ',dynamics_option
-       CALL wrf_error_fatal3("<stdin>",734,&
+       CALL wrf_error_fatal3("<stdin>",673,&
 wrf_err_message )
 
      END IF
@@ -792,63 +731,6 @@ wrf_err_message )
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-CALL HALO_EM_A_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_A_sub ( grid, &
-  config_flags, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
 
 
 
@@ -972,23 +854,6 @@ CALL PERIOD_BDY_EM_A_sub ( grid, &
                              , feedback_is_ready=feedback_is_ready    &
                             )
 
-       IF ( config_flags%bl_pbl_physics == MYNNPBLSCHEME ) THEN
-
-
-
-
-
-
-CALL HALO_EM_SCALAR_E_5_sub ( grid, &
-  num_scalar, &
-  scalar, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-       ENDIF
 
        CALL first_rk_step_part2 (    grid, config_flags         &
                              , moist , moist_old , moist_tend   &
@@ -1289,66 +1154,6 @@ CALL HALO_EM_SCALAR_E_5_sub ( grid, &
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-CALL HALO_EM_B_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_B_sub ( grid, &
-  config_flags, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
      !$OMP PARALLEL DO   &
      !$OMP PRIVATE ( ij )
 
@@ -1437,20 +1242,6 @@ CALL PERIOD_BDY_EM_B_sub ( grid, &
      small_steps : DO iteration = 1 , number_of_small_timesteps
 
        
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_B_sub ( grid, &
-  config_flags, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
 
        !$OMP PARALLEL DO   &
        !$OMP PRIVATE ( ij )
@@ -1549,29 +1340,6 @@ CALL PERIOD_BDY_EM_B_sub ( grid, &
 
        END DO
        !$OMP END PARALLEL DO
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-CALL HALO_EM_C_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
 
 
        !$OMP PARALLEL DO   &
@@ -1832,50 +1600,6 @@ CALL HALO_EM_C_sub ( grid, &
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-CALL HALO_EM_C2_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_B3_sub ( grid, &
-  config_flags, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
        !$OMP PARALLEL DO   &
        !$OMP PRIVATE ( ij )
        DO ij = 1 , grid%num_tiles
@@ -2087,61 +1811,6 @@ CALL PERIOD_BDY_EM_B3_sub ( grid, &
        !$OMP END PARALLEL DO
 
 
-       IF (config_flags%moist_adv_opt /= ORIGINAL .and. config_flags%moist_adv_opt /= WENO_SCALAR) THEN
-         IF      ( config_flags%h_sca_adv_order <= 4 ) THEN
-
-
-
-
-
-
-CALL HALO_EM_MOIST_OLD_E_5_sub ( grid, &
-  num_moist, &
-  moist_old, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-         ELSE IF ( config_flags%h_sca_adv_order <= 6 ) THEN
-
-
-
-
-
-
-CALL HALO_EM_MOIST_OLD_E_7_sub ( grid, &
-  num_moist, &
-  moist_old, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-         ELSE
-           WRITE(wrf_err_message,*)'solve_em: invalid h_sca_adv_order = ',config_flags%h_sca_adv_order
-           CALL wrf_error_fatal3("<stdin>",2125,&
-TRIM(wrf_err_message))
-         ENDIF
-       ENDIF
-
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_MOIST_OLD_sub ( grid, &
-  config_flags, &
-  num_moist, &
-  moist_old, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
 
 
        !$OMP PARALLEL DO   &
@@ -2190,61 +1859,6 @@ CALL PERIOD_BDY_EM_MOIST_OLD_sub ( grid, &
        !$OMP END PARALLEL DO
 
 
-       IF (config_flags%scalar_adv_opt /= ORIGINAL .and. config_flags%scalar_adv_opt /= WENO_SCALAR) THEN
-         IF      ( config_flags%h_sca_adv_order <= 4 ) THEN
-
-
-
-
-
-
-CALL HALO_EM_SCALAR_OLD_E_5_sub ( grid, &
-  num_scalar, &
-  scalar_old, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-         ELSE IF ( config_flags%h_sca_adv_order <= 6 ) THEN
-
-
-
-
-
-
-CALL HALO_EM_SCALAR_OLD_E_7_sub ( grid, &
-  num_scalar, &
-  scalar_old, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-         ELSE
-           WRITE(wrf_err_message,*)'solve_em: invalid h_sca_adv_order = ',config_flags%h_sca_adv_order
-           CALL wrf_error_fatal3("<stdin>",2228,&
-TRIM(wrf_err_message))
-         ENDIF
-  endif
-
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_SCALAR_OLD_sub ( grid, &
-  config_flags, &
-  num_scalar, &
-  scalar_old, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
 
          !$OMP PARALLEL DO   &
          !$OMP PRIVATE ( ij )
@@ -2292,61 +1906,6 @@ CALL PERIOD_BDY_EM_SCALAR_OLD_sub ( grid, &
          !$OMP END PARALLEL DO
 
 
-         IF (config_flags%chem_adv_opt /= ORIGINAL .and. config_flags%chem_adv_opt /= WENO_SCALAR) THEN
-           IF      ( config_flags%h_sca_adv_order <= 4 ) THEN
-
-
-
-
-
-
-CALL HALO_EM_CHEM_OLD_E_5_sub ( grid, &
-  num_chem, &
-  chem_old, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-           ELSE IF ( config_flags%h_sca_adv_order <= 6 ) THEN
-
-
-
-
-
-
-CALL HALO_EM_CHEM_OLD_E_7_sub ( grid, &
-  num_chem, &
-  chem_old, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-           ELSE
-             WRITE(wrf_err_message,*)'solve_em: invalid h_sca_adv_order = ',config_flags%h_sca_adv_order
-             CALL wrf_error_fatal3("<stdin>",2330,&
-TRIM(wrf_err_message))
-           ENDIF
-         ENDIF
-
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_CHEM_OLD_sub ( grid, &
-  config_flags, &
-  num_chem, &
-  chem_old, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
 
 
          !$OMP PARALLEL DO   &
@@ -2394,61 +1953,6 @@ CALL PERIOD_BDY_EM_CHEM_OLD_sub ( grid, &
          !$OMP END PARALLEL DO
 
 
-         IF (config_flags%tracer_adv_opt /= ORIGINAL .and. config_flags%tracer_adv_opt /= WENO_SCALAR) THEN
-           IF      ( config_flags%h_sca_adv_order <= 4 ) THEN
-
-
-
-
-
-
-CALL HALO_EM_TRACER_OLD_E_5_sub ( grid, &
-  num_tracer, &
-  tracer_old, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-           ELSE IF ( config_flags%h_sca_adv_order <= 6 ) THEN
-
-
-
-
-
-
-CALL HALO_EM_TRACER_OLD_E_7_sub ( grid, &
-  num_tracer, &
-  tracer_old, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-           ELSE
-             WRITE(wrf_err_message,*)'solve_em: invalid h_sca_adv_order = ',config_flags%h_sca_adv_order
-             CALL wrf_error_fatal3("<stdin>",2432,&
-TRIM(wrf_err_message))
-           ENDIF
-         ENDIF
-
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_TRACER_OLD_sub ( grid, &
-  config_flags, &
-  num_tracer, &
-  tracer_old, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
 
 
          !$OMP PARALLEL DO   &
@@ -2495,55 +1999,6 @@ CALL PERIOD_BDY_EM_TRACER_OLD_sub ( grid, &
          !$OMP END PARALLEL DO
 
 
-         IF (config_flags%tke_adv_opt /= ORIGINAL .and. config_flags%tke_adv_opt /= WENO_SCALAR) THEN
-           IF      ( config_flags%h_sca_adv_order <= 4 ) THEN
-
-
-
-
-
-
-CALL HALO_EM_TKE_OLD_E_5_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-           ELSE IF ( config_flags%h_sca_adv_order <= 6 ) THEN
-
-
-
-
-
-
-CALL HALO_EM_TKE_OLD_E_7_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-           ELSE
-             WRITE(wrf_err_message,*)'solve_em: invalid h_sca_adv_order = ',config_flags%h_sca_adv_order
-             CALL wrf_error_fatal3("<stdin>",2529,&
-TRIM(wrf_err_message))
-           ENDIF
-         ENDIF
-
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_TKE_OLD_sub ( grid, &
-  config_flags, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
 
 
          !$OMP PARALLEL DO   &
@@ -2562,50 +2017,6 @@ CALL PERIOD_BDY_EM_TKE_OLD_sub ( grid, &
 
 
        END IF  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-CALL HALO_EM_D_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-
-CALL PERIOD_EM_DA_sub ( grid, &
-  config_flags, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
 
 
 
@@ -2792,39 +2203,6 @@ CALL PERIOD_EM_DA_sub ( grid, &
 
 
        TKE_advance: IF (config_flags%km_opt .eq. 2.or.config_flags%km_opt.eq.5) then 
-         IF      ( config_flags%h_sca_adv_order <= 4 ) THEN
-
-
-
-
-
-
-CALL HALO_EM_TKE_ADVECT_3_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-         ELSE IF ( config_flags%h_sca_adv_order <= 6 ) THEN
-
-
-
-
-
-
-CALL HALO_EM_TKE_ADVECT_5_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-         ELSE
-          WRITE(wrf_err_message,*)'solve_em: invalid h_sca_adv_order = ',config_flags%h_sca_adv_order
-          CALL wrf_error_fatal3("<stdin>",2825,&
-TRIM(wrf_err_message))
-         ENDIF
          !$OMP PARALLEL DO   &
          !$OMP PRIVATE ( ij, tenddec )
          tke_tile_loop_1: DO ij = 1 , grid%num_tiles
@@ -3484,148 +2862,6 @@ TRIM(wrf_err_message))
 
 
 
-       IF      ( config_flags%h_mom_adv_order <= 4 .and. config_flags%h_sca_adv_order <= 4 ) THEN
-
-
-
-
-
-
-CALL HALO_EM_D2_3_sub ( grid, &
-  num_moist, &
-  moist, &
-  num_chem, &
-  chem, &
-  num_tracer, &
-  tracer, &
-  num_scalar, &
-  scalar, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-       ELSE IF ( config_flags%h_mom_adv_order <= 6 .and. config_flags%h_sca_adv_order <= 6 ) THEN
-
-
-
-
-
-
-CALL HALO_EM_D2_5_sub ( grid, &
-  num_moist, &
-  moist, &
-  num_chem, &
-  chem, &
-  num_tracer, &
-  tracer, &
-  num_scalar, &
-  scalar, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-       ELSE 
-         WRITE(wrf_err_message,*)'solve_em: invalid h_mom_adv_order or h_sca_adv_order = ', &
-               config_flags%h_mom_adv_order, config_flags%h_sca_adv_order
-         CALL wrf_error_fatal3("<stdin>",3534,&
-TRIM(wrf_err_message))
-       ENDIF
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_D_sub ( grid, &
-  config_flags, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_MOIST2_sub ( grid, &
-  config_flags, &
-  num_moist, &
-  moist, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_CHEM2_sub ( grid, &
-  config_flags, &
-  num_chem, &
-  chem, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_TRACER2_sub ( grid, &
-  config_flags, &
-  num_tracer, &
-  tracer, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_SCALAR2_sub ( grid, &
-  config_flags, &
-  num_scalar, &
-  scalar, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_TKE_sub ( grid, &
-  config_flags, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
 
 
        !$OMP PARALLEL DO   &
@@ -3737,382 +2973,6 @@ CALL PERIOD_BDY_EM_TKE_sub ( grid, &
 
 
 
-
-
-
-
-
-
-
-
-
-       IF      ( config_flags%h_sca_adv_order <= 4 ) THEN
-         IF ( (config_flags%tke_adv_opt /= ORIGINAL .and. config_flags%tke_adv_opt /= WENO_SCALAR) .and. (rk_step == rk_order-1) ) THEN
-
-
-
-
-
-
-CALL HALO_EM_TKE_5_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-         ELSE
-
-
-
-
-
-
-CALL HALO_EM_TKE_3_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-         ENDIF
-       ELSE IF ( config_flags%h_sca_adv_order <= 6 ) THEN
-         IF ( (config_flags%tke_adv_opt /= ORIGINAL .and. config_flags%tke_adv_opt /= WENO_SCALAR) .and. (rk_step == rk_order-1) ) THEN
-
-
-
-
-
-
-CALL HALO_EM_TKE_7_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-         ELSE
-
-
-
-
-
-
-CALL HALO_EM_TKE_5_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-         ENDIF
-       ELSE
-         WRITE(wrf_err_message,*)'solve_em: invalid h_sca_adv_order = ',config_flags%h_sca_adv_order
-         CALL wrf_error_fatal3("<stdin>",3811,&
-TRIM(wrf_err_message))
-       ENDIF
-
-       IF ( num_moist .GE. PARAM_FIRST_SCALAR ) THEN
-         IF      ( config_flags%h_sca_adv_order <= 4 ) THEN
-           IF ( (config_flags%moist_adv_opt /= ORIGINAL .and. config_flags%moist_adv_opt /= WENO_SCALAR) .and. (rk_step == rk_order-1) ) THEN
-
-
-
-
-
-
-CALL HALO_EM_MOIST_E_5_sub ( grid, &
-  num_moist, &
-  moist, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-           ELSE
-
-
-
-
-
-
-CALL HALO_EM_MOIST_E_3_sub ( grid, &
-  num_moist, &
-  moist, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-           END IF
-         ELSE IF ( config_flags%h_sca_adv_order <= 6 ) THEN
-           IF ( (config_flags%moist_adv_opt /= ORIGINAL .and. config_flags%moist_adv_opt /= WENO_SCALAR) .and. (rk_step == rk_order-1) ) THEN
-
-
-
-
-
-
-CALL HALO_EM_MOIST_E_7_sub ( grid, &
-  num_moist, &
-  moist, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-           ELSE
-
-
-
-
-
-
-CALL HALO_EM_MOIST_E_5_sub ( grid, &
-  num_moist, &
-  moist, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-           END IF
-         ELSE
-           WRITE(wrf_err_message,*)'solve_em: invalid h_sca_adv_order = ',config_flags%h_sca_adv_order
-           CALL wrf_error_fatal3("<stdin>",3886,&
-TRIM(wrf_err_message))
-         ENDIF
-       ENDIF
-       IF ( num_chem >= PARAM_FIRST_SCALAR ) THEN
-         IF      ( config_flags%h_sca_adv_order <= 4 ) THEN
-           IF ( (config_flags%chem_adv_opt /= ORIGINAL .and. config_flags%chem_adv_opt /= WENO_SCALAR) .and. (rk_step == rk_order-1) ) THEN
-
-
-
-
-
-
-CALL HALO_EM_CHEM_E_5_sub ( grid, &
-  num_chem, &
-  chem, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-           ELSE
-
-
-
-
-
-
-CALL HALO_EM_CHEM_E_3_sub ( grid, &
-  num_chem, &
-  chem, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-           ENDIF
-         ELSE IF ( config_flags%h_sca_adv_order <= 6 ) THEN
-           IF ( (config_flags%chem_adv_opt /= ORIGINAL .and. config_flags%chem_adv_opt /= WENO_SCALAR) .and. (rk_step == rk_order-1) ) THEN
-
-
-
-
-
-
-CALL HALO_EM_CHEM_E_7_sub ( grid, &
-  num_chem, &
-  chem, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-           ELSE
-
-
-
-
-
-
-CALL HALO_EM_CHEM_E_5_sub ( grid, &
-  num_chem, &
-  chem, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-           ENDIF
-         ELSE
-           WRITE(wrf_err_message,*)'solve_em: invalid h_sca_adv_order = ',config_flags%h_sca_adv_order
-           CALL wrf_error_fatal3("<stdin>",3961,&
-TRIM(wrf_err_message))
-         ENDIF
-       ENDIF
-       IF ( num_tracer >= PARAM_FIRST_SCALAR ) THEN
-         IF      ( config_flags%h_sca_adv_order <= 4 ) THEN
-           IF ( (config_flags%tracer_adv_opt /= ORIGINAL .and. config_flags%tracer_adv_opt /= WENO_SCALAR) .and. (rk_step == rk_order-1) ) THEN
-
-
-
-
-
-
-CALL HALO_EM_TRACER_E_5_sub ( grid, &
-  num_tracer, &
-  tracer, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-           ELSE
-
-
-
-
-
-
-CALL HALO_EM_TRACER_E_3_sub ( grid, &
-  num_tracer, &
-  tracer, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-           ENDIF
-         ELSE IF ( config_flags%h_sca_adv_order <= 6 ) THEN
-           IF ( (config_flags%tracer_adv_opt /= ORIGINAL .and. config_flags%tracer_adv_opt /= WENO_SCALAR) .and. (rk_step == rk_order-1) ) THEN
-
-
-
-
-
-
-CALL HALO_EM_TRACER_E_7_sub ( grid, &
-  num_tracer, &
-  tracer, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-           ELSE
-
-
-
-
-
-
-CALL HALO_EM_TRACER_E_5_sub ( grid, &
-  num_tracer, &
-  tracer, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-           ENDIF
-         ELSE
-           WRITE(wrf_err_message,*)'solve_em: invalid h_sca_adv_order = ',config_flags%h_sca_adv_order
-           CALL wrf_error_fatal3("<stdin>",4036,&
-TRIM(wrf_err_message))
-         ENDIF
-       ENDIF
-       IF ( num_scalar >= PARAM_FIRST_SCALAR ) THEN
-         IF      ( config_flags%h_sca_adv_order <= 4 ) THEN
-           IF ( (config_flags%scalar_adv_opt /= ORIGINAL .and. config_flags%scalar_adv_opt /= WENO_SCALAR) .and. (rk_step == rk_order-1) ) THEN
-
-
-
-
-
-
-CALL HALO_EM_SCALAR_E_5_sub ( grid, &
-  num_scalar, &
-  scalar, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-           ELSE
-
-
-
-
-
-
-CALL HALO_EM_SCALAR_E_3_sub ( grid, &
-  num_scalar, &
-  scalar, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-           ENDIF
-         ELSE IF ( config_flags%h_sca_adv_order <= 6 ) THEN
-           IF ( (config_flags%scalar_adv_opt /= ORIGINAL .and. config_flags%scalar_adv_opt /= WENO_SCALAR) .and. (rk_step == rk_order-1) ) THEN
-
-
-
-
-
-
-CALL HALO_EM_SCALAR_E_7_sub ( grid, &
-  num_scalar, &
-  scalar, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-           ELSE
-
-
-
-
-
-
-CALL HALO_EM_SCALAR_E_5_sub ( grid, &
-  num_scalar, &
-  scalar, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-           ENDIF
-         ELSE
-           WRITE(wrf_err_message,*)'solve_em: invalid h_sca_adv_order = ',config_flags%h_sca_adv_order
-           CALL wrf_error_fatal3("<stdin>",4111,&
-TRIM(wrf_err_message))
-         ENDIF
-       ENDIF
-
      ENDIF rk_step_1_check
 
 
@@ -4126,89 +2986,6 @@ TRIM(wrf_err_message))
 
 
    IF      ( config_flags%traj_opt .EQ. UM_TRAJECTORY ) THEN
-
-
-
-
-
-
-CALL HALO_EM_F_1_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL HALO_EM_D_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL HALO_EM_INIT_4_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-     IF( config_flags%periodic_x ) THEN
-
-
-
-
-
-
-CALL PERIOD_EM_DA_sub ( grid, &
-  config_flags, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL PERIOD_EM_F_sub ( grid, &
-  config_flags, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL PERIOD_EM_G_sub ( grid, &
-  config_flags, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-     ENDIF
      !$OMP PARALLEL DO   &
      !$OMP PRIVATE ( ij )
        DO ij = 1 , grid%num_tiles
@@ -4453,25 +3230,6 @@ CALL PERIOD_EM_G_sub ( grid, &
 
 
 
-
-
-
-
-
-
-
-CALL HALO_EM_SBM_sub ( grid, &
-  p_phy, &
-  pi_phy, &
-  dz8w, &
-  th_phy, &
-  num_moist, &
-  moist, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
 
 
 
@@ -4808,33 +3566,6 @@ CALL HALO_EM_SBM_sub ( grid, &
      END DO
      !$OMP END PARALLEL DO
 
-
-
-
-
-
-
-CALL HALO_EM_THETAM_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL PERIOD_EM_THETAM_sub ( grid, &
-  config_flags, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
         its=ips ; ite = ipe
         jts=jps ; jte = jpe
         CALL set_physical_bc3d( grid%h_diabatic, 'p', config_flags,      &
@@ -4934,33 +3665,6 @@ CALL PERIOD_EM_THETAM_sub ( grid, &
 
 
    IF (.not. config_flags%non_hydrostatic) THEN
-
-
-
-
-
-
-CALL HALO_EM_HYDRO_UV_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL PERIOD_EM_HYDRO_UV_sub ( grid, &
-  config_flags, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
      !$OMP PARALLEL DO   &
      !$OMP PRIVATE ( ij )
      DO ij = 1 , grid%num_tiles
@@ -5180,134 +3884,6 @@ CALL PERIOD_EM_HYDRO_UV_sub ( grid, &
 
 
 
-
-   IF      ( config_flags%h_mom_adv_order <= 4 .and. config_flags%h_sca_adv_order <= 4 ) THEN
-
-
-
-
-
-
-CALL HALO_EM_D3_3_sub ( grid, &
-  num_moist, &
-  moist, &
-  num_chem, &
-  chem, &
-  num_tracer, &
-  tracer, &
-  num_scalar, &
-  scalar, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-   ELSE IF ( config_flags%h_mom_adv_order <= 6 .and. config_flags%h_sca_adv_order <= 6 ) THEN
-
-
-
-
-
-
-CALL HALO_EM_D3_5_sub ( grid, &
-  num_moist, &
-  moist, &
-  num_chem, &
-  chem, &
-  num_tracer, &
-  tracer, &
-  num_scalar, &
-  scalar, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-   ELSE 
-      WRITE(wrf_err_message,*)'solve_em: invalid h_mom_adv_order or h_sca_adv_order = ', &
-               config_flags%h_mom_adv_order, config_flags%h_sca_adv_order
-      CALL wrf_error_fatal3("<stdin>",5231,&
-TRIM(wrf_err_message))
-   ENDIF
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_D3_sub ( grid, &
-  config_flags, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_MOIST_sub ( grid, &
-  config_flags, &
-  num_moist, &
-  moist, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_CHEM_sub ( grid, &
-  config_flags, &
-  num_chem, &
-  chem, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_TRACER_sub ( grid, &
-  config_flags, &
-  num_tracer, &
-  tracer, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_SCALAR_sub ( grid, &
-  config_flags, &
-  num_scalar, &
-  scalar, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
 
 
 
@@ -5563,33 +4139,6 @@ CALL PERIOD_BDY_EM_SCALAR_sub ( grid, &
 
 
 
-
-
-
-
-
-CALL HALO_EM_C_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL PERIOD_BDY_EM_E_sub ( grid, &
-  config_flags, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
    CALL wrf_debug ( 10 , ' call set_w_surface' )
    fill_w_flag = .false.
 
@@ -5633,216 +4182,6 @@ CALL PERIOD_BDY_EM_E_sub ( grid, &
 
 
 
-
-   CALL wrf_debug ( 200 , ' call HALO_RK_E' )
-   IF      ( config_flags%h_mom_adv_order <= 4  .and. config_flags%h_sca_adv_order <= 4 ) THEN
-
-
-
-
-
-
-CALL HALO_EM_E_3_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-   ELSE IF ( config_flags%h_mom_adv_order <= 6 .and. config_flags%h_sca_adv_order <= 6 ) THEN
-
-
-
-
-
-
-CALL HALO_EM_E_5_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-   ELSE
-     WRITE(wrf_err_message,*)'solve_em: invalid h_mom_adv_order or h_sca_adv_order = ', &
-               config_flags%h_mom_adv_order, config_flags%h_sca_adv_order
-     CALL wrf_error_fatal3("<stdin>",5669,&
-TRIM(wrf_err_message))
-   ENDIF
-
-   IF ( num_moist >= PARAM_FIRST_SCALAR  ) THEN
-
-
-
-     CALL wrf_debug ( 200 , ' call HALO_RK_MOIST' )
-     IF      ( config_flags%h_sca_adv_order <= 4 ) THEN
-
-
-
-
-
-
-CALL HALO_EM_MOIST_E_3_sub ( grid, &
-  num_moist, &
-  moist, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-     ELSE IF ( config_flags%h_sca_adv_order <= 6 ) THEN
-
-
-
-
-
-
-CALL HALO_EM_MOIST_E_5_sub ( grid, &
-  num_moist, &
-  moist, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-     ELSE
-       WRITE(wrf_err_message,*)'solve_em: invalid h_sca_adv_order = ',config_flags%h_sca_adv_order
-       CALL wrf_error_fatal3("<stdin>",5712,&
-TRIM(wrf_err_message))
-     ENDIF
-   ENDIF
-   IF ( num_chem >= PARAM_FIRST_SCALAR ) THEN
-
-
-
-     CALL wrf_debug ( 200 , ' call HALO_RK_CHEM' )
-     IF      ( config_flags%h_sca_adv_order <= 4 ) THEN
-
-
-
-
-
-
-CALL HALO_EM_CHEM_E_3_sub ( grid, &
-  num_chem, &
-  chem, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-     ELSE IF ( config_flags%h_sca_adv_order <= 6 ) THEN
-
-
-
-
-
-
-CALL HALO_EM_CHEM_E_5_sub ( grid, &
-  num_chem, &
-  chem, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-     ELSE
-       WRITE(wrf_err_message,*)'solve_em: invalid h_sca_adv_order = ',config_flags%h_sca_adv_order
-       CALL wrf_error_fatal3("<stdin>",5755,&
-TRIM(wrf_err_message))
-     ENDIF
-   ENDIF
-   IF ( num_tracer >= PARAM_FIRST_SCALAR ) THEN
-
-
-
-     CALL wrf_debug ( 200 , ' call HALO_RK_TRACER' )
-     IF      ( config_flags%h_sca_adv_order <= 4 ) THEN
-
-
-
-
-
-
-CALL HALO_EM_TRACER_E_3_sub ( grid, &
-  num_tracer, &
-  tracer, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-     ELSE IF ( config_flags%h_sca_adv_order <= 6 ) THEN
-
-
-
-
-
-
-CALL HALO_EM_TRACER_E_5_sub ( grid, &
-  num_tracer, &
-  tracer, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-     ELSE
-       WRITE(wrf_err_message,*)'solve_em: invalid h_sca_adv_order = ',config_flags%h_sca_adv_order
-       CALL wrf_error_fatal3("<stdin>",5798,&
-TRIM(wrf_err_message))
-     ENDIF
-   ENDIF
-   IF ( num_scalar >= PARAM_FIRST_SCALAR ) THEN
-
-
-
-     CALL wrf_debug ( 200 , ' call HALO_RK_SCALAR' )
-     IF      ( config_flags%h_sca_adv_order <= 4 ) THEN
-
-
-
-
-
-
-CALL HALO_EM_SCALAR_E_3_sub ( grid, &
-  num_scalar, &
-  scalar, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-     ELSE IF ( config_flags%h_sca_adv_order <= 6 ) THEN
-
-
-
-
-
-
-CALL HALO_EM_SCALAR_E_5_sub ( grid, &
-  num_scalar, &
-  scalar, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-     ELSE
-       WRITE(wrf_err_message,*)'solve_em: invalid h_sca_adv_order = ',config_flags%h_sca_adv_order
-       CALL wrf_error_fatal3("<stdin>",5841,&
-TRIM(wrf_err_message))
-     ENDIF
-   ENDIF
-
    
 
 
@@ -5854,20 +4193,6 @@ TRIM(wrf_err_message))
        config_flags%fs_firebrand_gen_lim > 0 .AND. & 
        
        config_flags%max_dom == grid%id) THEN 
-
-       CALL wrf_debug ( 200 , ' call HALO_FIREBRAND_SPOTTING' )
-
-
-
-
-
-
-CALL HALO_FIREBRAND_SPOTTING_5_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
 
 
        CALL wrf_debug ( 3 , 'solve: calling firebrand_spotting_em_driver...' )

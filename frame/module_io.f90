@@ -477,9 +477,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_dom_ti_real ( Hndl, Element,   Data, &
-                              locCount, Outcount, Status )
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_dom_ti_real ( Hndl, Element,   Data, &
@@ -732,9 +729,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_dom_ti_real ( Hndl, Element,   Data, &
-                              locCount, Outcount, Status )
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_dom_ti_real ( Hndl, Element,   Data, &
@@ -989,9 +983,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_dom_ti_real ( Hndl, Element,   Data, &
-                              locCount,  Status )
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_dom_ti_real ( Hndl, Element,   Data, &
@@ -1244,9 +1235,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_dom_ti_real ( Hndl, Element,   Data, &
-                              locCount,  Status )
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_dom_ti_real ( Hndl, Element,   Data, &
@@ -1501,9 +1489,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_dom_ti_double ( Hndl, Element,   Data, &
-                              locCount, Outcount, Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_dom_ti_double ( Hndl, Element,   Data, &
@@ -1756,9 +1741,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_dom_ti_double ( Hndl, Element,   Data, &
-                              locCount, Outcount, Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_dom_ti_double ( Hndl, Element,   Data, &
@@ -2013,9 +1995,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_dom_ti_double ( Hndl, Element,   Data, &
-                              locCount,  Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_dom_ti_double ( Hndl, Element,   Data, &
@@ -2268,9 +2247,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_dom_ti_double ( Hndl, Element,   Data, &
-                              locCount,  Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_dom_ti_double ( Hndl, Element,   Data, &
@@ -2525,9 +2501,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_dom_ti_integer ( Hndl, Element,   Data, &
-                              locCount, Outcount, Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_dom_ti_integer ( Hndl, Element,   Data, &
@@ -2780,9 +2753,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_dom_ti_integer ( Hndl, Element,   Data, &
-                              locCount, Outcount, Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_dom_ti_integer ( Hndl, Element,   Data, &
@@ -3037,9 +3007,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_dom_ti_integer ( Hndl, Element,   Data, &
-                              locCount,  Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_dom_ti_integer ( Hndl, Element,   Data, &
@@ -3292,9 +3259,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_dom_ti_integer ( Hndl, Element,   Data, &
-                              locCount,  Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_dom_ti_integer ( Hndl, Element,   Data, &
@@ -3549,9 +3513,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_dom_ti_logical ( Hndl, Element,   Data, &
-                              locCount, Outcount, Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_dom_ti_logical ( Hndl, Element,   Data, &
@@ -3804,9 +3765,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_dom_ti_logical ( Hndl, Element,   Data, &
-                              locCount, Outcount, Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_dom_ti_logical ( Hndl, Element,   Data, &
@@ -4061,9 +4019,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_dom_ti_logical ( Hndl, Element,   Data, &
-                              locCount,  Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_dom_ti_logical ( Hndl, Element,   Data, &
@@ -4316,9 +4271,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_dom_ti_logical ( Hndl, Element,   Data, &
-                              locCount,  Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_dom_ti_logical ( Hndl, Element,   Data, &
@@ -4573,9 +4525,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_dom_ti_char ( Hndl, Element,   Data, &
-                               Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_dom_ti_char ( Hndl, Element,   Data, &
@@ -4830,9 +4779,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_dom_ti_char ( Hndl, Element,   Data, &
-                               Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_dom_ti_char ( Hndl, Element,   Data, &
@@ -5088,9 +5034,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_dom_td_real ( Hndl, Element, DateStr,  Data, &
-                              locCount, Outcount, Status )
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_dom_td_real ( Hndl, Element, DateStr,  Data, &
@@ -5343,9 +5286,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_dom_td_real ( Hndl, Element, DateStr,  Data, &
-                              locCount, Outcount, Status )
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_dom_td_real ( Hndl, Element, DateStr,  Data, &
@@ -5600,9 +5540,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_dom_td_real ( Hndl, Element, DateStr,  Data, &
-                              locCount,  Status )
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_dom_td_real ( Hndl, Element, DateStr,  Data, &
@@ -5855,9 +5792,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_dom_td_real ( Hndl, Element, DateStr,  Data, &
-                              locCount,  Status )
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_dom_td_real ( Hndl, Element, DateStr,  Data, &
@@ -6112,9 +6046,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_dom_td_double ( Hndl, Element, DateStr,  Data, &
-                              locCount, Outcount, Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_dom_td_double ( Hndl, Element, DateStr,  Data, &
@@ -6367,9 +6298,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_dom_td_double ( Hndl, Element, DateStr,  Data, &
-                              locCount, Outcount, Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_dom_td_double ( Hndl, Element, DateStr,  Data, &
@@ -6624,9 +6552,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_dom_td_double ( Hndl, Element, DateStr,  Data, &
-                              locCount,  Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_dom_td_double ( Hndl, Element, DateStr,  Data, &
@@ -6879,9 +6804,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_dom_td_double ( Hndl, Element, DateStr,  Data, &
-                              locCount,  Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_dom_td_double ( Hndl, Element, DateStr,  Data, &
@@ -7136,9 +7058,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_dom_td_integer ( Hndl, Element, DateStr,  Data, &
-                              locCount, Outcount, Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_dom_td_integer ( Hndl, Element, DateStr,  Data, &
@@ -7391,9 +7310,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_dom_td_integer ( Hndl, Element, DateStr,  Data, &
-                              locCount, Outcount, Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_dom_td_integer ( Hndl, Element, DateStr,  Data, &
@@ -7648,9 +7564,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_dom_td_integer ( Hndl, Element, DateStr,  Data, &
-                              locCount,  Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_dom_td_integer ( Hndl, Element, DateStr,  Data, &
@@ -7903,9 +7816,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_dom_td_integer ( Hndl, Element, DateStr,  Data, &
-                              locCount,  Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_dom_td_integer ( Hndl, Element, DateStr,  Data, &
@@ -8160,9 +8070,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_dom_td_logical ( Hndl, Element, DateStr,  Data, &
-                              locCount, Outcount, Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_dom_td_logical ( Hndl, Element, DateStr,  Data, &
@@ -8415,9 +8322,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_dom_td_logical ( Hndl, Element, DateStr,  Data, &
-                              locCount, Outcount, Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_dom_td_logical ( Hndl, Element, DateStr,  Data, &
@@ -8672,9 +8576,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_dom_td_logical ( Hndl, Element, DateStr,  Data, &
-                              locCount,  Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_dom_td_logical ( Hndl, Element, DateStr,  Data, &
@@ -8927,9 +8828,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_dom_td_logical ( Hndl, Element, DateStr,  Data, &
-                              locCount,  Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_dom_td_logical ( Hndl, Element, DateStr,  Data, &
@@ -9184,9 +9082,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_dom_td_char ( Hndl, Element, DateStr,  Data, &
-                               Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_dom_td_char ( Hndl, Element, DateStr,  Data, &
@@ -9441,9 +9336,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_dom_td_char ( Hndl, Element, DateStr,  Data, &
-                               Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_dom_td_char ( Hndl, Element, DateStr,  Data, &
@@ -9699,9 +9591,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_var_ti_real ( Hndl, Element,  Varname, Data, &
-                              locCount, Outcount, Status )
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_var_ti_real ( Hndl, Element,  Varname, Data, &
@@ -9954,9 +9843,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_var_ti_real ( Hndl, Element,  Varname, Data, &
-                              locCount, Outcount, Status )
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_var_ti_real ( Hndl, Element,  Varname, Data, &
@@ -10211,9 +10097,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_var_ti_real ( Hndl, Element,  Varname, Data, &
-                              locCount,  Status )
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_var_ti_real ( Hndl, Element,  Varname, Data, &
@@ -10466,9 +10349,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_var_ti_real ( Hndl, Element,  Varname, Data, &
-                              locCount,  Status )
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_var_ti_real ( Hndl, Element,  Varname, Data, &
@@ -10723,9 +10603,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_var_ti_double ( Hndl, Element,  Varname, Data, &
-                              locCount, Outcount, Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_var_ti_double ( Hndl, Element,  Varname, Data, &
@@ -10978,9 +10855,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_var_ti_double ( Hndl, Element,  Varname, Data, &
-                              locCount, Outcount, Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_var_ti_double ( Hndl, Element,  Varname, Data, &
@@ -11235,9 +11109,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_var_ti_double ( Hndl, Element,  Varname, Data, &
-                              locCount,  Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_var_ti_double ( Hndl, Element,  Varname, Data, &
@@ -11490,9 +11361,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_var_ti_double ( Hndl, Element,  Varname, Data, &
-                              locCount,  Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_var_ti_double ( Hndl, Element,  Varname, Data, &
@@ -11747,9 +11615,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_var_ti_integer ( Hndl, Element,  Varname, Data, &
-                              locCount, Outcount, Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_var_ti_integer ( Hndl, Element,  Varname, Data, &
@@ -12002,9 +11867,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_var_ti_integer ( Hndl, Element,  Varname, Data, &
-                              locCount, Outcount, Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_var_ti_integer ( Hndl, Element,  Varname, Data, &
@@ -12259,9 +12121,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_var_ti_integer ( Hndl, Element,  Varname, Data, &
-                              locCount,  Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_var_ti_integer ( Hndl, Element,  Varname, Data, &
@@ -12514,9 +12373,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_var_ti_integer ( Hndl, Element,  Varname, Data, &
-                              locCount,  Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_var_ti_integer ( Hndl, Element,  Varname, Data, &
@@ -12771,9 +12627,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_var_ti_logical ( Hndl, Element,  Varname, Data, &
-                              locCount, Outcount, Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_var_ti_logical ( Hndl, Element,  Varname, Data, &
@@ -13026,9 +12879,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_var_ti_logical ( Hndl, Element,  Varname, Data, &
-                              locCount, Outcount, Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_var_ti_logical ( Hndl, Element,  Varname, Data, &
@@ -13283,9 +13133,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_var_ti_logical ( Hndl, Element,  Varname, Data, &
-                              locCount,  Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_var_ti_logical ( Hndl, Element,  Varname, Data, &
@@ -13538,9 +13385,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_var_ti_logical ( Hndl, Element,  Varname, Data, &
-                              locCount,  Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_var_ti_logical ( Hndl, Element,  Varname, Data, &
@@ -13795,9 +13639,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_var_ti_char ( Hndl, Element,  Varname, Data, &
-                               Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_var_ti_char ( Hndl, Element,  Varname, Data, &
@@ -14052,9 +13893,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_var_ti_char ( Hndl, Element,  Varname, Data, &
-                               Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_var_ti_char ( Hndl, Element,  Varname, Data, &
@@ -14310,9 +14148,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_var_td_real ( Hndl, Element, DateStr, Varname, Data, &
-                              locCount, Outcount, Status )
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_var_td_real ( Hndl, Element, DateStr, Varname, Data, &
@@ -14565,9 +14400,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_var_td_real ( Hndl, Element, DateStr, Varname, Data, &
-                              locCount, Outcount, Status )
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_var_td_real ( Hndl, Element, DateStr, Varname, Data, &
@@ -14822,9 +14654,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_var_td_real ( Hndl, Element, DateStr, Varname, Data, &
-                              locCount,  Status )
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_var_td_real ( Hndl, Element, DateStr, Varname, Data, &
@@ -15077,9 +14906,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_var_td_real ( Hndl, Element, DateStr, Varname, Data, &
-                              locCount,  Status )
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_var_td_real ( Hndl, Element, DateStr, Varname, Data, &
@@ -15334,9 +15160,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
-                              locCount, Outcount, Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
@@ -15589,9 +15412,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
-                              locCount, Outcount, Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
@@ -15846,9 +15666,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
-                              locCount,  Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
@@ -16101,9 +15918,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
-                              locCount,  Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_var_td_double ( Hndl, Element, DateStr, Varname, Data, &
@@ -16358,9 +16172,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_var_td_integer ( Hndl, Element, DateStr, Varname, Data, &
-                              locCount, Outcount, Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_var_td_integer ( Hndl, Element, DateStr, Varname, Data, &
@@ -16613,9 +16424,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_var_td_integer ( Hndl, Element, DateStr, Varname, Data, &
-                              locCount, Outcount, Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_var_td_integer ( Hndl, Element, DateStr, Varname, Data, &
@@ -16870,9 +16678,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_var_td_integer ( Hndl, Element, DateStr, Varname, Data, &
-                              locCount,  Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_var_td_integer ( Hndl, Element, DateStr, Varname, Data, &
@@ -17125,9 +16930,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_var_td_integer ( Hndl, Element, DateStr, Varname, Data, &
-                              locCount,  Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_var_td_integer ( Hndl, Element, DateStr, Varname, Data, &
@@ -17382,9 +17184,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_var_td_logical ( Hndl, Element, DateStr, Varname, Data, &
-                              locCount, Outcount, Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_var_td_logical ( Hndl, Element, DateStr, Varname, Data, &
@@ -17637,9 +17436,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_var_td_logical ( Hndl, Element, DateStr, Varname, Data, &
-                              locCount, Outcount, Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_var_td_logical ( Hndl, Element, DateStr, Varname, Data, &
@@ -17894,9 +17690,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_var_td_logical ( Hndl, Element, DateStr, Varname, Data, &
-                              locCount,  Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_var_td_logical ( Hndl, Element, DateStr, Varname, Data, &
@@ -18149,9 +17942,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_var_td_logical ( Hndl, Element, DateStr, Varname, Data, &
-                              locCount,  Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_var_td_logical ( Hndl, Element, DateStr, Varname, Data, &
@@ -18406,9 +18196,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_get_var_td_char ( Hndl, Element, DateStr, Varname, Data, &
-                               Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_get_var_td_char ( Hndl, Element, DateStr, Varname, Data, &
@@ -18663,9 +18450,6 @@ IF ( Hndl .GT. -1 ) THEN
           CALL wrf_dm_bcast_bytes( Status, 4 )
         ENDIF
 
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_put_var_td_char ( Hndl, Element, DateStr, Varname, Data, &
-                               Status ) 
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
            CALL ext_gr1_put_var_td_char ( Hndl, Element, DateStr, Varname, Data, &
@@ -18955,7 +18739,7 @@ END SUBROUTINE wrf_put_var_td_char_arr
     ELSE IF ( stream .eq. auxhist24_only ) THEN
       CALL nl_get_io_form_auxhist24( 1, io_form )
     ELSE  
-      CALL wrf_error_fatal3("<stdin>",18958,&
+      CALL wrf_error_fatal3("<stdin>",18742,&
 'internal error: please contact wrfhelp@ucar.edu: io_form_for_stream.inc -- invalid stream number')
     ENDIF
 
@@ -18987,7 +18771,6 @@ SUBROUTINE wrf_ioinit( Status )
   SysDepInfo = " "
   CALL ext_int_ioinit  ( SysDepInfo, ierr( 2) )
   CALL ext_gr1_ioinit  ( SysDepInfo, ierr( 9) )
-  CALL ext_pnc_ioinit  ( SysDepInfo, ierr(11) )
 
   minerr = MINVAL(ierr)
   maxerr = MAXVAL(ierr)
@@ -19020,7 +18803,6 @@ SUBROUTINE wrf_ioexit( Status )
   CALL ext_ncd_ioexit  ( ierr( 1) )
   CALL ext_int_ioexit  ( ierr( 2) )
   CALL ext_gr1_ioexit  ( ierr( 9) )
-  CALL ext_pnc_ioexit  ( ierr(11) )
  
   IF ( use_output_servers() ) THEN
       CALL wrf_quilt_ioexit( ierr(11) )
@@ -19048,7 +18830,6 @@ SUBROUTINE wrf_open_for_write_begin( FileName , grid, SysDepInfo, &
 
   USE module_state_description
   USE module_domain
-  USE module_dm, ONLY :  ntasks_x, mytask_x, local_communicator_x
   IMPLICIT NONE
       integer, parameter  :: WRF_FILE_NOT_OPENED                  = 100
       integer, parameter  :: WRF_FILE_OPENED_NOT_COMMITTED        = 101
@@ -19124,20 +18905,6 @@ SUBROUTINE wrf_open_for_write_begin( FileName , grid, SysDepInfo, &
         ENDIF
 
 
-      CASE (IO_PNETCDF  )
-        WRITE(tstr,"(A,',NTASKS_X=',i10,',MYTASK_X=',i10,',LOCAL_COMMUNICATOR_X=',i10)") &
-              TRIM(SysDepInfo),ntasks_x,mytask_x,local_communicator_x
-        j=1
-        t1 = " "
-        DO i=1,len(TRIM(tstr))
-          IF ( tstr(i:i) .NE. ' ' ) THEN
-            t1(j:j) = tstr(i:i)
-            j = j + 1
-          ENDIF
-        ENDDO
-        tstr = t1
-        CALL ext_pnc_open_for_write_begin( FileName, Comm_compute, Comm_io, tstr, &
-                                            Hndl, Status)
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR. wrf_dm_on_monitor() ) THEN
           IF ( multi_files(io_form) ) THEN
@@ -19239,8 +19006,6 @@ SUBROUTINE wrf_open_for_write_commit( DataHandle , Status )
             CALL ext_ncd_open_for_write_commit ( Hndl , Status )
           ENDIF
           IF ( .NOT. multi_files(io_form) ) CALL wrf_dm_bcast_bytes( Status, 4 )
-      CASE ( IO_PNETCDF  )
-        CALL ext_pnc_open_for_write_commit ( Hndl , Status )
       CASE ( IO_GRIB1   )
          IF ( multi_files(io_form) .OR. wrf_dm_on_monitor() ) THEN
             CALL ext_gr1_open_for_write_commit ( Hndl , Status )
@@ -19338,9 +19103,6 @@ SUBROUTINE wrf_open_for_read_begin( FileName , grid, SysDepInfo, &
           CALL wrf_dm_bcast_bytes( Status, 4 )
           CALL wrf_dm_bcast_bytes( Hndl, 4 )
         ENDIF
-      CASE ( IO_PNETCDF   )
-        CALL ext_pnc_open_for_read_begin ( FileName , Comm_compute, Comm_io, SysDepInfo, &
-                                            Hndl , Status )
       CASE ( IO_GRIB1   )
         IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
           IF ( multi_files(io_form) ) THEN
@@ -19420,8 +19182,6 @@ SUBROUTINE wrf_open_for_read_commit( DataHandle , Status )
             CALL ext_ncd_open_for_read_commit ( Hndl , Status )
           ENDIF
           IF ( .NOT. multi_files(io_form) ) CALL wrf_dm_bcast_bytes( Status, 4 )
-        CASE ( IO_PNETCDF )
-          CALL ext_pnc_open_for_read_commit ( Hndl , Status )
       CASE ( IO_GRIB1   )
         CALL ext_gr1_open_for_read_commit ( Hndl , Status )
       CASE ( IO_INTIO   )
@@ -19490,9 +19250,6 @@ SUBROUTINE wrf_open_for_read ( FileName , grid, SysDepInfo, &
         CALL wrf_dm_bcast_bytes( Status, 4 )
         CALL wrf_dm_bcast_bytes( Hndl, 4 )
       ENDIF
-    CASE ( IO_PNETCDF  )
-      CALL ext_pnc_open_for_read ( FileName , Comm_compute, Comm_io, SysDepInfo, &
-                               Hndl , Status )
     CASE ( IO_GRIB1   )
       IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) THEN
         IF ( multi_files(io_form) ) THEN
@@ -19721,8 +19478,6 @@ SUBROUTINE wrf_inquire_opened ( DataHandle, FileName , FileStatus, Status )
           IF (wrf_dm_on_monitor()) CALL ext_ncd_inquire_opened ( Hndl, FileName , FileStatus, Status )
           CALL wrf_dm_bcast_bytes( FileStatus, 4 )
           CALL wrf_dm_bcast_bytes( Status    , 4 )
-      CASE ( IO_PNETCDF   )
-          CALL ext_pnc_inquire_opened ( Hndl, FileName , FileStatus, Status )
       CASE ( IO_GRIB1   )
           IF (wrf_dm_on_monitor()) CALL ext_gr1_inquire_opened ( Hndl, FileName , FileStatus, Status )
           CALL wrf_dm_bcast_bytes( FileStatus, 4 )
@@ -19927,8 +19682,6 @@ SUBROUTINE wrf_inquire_filename ( DataHandle, FileName , FileStatus, Status )
           IF (wrf_dm_on_monitor()) CALL ext_ncd_inquire_filename ( Hndl, FileName , FileStatus, Status )
           CALL wrf_dm_bcast_bytes( FileStatus, 4 )
           CALL wrf_dm_bcast_bytes( Status    , 4 )
-        CASE ( IO_PNETCDF   )
-          CALL ext_pnc_inquire_filename ( Hndl, FileName , FileStatus, Status )
         CASE ( IO_GRIB1   )
           IF (wrf_dm_on_monitor()) CALL ext_gr1_inquire_filename ( Hndl, FileName , FileStatus, Status )
           CALL wrf_dm_bcast_bytes( FileStatus, 4 )
@@ -20314,8 +20067,6 @@ SUBROUTINE wrf_ioclose ( DataHandle, Status )
         CASE ( IO_NETCDF   )
           IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) CALL ext_ncd_ioclose( Hndl, Status )
           CALL wrf_dm_bcast_bytes( Status, 4 )
-        CASE ( IO_PNETCDF  )
-          CALL ext_pnc_ioclose( Hndl, Status )
         CASE ( IO_GRIB1   )
           IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) CALL ext_gr1_ioclose( Hndl, Status )
           CALL wrf_dm_bcast_bytes( Status, 4 )
@@ -20509,18 +20260,6 @@ SUBROUTINE wrf_get_next_time ( DataHandle, DateStr, Status )
         CASE ( IO_NETCDF   )
           IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) CALL ext_ncd_get_next_time( Hndl, DateStr, Status )
           IF ( .NOT. multi_files(io_form) ) THEN
-            CALL wrf_dm_bcast_bytes( Status, 4 )
-            len_of_str = LEN(DateStr)
-            CALL wrf_dm_bcast_string ( DateStr , len_of_str )
-          ENDIF
-        CASE ( IO_PNETCDF   )
-          IF ( multi_files(io_form) ) THEN
-            CALL ext_pnc_get_next_time( Hndl, DateStr, Status )
-          ELSE
-            IF ( wrf_dm_on_monitor() ) THEN
-              CALL ext_pnc_get_next_time( Hndl, DateStr, Status )
-            ENDIF
-
             CALL wrf_dm_bcast_bytes( Status, 4 )
             len_of_str = LEN(DateStr)
             CALL wrf_dm_bcast_string ( DateStr , len_of_str )
@@ -20730,8 +20469,6 @@ SUBROUTINE wrf_get_previous_time ( DataHandle, DateStr, Status )
             len_of_str = LEN(DateStr)
             CALL wrf_dm_bcast_string ( DateStr , len_of_str )
           ENDIF
-        CASE ( IO_PNETCDF   )
-          CALL ext_pnc_get_previous_time( Hndl, DateStr, Status )
         CASE ( IO_GRIB1   )
           IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) CALL ext_gr1_get_previous_time( Hndl, DateStr, Status )
           IF ( .NOT. multi_files(io_form) ) THEN
@@ -20926,8 +20663,6 @@ SUBROUTINE wrf_set_time ( DataHandle, DateStr, Status )
         CASE ( IO_NETCDF   )
           IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) CALL ext_ncd_set_time( Hndl, DateStr, Status )
           CALL wrf_dm_bcast_bytes( Status, 4 )
-        CASE ( IO_PNETCDF  )
-          CALL ext_pnc_set_time( Hndl, DateStr, Status )
         CASE ( IO_GRIB1   )
           IF ( multi_files(io_form) .OR.  wrf_dm_on_monitor() ) CALL ext_gr1_set_time( Hndl, DateStr, Status )
           CALL wrf_dm_bcast_bytes( Status, 4 )
@@ -21323,11 +21058,6 @@ SUBROUTINE wrf_get_var_info ( DataHandle , VarName , NDim , MemoryOrder , Stagge
                                       MemoryOrder , Stagger ,                  &
                                       DomainStart , DomainEnd ,                &
                                       Status )
-        CASE ( IO_PNETCDF)
-          CALL ext_pnc_get_var_info ( Hndl , VarName , NDim ,            &
-                                      MemoryOrder , Stagger ,                  &
-                                      DomainStart , DomainEnd ,                &
-                                      Status )
         CASE ( IO_GRIB1 )
           CALL ext_gr1_get_var_info ( Hndl , VarName , NDim ,            &
                                       MemoryOrder , Stagger ,                  &
@@ -21392,14 +21122,11 @@ SUBROUTINE add_new_handle( Hndl, Hopened, for_out, DataHandle )
   INTEGER, EXTERNAL       :: use_package
   LOGICAL, EXTERNAL       :: multi_files
   IF ( .NOT. is_inited ) THEN
-    CALL wrf_error_fatal3("<stdin>",21395,&
+    CALL wrf_error_fatal3("<stdin>",21125,&
 'add_new_handle: not initialized' )
   ENDIF
   IF ( multi_files( Hopened ) ) THEN
     SELECT CASE ( use_package( Hopened ) )
-      CASE ( IO_PNETCDF  )
-        CALL wrf_error_fatal3("<stdin>",21401,&
-'add_new_handle:  multiple output files not supported for PNETCDF' )
     END SELECT
   ENDIF
   DataHandle = -1
@@ -21414,7 +21141,7 @@ SUBROUTINE add_new_handle( Hndl, Hopened, for_out, DataHandle )
     ENDIF
   ENDDO
   IF ( DataHandle .EQ. -1 ) THEN
-    CALL wrf_error_fatal3("<stdin>",21417,&
+    CALL wrf_error_fatal3("<stdin>",21144,&
 'add_new_handle: no handles left' )
   ENDIF
   RETURN
@@ -21439,7 +21166,7 @@ SUBROUTINE get_handle ( Hndl, Hopened, for_out, DataHandle )
   CHARACTER*128 mess
   INTEGER i
   IF ( .NOT. is_inited ) THEN
-    CALL wrf_error_fatal3("<stdin>",21442,&
+    CALL wrf_error_fatal3("<stdin>",21169,&
 'module_io.F: get_handle: not initialized' )
   ENDIF
   IF ( DataHandle .GE. 1 .AND. DataHandle .LE. MAX_WRF_IO_HANDLE ) THEN
@@ -21462,7 +21189,7 @@ SUBROUTINE set_first_operation( DataHandle )
   IMPLICIT NONE
   INTEGER, INTENT(IN)    :: DataHandle
   IF ( .NOT. is_inited ) THEN
-    CALL wrf_error_fatal3("<stdin>",21465,&
+    CALL wrf_error_fatal3("<stdin>",21192,&
 'module_io.F: get_handle: not initialized' )
   ENDIF
   IF ( DataHandle .GE. 1 .AND. DataHandle .LE. MAX_WRF_IO_HANDLE ) THEN
@@ -21481,7 +21208,7 @@ SUBROUTINE reset_first_operation( DataHandle )
   IMPLICIT NONE
   INTEGER, INTENT(IN)    :: DataHandle
   IF ( .NOT. is_inited ) THEN
-    CALL wrf_error_fatal3("<stdin>",21484,&
+    CALL wrf_error_fatal3("<stdin>",21211,&
 'module_io.F: get_handle: not initialized' )
   ENDIF
   IF ( DataHandle .GE. 1 .AND. DataHandle .LE. MAX_WRF_IO_HANDLE ) THEN
@@ -21500,7 +21227,7 @@ LOGICAL FUNCTION is_first_operation( DataHandle )
   IMPLICIT NONE
   INTEGER, INTENT(IN)    :: DataHandle
   IF ( .NOT. is_inited ) THEN
-    CALL wrf_error_fatal3("<stdin>",21503,&
+    CALL wrf_error_fatal3("<stdin>",21230,&
 'module_io.F: get_handle: not initialized' )
   ENDIF
   IF ( DataHandle .GE. 1 .AND. DataHandle .LE. MAX_WRF_IO_HANDLE ) THEN
@@ -21519,7 +21246,7 @@ SUBROUTINE free_handle ( DataHandle )
   INTEGER, INTENT(IN)    :: DataHandle
   INTEGER i
   IF ( .NOT. is_inited ) THEN
-    CALL wrf_error_fatal3("<stdin>",21522,&
+    CALL wrf_error_fatal3("<stdin>",21249,&
 'free_handle: not initialized' )
   ENDIF
   IF ( DataHandle .GE. 1 .AND. DataHandle .LE. MAX_WRF_IO_HANDLE ) THEN
@@ -22306,7 +22033,6 @@ SUBROUTINE wrf_read_field1 ( DataHandle , DateStr , VarName , Field , FieldType 
   INTEGER, EXTERNAL           :: use_package
   LOGICAL, EXTERNAL           :: wrf_dm_on_monitor, multi_files, use_output_servers, use_input_servers, use_output_servers_for
   EXTERNAL     ext_ncd_read_field
-  EXTERNAL     ext_pnc_read_field
   EXTERNAL     ext_int_read_field
   EXTERNAL ext_gr1_read_field
 
@@ -22337,14 +22063,6 @@ SUBROUTINE wrf_read_field1 ( DataHandle , DateStr , VarName , Field , FieldType 
                                      PatchStart , PatchEnd ,                                      &
                                      Status )
 
-        CASE ( IO_PNETCDF)
-          CALL ext_pnc_read_field   (                   &
-                                     Hndl , DateStr , VarName , Field , FieldType , Comm , IOComm , &
-                                     DomainDesc , MemoryOrder , Stagger , DimNames ,              &
-                                     DomainStart , DomainEnd ,                                    &
-                                     MemoryStart , MemoryEnd ,                                    &
-                                     PatchStart , PatchEnd ,                                      &
-                                     Status )
         CASE ( IO_INTIO )
           CALL call_pkg_and_dist   ( ext_int_read_field, multi_files(io_form), .false.,         &
                                      Hndl , DateStr , VarName , Field , FieldType , Comm , IOComm , &
@@ -22365,7 +22083,7 @@ SUBROUTINE wrf_read_field1 ( DataHandle , DateStr , VarName , Field , FieldType 
           Status = 0
       END SELECT
     ELSE
-      CALL wrf_error_fatal3("<stdin>",22368,&
+      CALL wrf_error_fatal3("<stdin>",22086,&
 'module_io.F: wrf_read_field: input_servers not implemented yet')
     ENDIF
   ELSE
@@ -22775,7 +22493,6 @@ SUBROUTINE wrf_write_field1 ( DataHandle , DateStr , VarName , Field , FieldType
   INTEGER, EXTERNAL           :: use_package
   LOGICAL, EXTERNAL           :: wrf_dm_on_monitor, multi_files, use_output_servers, use_output_servers_for
   EXTERNAL     ext_ncd_write_field
-  EXTERNAL     ext_pnc_write_field
   EXTERNAL     ext_int_write_field
   EXTERNAL ext_gr1_write_field
 
@@ -22802,26 +22519,6 @@ SUBROUTINE wrf_write_field1 ( DataHandle , DateStr , VarName , Field , FieldType
                                      MemoryStart , MemoryEnd ,                                    &
                                      PatchStart , PatchEnd ,                                      &
                                      Status )
-        CASE ( IO_PNETCDF )
-          CALL lower_case( MemoryOrder, MemOrd )
-          okay_to_call = .TRUE.
-          IF ((TRIM(MemOrd).EQ.'xsz' .OR. TRIM(MemOrd).EQ.'xs').AND. .NOT. bdy_mask(P_XSB)) okay_to_call = .FALSE.
-          IF ((TRIM(MemOrd).EQ.'xez' .OR. TRIM(MemOrd).EQ.'xe').AND. .NOT. bdy_mask(P_XEB)) okay_to_call = .FALSE.
-          IF ((TRIM(MemOrd).EQ.'ysz' .OR. TRIM(MemOrd).EQ.'ys').AND. .NOT. bdy_mask(P_YSB)) okay_to_call = .FALSE.
-          IF ((TRIM(MemOrd).EQ.'yez' .OR. TRIM(MemOrd).EQ.'ye').AND. .NOT. bdy_mask(P_YEB)) okay_to_call = .FALSE.
-          IF ( okay_to_call ) THEN
-             starts(1:3) = PatchStart(1:3) ; ends(1:3) = PatchEnd(1:3)
-          ELSE
-             starts(1:3) = PatchStart(1:3) ; ends(1:3) = PatchStart(1:3)-1
-          ENDIF
-
-               CALL ext_pnc_write_field(                  &
-                                       Hndl , DateStr , VarName , Field , FieldType , Comm , IOComm , &
-                                       DomainDesc , MemoryOrder , Stagger , DimNames ,              &
-                                       DomainStart , DomainEnd ,                                    &
-                                       MemoryStart , MemoryEnd ,                                    &
-                                       starts , ends ,                                      &
-                                       Status )
         CASE ( IO_GRIB1 )
           CALL collect_fld_and_call_pkg ( ext_gr1_write_field, multi_files(io_form),                  &
                                      Hndl , DateStr , VarName , Field , FieldType , Comm , IOComm , &
@@ -22932,7 +22629,7 @@ LOGICAL FUNCTION multi_files ( io_form )
 
   IMPLICIT NONE
   INTEGER, INTENT(IN) :: io_form
-  multi_files = ( io_form >= 100 .and. io_form<200 )
+  multi_files = .FALSE.
 END FUNCTION multi_files
 
 INTEGER FUNCTION use_package ( io_form )
@@ -23322,7 +23019,6 @@ SUBROUTINE collect_generic_and_call_pkg ( fcn, globbuf,                         
 
 
       integer, parameter  :: WRF_FILE_OPENED_AND_COMMITTED        = 102
-include "mpif.h"
   EXTERNAL fcn
   REAL , DIMENSION(*) , INTENT(INOUT) :: globbuf
   INTEGER ,       INTENT(IN)    :: Hndl
@@ -23422,252 +23118,6 @@ include "mpif.h"
            PatchStart(1) , PatchEnd(1) , PatchStart(2) , PatchEnd(2) , PatchStart(3) , PatchEnd(3) )
       ENDIF
 
-    CASE ( 'xsz', 'xez' )
-      distributed_field = .FALSE.
-      IF ( nproc .GT. 1 ) THEN
-        jds = DomainStart(1) ; jde = DomainEnd(1) ; IF ( .NOT. has_char( Stagger, 'y' ) ) jde = jde+1  
-        kds = DomainStart(2) ; kde = DomainEnd(2) ; IF ( .NOT. has_char( Stagger, 'z' ) ) kde = kde+1  
-        ids = DomainStart(3) ; ide = DomainEnd(3) ; 
-        dom_end_rev(1) = jde
-        dom_end_rev(2) = kde
-        dom_end_rev(3) = ide
-        distributed_field = .TRUE.
-        IF ( (MemOrd .eq. 'xsz' .AND. bdy_mask( P_XSB )) .OR.     &
-             (MemOrd .eq. 'xez' .AND. bdy_mask( P_XEB ))       ) THEN
-          my_displ = PatchStart(1)-1
-          my_count = PatchEnd(1)-PatchStart(1)+1
-        ELSE
-          my_displ = 0
-          my_count = 0
-        ENDIF
-        CALL mpi_gather( my_displ, 1, MPI_INTEGER, displs, 1, MPI_INTEGER, collective_root, communicator, ierr )
-        CALL mpi_gather( my_count, 1, MPI_INTEGER, counts, 1, MPI_INTEGER, collective_root, communicator, ierr )
-        do i = DomainStart(3),DomainEnd(3)    
-        do k = DomainStart(2),DomainEnd(2)    
-           lx   = MemoryEnd(1)-MemoryStart(1)+1
-           lx2  = dom_end_rev(1)-DomainStart(1)+1
-           idx  = lx*((k-1)+(i-1)*(MemoryEnd(2)-MemoryStart(2)+1))
-           idx2 = lx2*((k-1)+(i-1)*(MemoryEnd(2)-MemoryStart(2)+1))
-           IF ( FieldType .EQ. WRF_DOUBLE  ) THEN
-
-             CALL wrf_gatherv_double ( Field, PatchStart(1)-MemoryStart(1)+1+idx , &
-                             my_count ,                       &    
-                             globbuf, 1+idx2 ,                &    
-                             counts                         , &    
-                             displs                         , &    
-                             collective_root                , &    
-                             communicator                   , &    
-                             ierr )
-
-           ELSE IF ( FieldType .EQ. WRF_FLOAT ) THEN
-
-             CALL wrf_gatherv_real ( Field, PatchStart(1)-MemoryStart(1)+1+idx , &
-                             my_count ,                       &    
-                             globbuf, 1+idx2 ,                &    
-                             counts                         , &    
-                             displs                         , &    
-                             collective_root                , &    
-                             communicator                   , &    
-                             ierr )
-
-           ELSE IF ( FieldType .EQ. WRF_INTEGER ) THEN
-
-             CALL wrf_gatherv_integer ( Field, PatchStart(1)-MemoryStart(1)+1+idx , &
-                             my_count ,                       &    
-                             globbuf, 1+idx2 ,                &    
-                             counts                         , &    
-                             displs                         , &    
-                             collective_root                , &    
-                             communicator                   , &    
-                             ierr )
-           ENDIF
-
-        enddo
-        enddo
-      ENDIF
-    CASE ( 'xs', 'xe' )
-      distributed_field = .FALSE.
-      IF ( nproc .GT. 1 ) THEN
-        jds = DomainStart(1) ; jde = DomainEnd(1) ; IF ( .NOT. has_char( Stagger, 'y' ) ) jde = jde+1  
-        ids = DomainStart(2) ; ide = DomainEnd(2) ; 
-        dom_end_rev(1) = jde
-        dom_end_rev(2) = ide
-        distributed_field = .TRUE.
-        IF ( (MemOrd .eq. 'xs' .AND. bdy_mask( P_XSB )) .OR.     &
-             (MemOrd .eq. 'xe' .AND. bdy_mask( P_XEB ))       ) THEN
-          my_displ = PatchStart(1)-1
-          my_count = PatchEnd(1)-PatchStart(1)+1
-        ELSE
-          my_displ = 0
-          my_count = 0
-        ENDIF
-        CALL mpi_gather( my_displ, 1, MPI_INTEGER, displs, 1, MPI_INTEGER, collective_root, communicator, ierr )
-        CALL mpi_gather( my_count, 1, MPI_INTEGER, counts, 1, MPI_INTEGER, collective_root, communicator, ierr )
-        do i = DomainStart(2),DomainEnd(2)    
-           lx   = MemoryEnd(1)-MemoryStart(1)+1
-           idx  = lx*(i-1)
-           lx2  = dom_end_rev(1)-DomainStart(1)+1
-           idx2 = lx2*(i-1)
-           IF ( FieldType .EQ. WRF_DOUBLE ) THEN
-
-             CALL wrf_gatherv_double ( Field, PatchStart(1)-MemoryStart(1)+1+idx , &
-                             my_count ,                       &    
-                             globbuf, 1+idx2 ,                &    
-                             counts                         , &    
-                             displs                         , &    
-                             collective_root                , &    
-                             communicator                   , &    
-                             ierr )
-
-           ELSE IF ( FieldType .EQ. WRF_FLOAT ) THEN
-
-             CALL wrf_gatherv_real ( Field, PatchStart(1)-MemoryStart(1)+1+idx , &
-                             my_count ,                       &    
-                             globbuf, 1+idx2 ,                &    
-                             counts                         , &    
-                             displs                         , &    
-                             collective_root                , &    
-                             communicator                   , &    
-                             ierr )
-
-           ELSE IF ( FieldType .EQ. WRF_INTEGER ) THEN
-
-             CALL wrf_gatherv_integer ( Field, PatchStart(1)-MemoryStart(1)+1+idx , &
-                             my_count ,                       &    
-                             globbuf, 1+idx2 ,                &    
-                             counts                         , &    
-                             displs                         , &    
-                             collective_root                , &    
-                             communicator                   , &    
-                             ierr )
-           ENDIF
-
-        enddo
-      ENDIF
-    CASE ( 'ysz', 'yez' )
-      distributed_field = .FALSE.
-      IF ( nproc .GT. 1 ) THEN
-        ids = DomainStart(1) ; ide = DomainEnd(1) ; IF ( .NOT. has_char( Stagger, 'y' ) ) ide = ide+1  
-        kds = DomainStart(2) ; kde = DomainEnd(2) ; IF ( .NOT. has_char( Stagger, 'z' ) ) kde = kde+1  
-        jds = DomainStart(3) ; jde = DomainEnd(3) ; 
-        dom_end_rev(1) = ide
-        dom_end_rev(2) = kde
-        dom_end_rev(3) = jde
-        distributed_field = .TRUE.
-        IF ( (MemOrd .eq. 'ysz' .AND. bdy_mask( P_YSB )) .OR.     &
-             (MemOrd .eq. 'yez' .AND. bdy_mask( P_YEB ))       ) THEN
-          my_displ = PatchStart(1)-1
-          my_count = PatchEnd(1)-PatchStart(1)+1
-        ELSE
-          my_displ = 0
-          my_count = 0
-        ENDIF
-        CALL mpi_gather( my_displ, 1, MPI_INTEGER, displs, 1, MPI_INTEGER, collective_root, communicator, ierr )
-        CALL mpi_gather( my_count, 1, MPI_INTEGER, counts, 1, MPI_INTEGER, collective_root, communicator, ierr )
-        do j = DomainStart(3),DomainEnd(3)    
-        do k = DomainStart(2),DomainEnd(2)    
-           lx   = MemoryEnd(1)-MemoryStart(1)+1
-           lx2  = dom_end_rev(1)-DomainStart(1)+1
-           idx  = lx*((k-1)+(j-1)*(MemoryEnd(2)-MemoryStart(2)+1))
-           idx2 = lx2*((k-1)+(j-1)*(MemoryEnd(2)-MemoryStart(2)+1))
-
-           IF ( FieldType .EQ. WRF_DOUBLE ) THEN 
-
-             CALL wrf_gatherv_double ( Field, PatchStart(1)-MemoryStart(1)+1+idx ,      &    
-                             my_count                       , &    
-                             globbuf, 1+idx2                , &    
-                             counts                         , &    
-                             displs                         , &    
-                             collective_root                , &    
-                             communicator                   , &    
-                             ierr )
-
-           ELSE IF ( FieldType .EQ. WRF_FLOAT ) THEN
-
-             CALL wrf_gatherv_real( Field, PatchStart(1)-MemoryStart(1)+1+idx ,      &    
-                             my_count                       , &    
-                             globbuf, 1+idx2                , &    
-                             counts                         , &    
-                             displs                         , &    
-                             collective_root                , &    
-                             communicator                   , &    
-                             ierr )
-
-           ELSE IF ( FieldType .EQ. WRF_INTEGER ) THEN
-
-             CALL wrf_gatherv_integer( Field, PatchStart(1)-MemoryStart(1)+1+idx ,      &    
-                             my_count                       , &    
-                             globbuf, 1+idx2                , &    
-                             counts                         , &    
-                             displs                         , &    
-                             collective_root                , &    
-                             communicator                   , &    
-                             ierr )
-           ENDIF
-
-        enddo
-        enddo
-      ENDIF
-    CASE ( 'ys', 'ye' )
-      distributed_field = .FALSE.
-      IF ( nproc .GT. 1 ) THEN
-        ids = DomainStart(1) ; ide = DomainEnd(1) ; IF ( .NOT. has_char( Stagger, 'y' ) ) ide = ide+1  
-        jds = DomainStart(2) ; jde = DomainEnd(2) ; 
-        dom_end_rev(1) = ide
-        dom_end_rev(2) = jde
-        distributed_field = .TRUE.
-        IF ( (MemOrd .eq. 'ys' .AND. bdy_mask( P_YSB )) .OR.     &
-             (MemOrd .eq. 'ye' .AND. bdy_mask( P_YEB ))       ) THEN
-          my_displ = PatchStart(1)-1
-          my_count = PatchEnd(1)-PatchStart(1)+1
-        ELSE
-          my_displ = 0
-          my_count = 0
-        ENDIF
-        CALL mpi_gather( my_displ, 1, MPI_INTEGER, displs, 1, MPI_INTEGER, collective_root, communicator, ierr )
-        CALL mpi_gather( my_count, 1, MPI_INTEGER, counts, 1, MPI_INTEGER, collective_root, communicator, ierr )
-        do j = DomainStart(2),DomainEnd(2)    
-           lx   = MemoryEnd(1)-MemoryStart(1)+1
-           idx  = lx*(j-1)
-           lx2  = dom_end_rev(1)-DomainStart(1)+1
-           idx2 = lx2*(j-1)
-
-           IF ( FieldType .EQ. WRF_DOUBLE ) THEN 
-
-             CALL wrf_gatherv_double( Field, PatchStart(1)-MemoryStart(1)+1+idx ,      &    
-                             my_count                       , &    
-                             globbuf, 1+idx2                , &    
-                             counts                         , &    
-                             displs                         , &    
-                             collective_root                , &    
-                             communicator                   , &    
-                             ierr )
-
-           ELSE IF ( FieldType .EQ. WRF_FLOAT ) THEN
-
-             CALL wrf_gatherv_real( Field, PatchStart(1)-MemoryStart(1)+1+idx ,      &    
-                             my_count                       , &    
-                             globbuf, 1+idx2                , &    
-                             counts                         , &    
-                             displs                         , &    
-                             collective_root                , &    
-                             communicator                   , &    
-                             ierr )
-
-           ELSE IF ( FieldType .EQ. WRF_INTEGER ) THEN
-
-             CALL wrf_gatherv_integer( Field, PatchStart(1)-MemoryStart(1)+1+idx ,      &    
-                             my_count                       , &    
-                             globbuf, 1+idx2                , &    
-                             counts                         , &    
-                             displs                         , &    
-                             collective_root                , &    
-                             communicator                   , &    
-                             ierr )
-           ENDIF
-
-        enddo
-      ENDIF
     CASE DEFAULT
       distributed_field = .FALSE.
   END SELECT
@@ -23848,14 +23298,14 @@ SUBROUTINE call_pkg_and_dist_real (  fcn, update_arg,                           
     IF ( test .NE. 0 ) THEN
       write(mess,*)"module_io.b",'allocating globbuf ',&
            (DomainEnd(1)-DomainStart(1)+3)*(DomainEnd(2)-DomainStart(2)+3)*(DomainEnd(3)-DomainStart(3)+3)
-      CALL wrf_error_fatal3("<stdin>",23851,&
+      CALL wrf_error_fatal3("<stdin>",23301,&
 mess)
     ENDIF
   ELSE
     ALLOCATE( globbuf( 1 ), STAT=test )
     IF ( test .NE. 0 ) THEN
       write(mess,*)"module_io.b",'allocating globbuf ',1
-      CALL wrf_error_fatal3("<stdin>",23858,&
+      CALL wrf_error_fatal3("<stdin>",23308,&
 mess)
     ENDIF
   ENDIF
@@ -24080,7 +23530,6 @@ SUBROUTINE call_pkg_and_dist_generic (   fcn, globbuf , update_arg ,            
 
 
       integer, parameter  :: WRF_FILE_OPENED_AND_COMMITTED        = 102
-include "mpif.h"
 
   EXTERNAL fcn
   REAL, DIMENSION(*) ::  globbuf
@@ -24244,216 +23693,6 @@ include "mpif.h"
 
     CALL lower_case( MemoryOrder, MemOrd )
 
-
-    IF ( TRIM(MemOrd) .EQ. 'xsz' .OR. TRIM(MemOrd) .EQ. 'xez' .OR. &
-         TRIM(MemOrd) .EQ. 'xs'  .OR. TRIM(MemOrd) .EQ. 'xe'  .OR. &
-         TRIM(MemOrd) .EQ. 'ysz' .OR. TRIM(MemOrd) .EQ. 'yez' .OR. &
-         TRIM(MemOrd) .EQ. 'ys'  .OR. TRIM(MemOrd) .EQ. 'ye'    ) THEN
-
-      IF ( TRIM(MemOrd) .EQ. 'xsz' .OR. TRIM(MemOrd) .EQ. 'xez' .OR. &
-           TRIM(MemOrd) .EQ. 'xs'  .OR. TRIM(MemOrd) .EQ. 'xe'    ) THEN
-
-       jds=DomainStart(1); jde=dom_end_rev(1); ids=DomainStart(3); ide=dom_end_rev(3); kds=DomainStart(2); kde=dom_end_rev(2);
-       jms=MemoryStart(1); jme=  MemoryEnd(1); ims=MemoryStart(3); ime=  MemoryEnd(3); kms=MemoryStart(2); kme=  MemoryEnd(2);
-       jps= PatchStart(1); jpe=   PatchEnd(1); ips= PatchStart(3); ipe=   PatchEnd(3); kps= PatchStart(2); kpe=   PatchEnd(2);
-
-        IF ( nproc .GT. 1 ) THEN
-
-
-
-
-
-
-
-
-
-
-
-          IF ( (MemOrd(1:2) .EQ. 'xs' .AND. bdy_mask( P_XSB )) .OR.     &
-               (MemOrd(1:2) .EQ. 'xe' .AND. bdy_mask( P_XEB ))       ) THEN
-            my_displ = jps-1         
-            my_count = jpe-jps+1
-          ELSE
-            my_displ = 0
-            my_count = 0
-          ENDIF
-
-          CALL mpi_gather( my_displ, 1, MPI_INTEGER, displs, 1, MPI_INTEGER, collective_root, communicator, ierr )
-          CALL mpi_gather( my_count, 1, MPI_INTEGER, counts, 1, MPI_INTEGER, collective_root, communicator, ierr )
-
-          do i = ips,ipe    
-          do k = kds,kde    
-             lx   = jme-jms+1
-             lx2  = jde-jds+1
-             idx  = lx*((k-1)+(i-1)*(kme-kms+1))
-             idx2 = lx2*((k-1)+(i-1)*(kde-kds+1))
-             IF ( FieldType .EQ. WRF_DOUBLE  ) THEN
-               CALL wrf_scatterv_double (                        &
-                               globbuf, 1+idx2 ,                &    
-                               counts                         , &    
-                               Field, jps-jms+1+idx ,       &
-                               my_count ,                       &    
-                               displs                         , &    
-                               collective_root                , &    
-                               communicator                   , &    
-                               ierr )
-             ELSE IF ( FieldType .EQ. WRF_FLOAT ) THEN
-
-               CALL wrf_scatterv_real (                          &
-                               globbuf, 1+idx2 ,                &    
-                               counts                         , &    
-                               Field, jps-jms+1+idx ,       &
-                               my_count ,                       &    
-                               displs                         , &    
-                               collective_root                , &    
-                               communicator                   , &    
-                               ierr )
-
-             ELSE IF ( FieldType .EQ. WRF_INTEGER ) THEN
-               CALL wrf_scatterv_integer (                       &
-                               globbuf, 1+idx2 ,                &    
-                               counts                         , &    
-                               Field, jps-jms+1+idx ,       &
-                               my_count ,                       &    
-                               displs                         , &    
-                               collective_root                , &    
-                               communicator                   , &    
-                               ierr )
-             ENDIF
-          enddo
-          enddo
-        ENDIF
-      ENDIF
-
-      IF ( TRIM(MemOrd) .EQ. 'ysz' .OR. TRIM(MemOrd) .EQ. 'yez' .OR. &
-           TRIM(MemOrd) .EQ. 'ys'  .OR. TRIM(MemOrd) .EQ. 'ye'    ) THEN
-
-
-       ids=DomainStart(1); ide=dom_end_rev(1); jds=DomainStart(3); jde=dom_end_rev(3); kds=DomainStart(2); kde=dom_end_rev(2);
-       ims=MemoryStart(1); ime=  MemoryEnd(1); jms=MemoryStart(3); jme=  MemoryEnd(3); kms=MemoryStart(2); kme=  MemoryEnd(2);
-       ips= PatchStart(1); ipe=   PatchEnd(1); jps= PatchStart(3); jpe=   PatchEnd(3); kps= PatchStart(2); kpe=   PatchEnd(2);
-
-        IF ( nproc .GT. 1 ) THEN
-
-          IF ( (MemOrd(1:2) .EQ. 'ys' .AND. bdy_mask( P_YSB )) .OR.     &
-               (MemOrd(1:2) .EQ. 'ye' .AND. bdy_mask( P_YEB ))       ) THEN
-            my_displ = ips-1
-            my_count = ipe-ips+1
-           ELSE
-             my_displ = 0
-             my_count = 0
-          ENDIF
-
-          CALL mpi_gather( my_displ, 1, MPI_INTEGER, displs, 1, MPI_INTEGER, collective_root, communicator, ierr )
-          CALL mpi_gather( my_count, 1, MPI_INTEGER, counts, 1, MPI_INTEGER, collective_root, communicator, ierr )
-
-          do j = jds,jde    
-          do k = kds,kde    
-             lx   = ime-ims+1
-             lx2  = ide-ids+1
-             idx  = lx*((k-1)+(j-1)*(kme-kms+1))
-             idx2 = lx2*((k-1)+(j-1)*(kde-kds+1))
-
-             IF ( FieldType .EQ. WRF_DOUBLE  ) THEN
-               CALL wrf_scatterv_double (                        &
-                               globbuf, 1+idx2 ,                &    
-                               counts                         , &    
-                               Field, ips-ims+1+idx ,       &
-                               my_count ,                       &    
-                               displs                         , &    
-                               collective_root                , &    
-                               communicator                   , &    
-                               ierr )
-             ELSE IF ( FieldType .EQ. WRF_FLOAT ) THEN
-               CALL wrf_scatterv_real (                          &
-                               globbuf, 1+idx2 ,                &    
-                               counts                         , &    
-                               Field, ips-ims+1+idx ,       &
-                               my_count ,                       &    
-                               displs                         , &    
-                               collective_root                , &    
-                               communicator                   , &    
-                               ierr )
-             ELSE IF ( FieldType .EQ. WRF_INTEGER ) THEN
-               CALL wrf_scatterv_integer (                       &
-                               globbuf, 1+idx2 ,                &    
-                               counts                         , &    
-                               Field, ips-ims+1+idx ,       &
-                               my_count ,                       &    
-                               displs                         , &    
-                               collective_root                , &    
-                               communicator                   , &    
-                               ierr )
-             ENDIF
-          enddo
-          enddo
-        ENDIF
-      ENDIF
-
-    ELSE  
-  
-      IF ( FieldType .EQ. WRF_DOUBLE ) THEN
-
-        SELECT CASE (MemOrd)
-        CASE ( 'xzy','xyz','yxz','zxy' )
-          CALL wrf_global_to_patch_double (  globbuf,  Field  , DomainDesc, Stagger, MemOrd ,    &
-             DomainStart(1), DomainEnd(1), DomainStart(2), DomainEnd(2), DomainStart(3), DomainEnd(3), &
-             MemoryStart(1), MemoryEnd(1), MemoryStart(2), MemoryEnd(2), MemoryStart(3), MemoryEnd(3), &
-             PatchStart(1) , PatchEnd(1) , PatchStart(2) , PatchEnd(2) , PatchStart(3) , PatchEnd(3)  )
-        CASE ( 'xy','yx' )
-          CALL wrf_global_to_patch_double (  globbuf, Field ,  DomainDesc, Stagger, MemOrd ,  &
-             DomainStart(1), DomainEnd(1), DomainStart(2), DomainEnd(2), 1            , 1 , &
-             MemoryStart(1), MemoryEnd(1), MemoryStart(2), MemoryEnd(2), 1            , 1 , &
-             PatchStart(1) , PatchEnd(1) , PatchStart(2) , PatchEnd(2) , 1            , 1   )
-        END SELECT
-
-      ELSE IF ( FieldType .EQ. WRF_FLOAT ) THEN
-
-        SELECT CASE (MemOrd)
-        CASE ( 'xzy','xyz','yxz','zxy' )
-          CALL wrf_global_to_patch_real (  globbuf,  Field  , DomainDesc, Stagger, MemOrd ,    &
-             DomainStart(1), DomainEnd(1), DomainStart(2), DomainEnd(2), DomainStart(3), DomainEnd(3), &
-             MemoryStart(1), MemoryEnd(1), MemoryStart(2), MemoryEnd(2), MemoryStart(3), MemoryEnd(3), &
-             PatchStart(1) , PatchEnd(1) , PatchStart(2) , PatchEnd(2) , PatchStart(3) , PatchEnd(3)  )
-        CASE ( 'xy','yx' )
-          CALL wrf_global_to_patch_real (  globbuf, Field ,  DomainDesc, Stagger, MemOrd ,  &
-             DomainStart(1), DomainEnd(1), DomainStart(2), DomainEnd(2), 1            , 1 , &
-             MemoryStart(1), MemoryEnd(1), MemoryStart(2), MemoryEnd(2), 1            , 1 , &
-             PatchStart(1) , PatchEnd(1) , PatchStart(2) , PatchEnd(2) , 1            , 1   )
-        END SELECT
-
-      ELSE IF ( FieldType .EQ. WRF_INTEGER ) THEN
-
-        SELECT CASE (MemOrd)
-        CASE ( 'xzy','xyz','yxz','zxy' )
-          CALL wrf_global_to_patch_integer (  globbuf,  Field  , DomainDesc, Stagger, MemOrd ,    &
-             DomainStart(1), DomainEnd(1), DomainStart(2), DomainEnd(2), DomainStart(3), DomainEnd(3), &
-             MemoryStart(1), MemoryEnd(1), MemoryStart(2), MemoryEnd(2), MemoryStart(3), MemoryEnd(3), &
-             PatchStart(1) , PatchEnd(1) , PatchStart(2) , PatchEnd(2) , PatchStart(3) , PatchEnd(3)  )
-        CASE ( 'xy','yx' )
-          CALL wrf_global_to_patch_integer (  globbuf, Field ,  DomainDesc, Stagger, MemOrd ,  &
-             DomainStart(1), DomainEnd(1), DomainStart(2), DomainEnd(2), 1            , 1 , &
-             MemoryStart(1), MemoryEnd(1), MemoryStart(2), MemoryEnd(2), 1            , 1 , &
-             PatchStart(1) , PatchEnd(1) , PatchStart(2) , PatchEnd(2) , 1            , 1   )
-        END SELECT
-
-      ELSE IF ( FieldType .EQ. WRF_LOGICAL ) THEN
-
-        SELECT CASE (MemOrd)
-        CASE ( 'xzy','xyz','yxz','zxy' )
-          CALL wrf_global_to_patch_logical (  globbuf,  Field  , DomainDesc, Stagger, MemOrd ,    &
-             DomainStart(1), DomainEnd(1), DomainStart(2), DomainEnd(2), DomainStart(3), DomainEnd(3), &
-             MemoryStart(1), MemoryEnd(1), MemoryStart(2), MemoryEnd(2), MemoryStart(3), MemoryEnd(3), &
-             PatchStart(1) , PatchEnd(1) , PatchStart(2) , PatchEnd(2) , PatchStart(3) , PatchEnd(3)  )
-        CASE ( 'xy','yx' )
-          CALL wrf_global_to_patch_logical (  globbuf, Field ,  DomainDesc, Stagger, MemOrd ,  &
-             DomainStart(1), DomainEnd(1), DomainStart(2), DomainEnd(2), 1            , 1 , &
-             MemoryStart(1), MemoryEnd(1), MemoryStart(2), MemoryEnd(2), 1            , 1 , &
-             PatchStart(1) , PatchEnd(1) , PatchStart(2) , PatchEnd(2) , 1            , 1   )
-        END SELECT
-
-      ENDIF
-    ENDIF
 
   ELSE 
 

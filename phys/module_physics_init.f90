@@ -12,7 +12,6 @@ MODULE module_physics_init
    USE module_state_description
    USE module_model_constants
    USE module_configure, ONLY : grid_config_rec_type
-   USE module_dm, ONLY : wrf_dm_max_real
    USE module_ra_clWRF_support
 
 
@@ -992,7 +991,7 @@ CHARACTER(LEN=8) :: name
            ( f_qs            ))) THEN
          
       ELSE
-         CALL wrf_error_fatal3("<stdin>",995,&
+         CALL wrf_error_fatal3("<stdin>",994,&
 '--- ERROR: FARMS (swint_opt==2) requires a different MP scheme (Please see the module_physics_init')
       END IF
    END IF
@@ -1722,7 +1721,7 @@ CHARACTER(LEN=8) :: name
         IF ( ierr .NE. OPEN_OK ) THEN
           WRITE(message,FMT='(A)') &
           'module_physics_init.F: LANDUSE_INIT: open failure for LANDUSE.TBL'
-          CALL wrf_error_fatal3("<stdin>",1725,&
+          CALL wrf_error_fatal3("<stdin>",1724,&
 message )
         END IF
         REWIND(landuse_unit)
@@ -1789,7 +1788,7 @@ message )
                            SFZ0(LC,LS),THERIN(LC,LS),SCFX(LC),SFHC(LC,LS)
               ENDIF
               CALL wrf_dm_bcast_bytes (LI,  4 )
-              IF(LC.NE.LI)CALL wrf_error_fatal3("<stdin>",1792,&
+              IF(LC.NE.LI)CALL wrf_error_fatal3("<stdin>",1791,&
 'module_start: MISSING LANDUSE UNIT ' )
             ELSE
               IF ( wrf_dm_on_monitor() ) THEN
@@ -1830,7 +1829,7 @@ message )
           IF(allowed_to_read)THEN
              IF(IS.LT.0.OR.IS.GT.LUN)THEN
                WRITE ( wrf_err_message , * ) 'ERROR: LANDUSE OUTSIDE RANGE =',IS,' AT ',I,J,' LUN= ',LUN
-               CALL wrf_error_fatal3("<stdin>",1833,&
+               CALL wrf_error_fatal3("<stdin>",1832,&
 TRIM ( wrf_err_message ) )
              ENDIF
           ENDIF
@@ -2126,7 +2125,7 @@ TRIM ( wrf_err_message ) )
                          ims, ime, jms, jme, kms, kme,     &
                          its, ite, jts, jte, kts, kte      )
              ELSE
-                CALL wrf_error_fatal3("<stdin>",2129,&
+                CALL wrf_error_fatal3("<stdin>",2128,&
 'arguments not present for calling cam radiation' )
              ENDIF
 
@@ -2233,7 +2232,7 @@ TRIM ( wrf_err_message ) )
 
    IF(config_flags%bucket_J .gt. 0.0)THEN
      IF(.not. (acswalloc .and. aclwalloc))THEN
-           CALL wrf_error_fatal3("<stdin>",2236,&
+           CALL wrf_error_fatal3("<stdin>",2235,&
 'Need CAM or RRTMG radiation for bucket_J option')
      ENDIF
    ENDIF
@@ -3038,7 +3037,6 @@ TRIM ( wrf_err_message ) )
           
 
                max_utype_urb2d = maxval(UTYPE_URB2D)*1.0
-               max_utype_urb2d = wrf_dm_max_real(max_utype_urb2d)
                IF (config_flags%use_wudapt_lcz.eq.0 .and. max_utype_urb2d.gt.3.0) THEN  
                  CALL wrf_error_fatal &
                  ('USING 10 WUDAPT LCZ WITHOUT URBPARM_LCZ.TBL. SET USE_WUDAPT_LCZ=1')
@@ -3050,7 +3048,7 @@ TRIM ( wrf_err_message ) )
 
 
              ELSE
-                CALL wrf_error_fatal3("<stdin>",3053,&
+                CALL wrf_error_fatal3("<stdin>",3051,&
 'arguments not present for calling urban model' )
              ENDIF
           ENDIF
@@ -3090,7 +3088,7 @@ CALL lsm_mosaic_init(IVGTYP,config_flags%ISWATER,config_flags%ISURBAN,config_fla
 
       CASE (NOAHMPSCHEME)
           IF ( TRIM(mminlu) .EQ. 'NLCD40' ) THEN
-             CALL wrf_error_fatal3("<stdin>",3093,&
+             CALL wrf_error_fatal3("<stdin>",3091,&
 'NoahMP does not work with NLCD data. Stop.' )
           ENDIF
 
@@ -3173,7 +3171,6 @@ CALL lsm_mosaic_init(IVGTYP,config_flags%ISWATER,config_flags%ISURBAN,config_fla
                               FRC_URB2D, UTYPE_URB2D,config_flags%use_wudapt_lcz)
 
                max_utype_urb2d = maxval(UTYPE_URB2D)*1.0
-               max_utype_urb2d = wrf_dm_max_real(max_utype_urb2d)
 
                IF (config_flags%use_wudapt_lcz.eq.0 .and. max_utype_urb2d.gt.3.) THEN  
                  CALL wrf_error_fatal &
@@ -3186,7 +3183,7 @@ CALL lsm_mosaic_init(IVGTYP,config_flags%ISWATER,config_flags%ISURBAN,config_fla
 
 
              ELSE
-                CALL wrf_error_fatal3("<stdin>",3189,&
+                CALL wrf_error_fatal3("<stdin>",3186,&
 'arguments not present for calling urban model' )
              ENDIF
           ENDIF
@@ -3206,7 +3203,7 @@ CALL lsm_mosaic_init(IVGTYP,config_flags%ISWATER,config_flags%ISURBAN,config_fla
           if(config_flags%num_land_cat .ne. 20 .and. config_flags%num_land_cat .ne. 21 .and. & 
              config_flags%num_land_cat .ne. 24 .and. config_flags%num_land_cat .ne. 28 .and. & 
              config_flags%num_land_cat .ne. 40 .and. config_flags%num_land_cat .ne. 50 )     & 
-          CALL wrf_error_fatal3("<stdin>",3209,&
+          CALL wrf_error_fatal3("<stdin>",3206,&
 'module_physics_init: PX LSM option requires USGS, MODIS, or NLCD' )
           CALL LSMINIT(VEGFRA,SNOW,SNOWC,SNOWH,CANWAT,SMSTAV,  &
                      SMSTOT, SFCRUNOFF,UDRUNOFF,ACSNOW,        &
@@ -3234,18 +3231,18 @@ CALL lsm_mosaic_init(IVGTYP,config_flags%ISWATER,config_flags%ISURBAN,config_fla
            ( 'module_physics_init: SSiB only works with rrtm, cam scheme or rrtmg scheme (sw_phys=1,3,4)' )
 
           IF ( TRIM(mminlu) .EQ. 'NLCD40' ) THEN
-             CALL wrf_error_fatal3("<stdin>",3237,&
+             CALL wrf_error_fatal3("<stdin>",3234,&
 'SSIB does not work with NLCD data. Stop.' )
           ENDIF
 
 
       CASE (CLMSCHEME)
         IF ((SF_URBAN_PHYSICS.eq.1).OR.(SF_URBAN_PHYSICS.EQ.2).OR.(SF_URBAN_PHYSICS.EQ.3)) THEN
-                CALL wrf_error_fatal3("<stdin>",3244,&
+                CALL wrf_error_fatal3("<stdin>",3241,&
 'CLM DOES NOT WORK WITH URBAN SCHEME' ) 
         ENDIF
         IF ( TRIM(mminlu) .EQ. 'NLCD40' ) THEN
-           CALL wrf_error_fatal3("<stdin>",3248,&
+           CALL wrf_error_fatal3("<stdin>",3245,&
 'CLM does not work with NLCD input. Stop' )
         ENDIF
 
@@ -3304,7 +3301,7 @@ CALL lsm_mosaic_init(IVGTYP,config_flags%ISWATER,config_flags%ISURBAN,config_fla
                      SWUPsubgrid,lhsoi,lhveg,lhtran,config_flags%chem_opt  &
                     )
         ELSE
-                CALL wrf_error_fatal3("<stdin>",3307,&
+                CALL wrf_error_fatal3("<stdin>",3304,&
 'arguments not present for calling CLM' )
         ENDIF
 
@@ -3515,7 +3512,7 @@ CALL lsm_mosaic_init(IVGTYP,config_flags%ISWATER,config_flags%ISURBAN,config_fla
                         ims, ime, jms, jme, kms, kme,         &
                         its, ite, jts, jte, kts, kte          )
              ELSE
-                CALL wrf_error_fatal3("<stdin>",3518,&
+                CALL wrf_error_fatal3("<stdin>",3515,&
 'arguments not present for calling TEMF scheme' )
          ENDIF
 
@@ -3534,7 +3531,7 @@ CALL lsm_mosaic_init(IVGTYP,config_flags%ISWATER,config_flags%ISURBAN,config_fla
                         ims, ime, jms, jme, kms, kme,         &
                         its, ite, jts, jte, kts, kte          )
           ELSE
-            CALL wrf_error_fatal3("<stdin>",3537,&
+            CALL wrf_error_fatal3("<stdin>",3534,&
 'arguments not present for calling EEPS scheme' )
          ENDIF
 
@@ -3795,7 +3792,7 @@ CALL lsm_mosaic_init(IVGTYP,config_flags%ISWATER,config_flags%ISURBAN,config_fla
                       ims, ime, jms, jme, kms, kme,                     &
                       its, ite, jts, jte, kts, kte                      )
           ELSE
-          CALL wrf_error_fatal3("<stdin>",3798,&
+          CALL wrf_error_fatal3("<stdin>",3795,&
 'arguments not present for calling camzmscheme' )
           ENDIF
 
@@ -4235,7 +4232,7 @@ CALL lsm_mosaic_init(IVGTYP,config_flags%ISWATER,config_flags%ISURBAN,config_fla
    END SELECT mp_select
 
    if (config_flags%madwrf_opt == 2 .and. (.not. f_qc .or. .not. f_qi .or. .not. f_qs)) &
-        call wrf_error_fatal3("<stdin>",4238,&
+        call wrf_error_fatal3("<stdin>",4235,&
 'madwrf_opt = 2 requires a mp_physics option with qc, qi, and qs')
 
    END SUBROUTINE mp_init
@@ -5024,7 +5021,7 @@ subroutine aerosol_in_cu(aeromcu,alevsiz,no_months,no_src_types,XLAT,XLONG,aerop
           iunit = get_unused_unit()
           IF ( iunit <= 0 ) THEN
              IF ( wrf_dm_on_monitor() ) THEN
-                CALL wrf_error_fatal3("<stdin>",5027,&
+                CALL wrf_error_fatal3("<stdin>",5024,&
 'Error in aerosol_in_cu: could not find a free Fortran unit.')
              END IF
           END IF
@@ -5043,13 +5040,13 @@ subroutine aerosol_in_cu(aeromcu,alevsiz,no_months,no_src_types,XLAT,XLONG,aerop
                READ(UNIT=iunit)  aeropin
                READ(UNIT=iunit)  aeroin
             ELSE
-               CALL wrf_error_fatal3("<stdin>",5046,&
+               CALL wrf_error_fatal3("<stdin>",5043,&
 'Unable to open file "CESM_RCP4.5_Aerosol_Data.dat" (required for aercu_opt = 1 or 2). ' // &
                   'Please refer to the run/README.namelist file for more information.')
             END IF
           CLOSE(iunit)
       ELSE
-          CALL wrf_error_fatal3("<stdin>",5052,&
+          CALL wrf_error_fatal3("<stdin>",5049,&
 'Missing file "CESM_RCP4.5_Aerosol_Data.dat" (required for aercu_opt = 1 or 2). ' // &
               'Please refer to the run/README.namelist file for more information.')
       END IF

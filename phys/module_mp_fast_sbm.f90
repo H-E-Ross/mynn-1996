@@ -4300,37 +4300,6 @@ enddo
  
  
  
-    if (itimestep > 1 .and. domain_id == 1)then
-        DO j = jts,jte
-         DO k = kts,kte
-           DO i = its,ite
-		          rhoair_max = rhocgs(i,1,j) 
-              if (i <= 5 .or. i >= IDE-5 .OR. &
-                  & j <= 5 .or. j >= JDE-5)THEN
-                  if(ILogNormal_modes_Aerosol == 1)then
-                    IF (zcgs(I,K,J).LE.ZMIN) THEN
-                       FACTZ = 1.0
-                    ELSE
-                       FACTZ=EXP(-(zcgs(I,K,J)-ZMIN)/Z0IN)
-                    END IF
-                    
-	                  KRR = 0
-                    DO kr = p_ff8i01,p_ff8i43
-                      KRR = KRR + 1
-           						if (xland(i,j) == 1)then
-           							
-           							chem_new(I,K,J,KR) = (FCCNR_CON(KRR)/rhoair_max)*rhocgs(i,k,j)
-                       else
-                        
-           							chem_new(I,K,J,KR) = (FCCNR_MAR(KRR)/rhoair_max)*rhocgs(i,k,j)
-           						endif
-                   END DO
-	               endif
-              end if
-           end do
-         end do
-       end do
-     end if
 
      if (itimestep == 1)then
         DO j = j_start,j_end
@@ -5413,9 +5382,8 @@ enddo
  	2060  CONTINUE
  	ENDIF
 
- 		CALL wrf_dm_bcast_bytes( hujisbm_unit1 , 4 )
  	IF ( hujisbm_unit1 < 0 ) THEN
-     	CALL wrf_error_fatal3("<stdin>",5418,&
+     	CALL wrf_error_fatal3("<stdin>",5386,&
 'module_mp_FAST-SBM: Table-1 -- FAST_SBM_INIT: '// 			&
  							              'Can not find unused fortran unit to read in lookup table, model stop' )
  	ENDIF
@@ -5431,11 +5399,6 @@ enddo
  	ENDIF
 
 
-    CALL wrf_dm_bcast_bytes(bin_mass, size(bin_mass)*R8SIZE)
- 	  CALL wrf_dm_bcast_bytes(tab_colum, size(tab_colum)*R8SIZE)
- 	  CALL wrf_dm_bcast_bytes(tab_dendr, size(tab_dendr)*R8SIZE)
- 	  CALL wrf_dm_bcast_bytes(tab_snow, size(tab_snow)*R8SIZE)
- 	  CALL wrf_dm_bcast_bytes(bin_log, size(bin_log)*R8SIZE)
 
      WRITE(errmess, '(A,I2)') 'FAST_SBM_INIT : succesfull reading Table-1'
      CALL wrf_debug(000, errmess)
@@ -5461,9 +5424,8 @@ enddo
      2061  CONTINUE
      ENDIF
 
- 	CALL wrf_dm_bcast_bytes ( hujisbm_unit1 , 4 )
      IF ( hujisbm_unit1 < 0 ) THEN
-         CALL wrf_error_fatal3("<stdin>",5466,&
+         CALL wrf_error_fatal3("<stdin>",5428,&
 'module_mp_FAST-SBM: Table-2 -- FAST_SBM_INIT: '// 			&
                                'Can not find unused fortran unit to read in lookup table,model stop' )
      ENDIF
@@ -5477,11 +5439,6 @@ enddo
  	READ(hujisbm_unit1,900) RLEC,RIEC,RSEC,RGEC,RHEC
  END IF
 
-     CALL wrf_dm_bcast_bytes(RLEC, size(RLEC)*R4SIZE)
-     CALL wrf_dm_bcast_bytes(RIEC, size(RIEC)*R4SIZE)
-     CALL wrf_dm_bcast_bytes(RSEC, size(RSEC)*R4SIZE)
-     CALL wrf_dm_bcast_bytes(RGEC, size(RGEC)*R4SIZE)
-     CALL wrf_dm_bcast_bytes(RHEC, size(RHEC)*R4SIZE)
 
      WRITE(errmess, '(A,I2)') 'FAST_SBM_INIT : succesfull reading Table-2'
      CALL wrf_debug(000, errmess)
@@ -5507,10 +5464,9 @@ enddo
      2062 CONTINUE
      ENDIF
 
-     CALL wrf_dm_bcast_bytes ( hujisbm_unit1, 4 )
 
      IF ( hujisbm_unit1 < 0 ) THEN
-         CALL wrf_error_fatal3("<stdin>",5513,&
+         CALL wrf_error_fatal3("<stdin>",5469,&
 'module_mp_FAST_SBM: Table-3 -- FAST_SBM_INIT: '// 		&
                               'Can not find unused fortran unit to read in lookup table,model stop' )
      ENDIF
@@ -5523,11 +5479,6 @@ enddo
          CLOSE(hujisbm_unit1)
      ENDIF
 
-   	CALL wrf_dm_bcast_bytes(XL, size(XL)*R4SIZE)
-     CALL wrf_dm_bcast_bytes(XI, size(XI)*R4SIZE)
-     CALL wrf_dm_bcast_bytes(XS, size(XS)*R4SIZE)
-     CALL wrf_dm_bcast_bytes(XG, size(XG)*R4SIZE)
-     CALL wrf_dm_bcast_bytes(XH, size(XH)*R4SIZE)
 
       WRITE(errmess, '(A,I2)') 'FAST_SBM_INIT : succesfull reading Table-3'
       CALL wrf_debug(000, errmess)
@@ -5554,9 +5505,8 @@ enddo
      2063   CONTINUE
      ENDIF
 
-     CALL wrf_dm_bcast_bytes ( hujisbm_unit1 , 4 )
      IF ( hujisbm_unit1 < 0 ) THEN
-         CALL wrf_error_fatal3("<stdin>",5559,&
+         CALL wrf_error_fatal3("<stdin>",5509,&
 'module_mp_FAST_SBM: Table-4 -- FAST_SBM_INIT: '// 										&
                                  'Can not find unused fortran unit to read in lookup table,model stop' )
      ENDIF
@@ -5570,11 +5520,6 @@ enddo
         CLOSE(hujisbm_unit1)
      ENDIF
 
- 	CALL wrf_dm_bcast_bytes(VR1, size(VR1)*R4SIZE)
-     CALL wrf_dm_bcast_bytes(VR2, size(VR2)*R4SIZE)
-     CALL wrf_dm_bcast_bytes(VR3, size(VR3)*R4SIZE)
-     CALL wrf_dm_bcast_bytes(VR4, size(VR4)*R4SIZE)
-     CALL wrf_dm_bcast_bytes(VR5, size(VR5)*R4SIZE)
      WRITE(errmess, '(A,I2)') 'FAST_SBM_INIT : succesfull reading Table-4'
      CALL wrf_debug(000, errmess)
  
@@ -5600,10 +5545,9 @@ enddo
      2065     CONTINUE
      ENDIF
 
- 		CALL wrf_dm_bcast_bytes ( hujisbm_unit1 , 4 )
 
      IF ( hujisbm_unit1 < 0 ) THEN
-         CALL wrf_error_fatal3("<stdin>",5606,&
+         CALL wrf_error_fatal3("<stdin>",5550,&
 'module_mp_FAST_SBM: Table-5 -- FAST_SBM_INIT: '// 										&
                                 'Can not find unused fortran unit to read in lookup table,model stop' )
      ENDIF
@@ -5617,9 +5561,6 @@ enddo
       CLOSE(hujisbm_unit1)
      END IF
 
- 	  CALL wrf_dm_bcast_bytes(SLIC, size(SLIC)*R4SIZE)
-    CALL wrf_dm_bcast_bytes(TLIC, size(TLIC)*R4SIZE)
-    CALL wrf_dm_bcast_bytes(COEFIN, size(COEFIN)*R4SIZE)
      WRITE(errmess, '(A,I2)') 'FAST_SBM_INIT : succesfull reading Table-5'
      CALL wrf_debug(000, errmess)
  
@@ -5644,9 +5585,8 @@ enddo
      2066     CONTINUE
      ENDIF
 
- 		CALL wrf_dm_bcast_bytes ( hujisbm_unit1 , 4 )
      IF ( hujisbm_unit1 < 0 ) THEN
-         CALL wrf_error_fatal3("<stdin>",5649,&
+         CALL wrf_error_fatal3("<stdin>",5589,&
 'module_mp_FAST_SBM: Table-6 -- FAST_SBM_INIT: '// 			&
                                  'Can not find unused fortran unit to read in lookup table,model stop' )
      ENDIF
@@ -5670,9 +5610,6 @@ enddo
    		ENDDO
    	ENDDO
 
- 	CALL wrf_dm_bcast_bytes(YWLL_1000MB, size(YWLL_1000MB)*R4SIZE)
-     CALL wrf_dm_bcast_bytes(YWLL_750MB, size(YWLL_750MB)*R4SIZE)
-     CALL wrf_dm_bcast_bytes(YWLL_500MB, size(YWLL_500MB)*R4SIZE)
 
      WRITE(errmess, '(A,I2)') 'FAST_SBM_INIT : succesfull reading Table-6'
      CALL wrf_debug(000, errmess)
@@ -5734,9 +5671,8 @@ enddo
      2067     CONTINUE
      ENDIF
 
-     CALL wrf_dm_bcast_bytes ( hujisbm_unit1 , 4 )
  IF ( hujisbm_unit1 < 0 ) THEN
- 	CALL wrf_error_fatal3("<stdin>",5739,&
+ 	CALL wrf_error_fatal3("<stdin>",5675,&
 'module_mp_FAST_SBM: Table-7 -- FAST_SBM_INIT: '// 			&
  											'Can not find unused fortran unit to read in lookup table,model stop' )
  ENDIF
@@ -5875,38 +5811,6 @@ enddo
   CLOSE(hujisbm_unit1)
  END IF
 
-	   CALL wrf_dm_bcast_bytes(YWLI_300MB, size(YWLI_300MB)*R4SIZE)
-     CALL wrf_dm_bcast_bytes(YWLI_500MB, size(YWLI_500MB)*R4SIZE)
-     CALL wrf_dm_bcast_bytes(YWLI_750MB, size(YWLI_750MB)*R4SIZE)
-
-     CALL wrf_dm_bcast_bytes(YWLG_300MB, size(YWLG_300MB)*R4SIZE)
-     CALL wrf_dm_bcast_bytes(YWLG_500MB, size(YWLG_500MB)*R4SIZE)
-     CALL wrf_dm_bcast_bytes(YWLG_750MB, size(YWLG_750MB)*R4SIZE)
-     
-
-     CALL wrf_dm_bcast_bytes(YWLH_300MB, size(YWLH_300MB)*R4SIZE)
-     CALL wrf_dm_bcast_bytes(YWLH_500MB, size(YWLH_500MB)*R4SIZE)
-     CALL wrf_dm_bcast_bytes(YWLH_750MB, size(YWLH_750MB)*R4SIZE)
-
-     CALL wrf_dm_bcast_bytes(YWLS_300MB, size(YWLS_300MB)*R4SIZE)
-     CALL wrf_dm_bcast_bytes(YWLS_500MB, size(YWLS_500MB)*R4SIZE)
-     CALL wrf_dm_bcast_bytes(YWLS_750MB, size(YWLS_750MB)*R4SIZE)
-
-     CALL wrf_dm_bcast_bytes(YWII_300MB, size(YWII_300MB)*R4SIZE)
-     CALL wrf_dm_bcast_bytes(YWII_500MB, size(YWII_500MB)*R4SIZE)
-     CALL wrf_dm_bcast_bytes(YWII_750MB, size(YWII_750MB)*R4SIZE)
-
-     CALL wrf_dm_bcast_bytes(YWIS_300MB, size(YWIS_300MB)*R4SIZE)
-     CALL wrf_dm_bcast_bytes(YWIS_500MB, size(YWIS_500MB)*R4SIZE)
-     CALL wrf_dm_bcast_bytes(YWIS_750MB, size(YWIS_750MB)*R4SIZE)
-
-     CALL wrf_dm_bcast_bytes(YWSG_300MB, size(YWSG_300MB)*R4SIZE)
-     CALL wrf_dm_bcast_bytes(YWSG_500MB, size(YWSG_500MB)*R4SIZE)
-     CALL wrf_dm_bcast_bytes(YWSG_750MB, size(YWSG_750MB)*R4SIZE)
-
-     CALL wrf_dm_bcast_bytes(YWSS_300MB, size(YWSS_300MB)*R4SIZE)
-     CALL wrf_dm_bcast_bytes(YWSS_500MB, size(YWSS_500MB)*R4SIZE)
-     CALL wrf_dm_bcast_bytes(YWSS_750MB, size(YWSS_750MB)*R4SIZE)
 
      WRITE(errmess, '(A,I2)') 'FAST_SBM_INIT : succesfull reading Table-7'
      CALL wrf_debug(000, errmess)
@@ -5933,9 +5837,8 @@ enddo
      2068     CONTINUE
      ENDIF
 
-     CALL wrf_dm_bcast_bytes ( hujisbm_unit1 , 4 )
      IF ( hujisbm_unit1 < 0 ) THEN
-         CALL wrf_error_fatal3("<stdin>",5938,&
+         CALL wrf_error_fatal3("<stdin>",5841,&
 'module_mp_FAST_SBM: Table-8 -- FAST_SBM_INIT: '// 			&
                                  'Can not find unused fortran unit to read in lookup table,model stop' )
      ENDIF
@@ -5948,11 +5851,6 @@ enddo
          CLOSE(hujisbm_unit1)
      END IF
 
- 	    CALL wrf_dm_bcast_bytes(RO1BL, size(RO1BL)*R4SIZE)
-      CALL wrf_dm_bcast_bytes(RO2BL, size(RO2BL)*R4SIZE)
-      CALL wrf_dm_bcast_bytes(RO3BL, size(RO3BL)*R4SIZE)
-      CALL wrf_dm_bcast_bytes(RO4BL, size(RO4BL)*R4SIZE)
-      CALL wrf_dm_bcast_bytes(RO5BL, size(RO5BL)*R4SIZE)
      WRITE(errmess, '(A,I2)') 'FAST_SBM_INIT : succesfull reading Table-8'
      CALL wrf_debug(000, errmess)
  
@@ -5972,9 +5870,8 @@ enddo
        ENDDO
      2069     CONTINUE
      ENDIF
- 		CALL wrf_dm_bcast_bytes ( hujisbm_unit1 , 4 )
      IF ( hujisbm_unit1 < 0 ) THEN
-      CALL wrf_error_fatal3("<stdin>",5977,&
+      CALL wrf_error_fatal3("<stdin>",5874,&
 'module_mp_FAST_SBM: Table-9 -- FAST_SBM_INIT: '// 			&
                                  'Can not find unused fortran unit to read in lookup table,model stop' )
      ENDIF
@@ -5987,7 +5884,6 @@ enddo
          CLOSE(hujisbm_unit1)
      END IF
 
-       CALL wrf_dm_bcast_bytes(RADXXO, size(RADXXO)*R4SIZE)
      WRITE(errmess, '(A,I2)') 'FAST_SBM_INIT : succesfull reading Table-9'
      CALL wrf_debug(000, errmess)
  
@@ -5998,27 +5894,6 @@ enddo
   CALL LOAD_TABLES(NKR)  
 
  
-   	CALL wrf_dm_bcast_bytes(FAF1, size(FAF1)*R16SIZE)
-   	CALL wrf_dm_bcast_bytes(FBF1, size(FBF1)*R16SIZE)
-   	CALL wrf_dm_bcast_bytes(FAB1, size(FAB1)*R16SIZE)
-   	CALL wrf_dm_bcast_bytes(FBB1, size(FBB1)*R16SIZE)
-   
-   	CALL wrf_dm_bcast_bytes(FAF3, size(FAF3)*R16SIZE)
-   	CALL wrf_dm_bcast_bytes(FBF3, size(FBF3)*R16SIZE)
-   	CALL wrf_dm_bcast_bytes(FAB3, size(FAB3)*R16SIZE)
-   	CALL wrf_dm_bcast_bytes(FBB3, size(FBB3)*R16SIZE)
-   
-   	CALL wrf_dm_bcast_bytes(FAF4, size(FAF4)*R16SIZE)
-   	CALL wrf_dm_bcast_bytes(FBF4, size(FBF4)*R16SIZE)
-   	CALL wrf_dm_bcast_bytes(FAB4, size(FAB4)*R16SIZE)
-   	CALL wrf_dm_bcast_bytes(FBB4, size(FBB4)*R16SIZE)
-   
-   	CALL wrf_dm_bcast_bytes(FAF5, size(FAF5)*R16SIZE)
-   	CALL wrf_dm_bcast_bytes(FBF5, size(FBF5)*R16SIZE)
-   	CALL wrf_dm_bcast_bytes(FAB5, size(FAB5)*R16SIZE)
-   	CALL wrf_dm_bcast_bytes(FBB5, size(FBB5)*R16SIZE)
- 
- 	  CALL wrf_dm_bcast_integer ( usetables , size ( usetables ) * 4 )
   WRITE(errmess, '(A,I2)') 'module_mp_WRFsbm : succesfull reading Table-10'
   call wrf_message(errmess)
  
@@ -6085,8 +5960,6 @@ enddo
     ECOALMASSM = 0.0d0
     BRKWEIGHT = 0.0d0
  	 CALL BREAKINIT_KS(PKIJ,QKJ,ECOALMASSM,BRKWEIGHT,XL,DROPRADII,BR_MAX,JBREAK,JMAX,NKR,VR1) 
- 	 	CALL wrf_dm_bcast_bytes(PKIJ, size(PKIJ)*R4SIZE)
-    CALL wrf_dm_bcast_bytes(QKJ, size(QKJ)*R4SIZE)
  	  WRITE(errmess, '(A,I2)') 'FAST_SBM_INIT : succesfull reading BREAKINIT_KS" '
     CALL wrf_debug(000, errmess)
   
@@ -6181,7 +6054,7 @@ enddo
       WRITE( errmess , '(A,I4)' )                                          &
                  'module_mp_FAST_SBM_INIT: error opening hujisbm_DATA on unit,model stop ' &
                  &, hujisbm_unit1
-      CALL wrf_error_fatal3("<stdin>",6184,&
+      CALL wrf_error_fatal3("<stdin>",6057,&
 errmess)
 
   END SUBROUTINE FAST_HUCMINIT
@@ -6889,7 +6762,7 @@ errmess)
 
  IF(RW.NE.RW .or. PW.NE.PW)THEN
     print*, 'NaN In ONECOND1'
-    call wrf_error_fatal3("<stdin>",6892,&
+    call wrf_error_fatal3("<stdin>",6765,&
 "fatal error in ONECOND1 (RW or PW are NaN), model stop")
  ENDIF
 
@@ -6903,7 +6776,7 @@ errmess)
       TIMENEW = TIMENEW + DTNEWL
       DTT = DTNEWL
 
-   	  IF (DTT < 0.0) call wrf_error_fatal3("<stdin>",6906,&
+   	  IF (DTT < 0.0) call wrf_error_fatal3("<stdin>",6779,&
 "fatal error in ONECOND1-DEL1N>0:(DTT<0), model stop")
 
      	DEL1_d = DEL1
@@ -6934,7 +6807,7 @@ errmess)
 
      	IF((DEL1.GT.0.AND.DEL1N.LT.0) &
        		&.AND.ABS(DEL1N).GT.EPSDEL) THEN
-             		call wrf_error_fatal3("<stdin>",6937,&
+             		call wrf_error_fatal3("<stdin>",6810,&
 "fatal error in ONECOND1-1 (DEL1.GT.0.AND.DEL1N.LT.0), model stop")
      	ENDIF
 
@@ -6949,7 +6822,7 @@ errmess)
       TIMENEW = TIMENEW + DTNEWL
       DTT = DTNEWL
 
- 	    IF (DTT < 0.0) call wrf_error_fatal3("<stdin>",6952,&
+ 	    IF (DTT < 0.0) call wrf_error_fatal3("<stdin>",6825,&
 "fatal error in ONECOND1-DEL1N<0:(DTT<0), model stop")
 
  	    DEL1_d = DEL1
@@ -6980,7 +6853,7 @@ errmess)
 
       IF((DEL1.LT.0.AND.DEL1N.GT.0) &
         .AND.ABS(DEL1N).GT.EPSDEL) THEN
-         call wrf_error_fatal3("<stdin>",6983,&
+         call wrf_error_fatal3("<stdin>",6856,&
 "fatal error in ONECOND1-2 (DEL1.LT.0.AND.DEL1N.GT.0), model stop")
       ENDIF
 
@@ -7023,7 +6896,7 @@ errmess)
  	print*,"TPS",TPS,"QPS",QPS
 	print*,'FI1 before',FI1,'PSI1 after',PSI1
  	print*,"ONECOND1-in(end)"
- 	call wrf_error_fatal3("<stdin>",7026,&
+ 	call wrf_error_fatal3("<stdin>",6899,&
 "fatal error in ONECOND1-in (ABS(DAL1*DELMASSL1) > 3.0), model stop")
  ENDIF
 
@@ -7086,7 +6959,7 @@ errmess)
  	print*,"PSI1",PSI1
  	print*,"ONECOND1-out (end)"
  	IF(ABS(DAL1*DELMASSL1) > 5.0 )THEN
- 		call wrf_error_fatal3("<stdin>",7089,&
+ 		call wrf_error_fatal3("<stdin>",6962,&
 "fatal error in ONECOND1-out (ABS(DAL1*DELMASSL1) > 5.0), model stop")
  	ENDIF
  ENDIF
@@ -7396,7 +7269,7 @@ errmess)
 
    	IF(RW.NE.RW .or. PW.NE.PW)THEN
  	    print*, 'NaN In ONECOND2'
- 	    call wrf_error_fatal3("<stdin>",7399,&
+ 	    call wrf_error_fatal3("<stdin>",7272,&
 "fatal error in ONECOND2 (RW or PW are NaN), model stop")
    	ENDIF
 
@@ -7408,7 +7281,7 @@ errmess)
        TIMENEW = TIMENEW + DTNEWL
        DTT = DTNEWL
 
- 			IF (DTT < 0.0) call wrf_error_fatal3("<stdin>",7411,&
+ 			IF (DTT < 0.0) call wrf_error_fatal3("<stdin>",7284,&
 "fatal error in ONECOND2-DEL2N>0:(DTT<0), model stop")
 
  			DEL1_d = DEL1
@@ -7481,7 +7354,7 @@ errmess)
 
  			IF((DEL2.GT.0.AND.DEL2N.LT.0) &
           		.AND.ABS(DEL2N).GT.EPSDEL) THEN
-                 call wrf_error_fatal3("<stdin>",7484,&
+                 call wrf_error_fatal3("<stdin>",7357,&
 "fatal error in module_mp_fast_sbm (DEL2.GT.0.AND.DEL2N.LT.0), model stop")
  			ENDIF
 
@@ -7493,7 +7366,7 @@ errmess)
         TIMENEW = TIMENEW + DTNEWL
         DTT = DTNEWL
 
- 			  IF (DTT < 0.0) call wrf_error_fatal3("<stdin>",7496,&
+ 			  IF (DTT < 0.0) call wrf_error_fatal3("<stdin>",7369,&
 "fatal error in ONECOND2-DEL2N<0:(DTT<0), model stop")
 
    			DEL1_d = DEL1
@@ -7569,7 +7442,7 @@ errmess)
 
        IF((DEL2.LT.0.AND.DEL2N.GT.0) &
             .AND.ABS(DEL2N).GT.EPSDEL) THEN
-             call wrf_error_fatal3("<stdin>",7572,&
+             call wrf_error_fatal3("<stdin>",7445,&
 "fatal error in module_mp_fast_sbm (DEL2.LT.0.AND.DEL2N.GT.0), model stop")
        ENDIF
 
@@ -7654,7 +7527,7 @@ errmess)
       print*,"PSI5",PSI5
       print*,"ONECOND2-out (end)"
       IF(ABS(DAL2*DELMASSI1) > 5.0 )THEN
-      call wrf_error_fatal3("<stdin>",7657,&
+      call wrf_error_fatal3("<stdin>",7530,&
 "fatal error in ONECOND2-out (ABS(DAL2*DELMASSI1) > 5.0), model stop")
  		ENDIF
  	  ENDIF
@@ -7954,7 +7827,7 @@ errmess)
 
  	IF(RW.NE.RW .or. PW.NE.PW)THEN
  	  print*, 'NaN In ONECOND3'
- 	  call wrf_error_fatal3("<stdin>",7957,&
+ 	  call wrf_error_fatal3("<stdin>",7830,&
 "fatal error in ONECOND3 (RW or PW are NaN), model stop")
  	ENDIF
 
@@ -8011,7 +7884,7 @@ errmess)
  	
  	ENDIF
 
-   IF (DTT < 0.0) call wrf_error_fatal3("<stdin>",8014,&
+   IF (DTT < 0.0) call wrf_error_fatal3("<stdin>",7887,&
 "fatal error in ONECOND3:(DTT<0), model stop")
 
  	DEL1_d = DEL1
@@ -8202,7 +8075,7 @@ errmess)
  		print*,"R5D",R5D,"R5ND",R5ND
  		print*,"ONECOND3-out (end)"
  		IF(ABS(DAL1*DELMASSL1+DAL2*DELMASSI1) > 5.0 )THEN
- 			call wrf_error_fatal3("<stdin>",8205,&
+ 			call wrf_error_fatal3("<stdin>",8078,&
 "fatal error in ONECOND3-out (ABS(DAL1*DELMASSL1+DAL2*DELMASSI1) > 5.0), model stop")
  		ENDIF
  	ENDIF
@@ -8378,7 +8251,7 @@ errmess)
         print*,IT,NDIV, DTBREAKUP
         print*,GDUMB
         print*,GDUMB_BF_BREAKUP
-        call wrf_error_fatal3("<stdin>",8381,&
+        call wrf_error_fatal3("<stdin>",8254,&
 "in coal_bott af-coll_breakup - FF1R NaN, model stop")
       endif
     enddo
@@ -8564,7 +8437,7 @@ end if
        else
   	     
          if(abs(deldrop).gt.cont_init_drop*0.05) then
-           call wrf_error_fatal3("<stdin>",8567,&
+           call wrf_error_fatal3("<stdin>",8440,&
 "fatal error in module_mp_fast_sbm (abs(deldrop).gt.cont_init_drop), model stop")
          endif
        endif
@@ -8576,24 +8449,24 @@ end if
         FF1R(KR)=G1(KR)/(3.*XL(KR)*XL(KR)*1.E3)
         if((FF1R(kr) .ne. FF1R(kr)) .or. FF1R(kr) < 0.0)then
 	 	       print*,"G1",G1
- 		 	     call wrf_error_fatal3("<stdin>",8579,&
+ 		 	     call wrf_error_fatal3("<stdin>",8452,&
 "stop at end coal_bott - FF1R NaN or FF1R < 0.0, model stop")
 	      endif
         FF3R(KR)=G3(KR)/(3.*xs(kr)*xs(kr)*1.e3)
           if((FF3R(kr) .ne. FF3R(kr)) .or. FF3R(kr) < 0.0)then
-           call wrf_error_fatal3("<stdin>",8584,&
+           call wrf_error_fatal3("<stdin>",8457,&
 "stop at end coal_bott - FF3R NaN or FF3R < 0.0, model stop")
           endif
  		   if(hail_opt == 0)then
  		 	   FF4R(KR)=G4(KR)/(3.*xg(kr)*xg(kr)*1.e3)
       	 if((FF4R(kr) .ne. FF4R(kr)) .or. FF4R(kr) < 0.0) then
-          call wrf_error_fatal3("<stdin>",8590,&
+          call wrf_error_fatal3("<stdin>",8463,&
 "stop at end coal_bott - FF4R NaN or FF4R < 0.0, model stop")
          end if
       else
  		 	   FF5R(KR)=G5(KR)/(3.*xh(kr)*xh(kr)*1.e3)
 		     if((FF5R(kr) .ne. FF5R(kr)) .or. FF5R(kr) < 0.0) then
-           call wrf_error_fatal3("<stdin>",8596,&
+           call wrf_error_fatal3("<stdin>",8469,&
 "stop at end coal_bott - FF5R NaN or FF5R < 0.0, model stop")
          endif
  		 endif
@@ -8606,7 +8479,7 @@ end if
  	FRIMFR_S(:) = rf3(:)
 
  	if (abs(tt-t_new).gt.5.0) then
- 		call wrf_error_fatal3("<stdin>",8609,&
+ 		call wrf_error_fatal3("<stdin>",8482,&
 "fatal error in module_mp_FAST_sbm Del_T 5 K, model stop")
  	endif
 
@@ -8685,7 +8558,7 @@ end if
      CALL wrf_dm_bcast_bytes ( hujisbm_unit1 , 4 )
 
      IF ( hujisbm_unit1 < 0 ) THEN
-       CALL wrf_error_fatal3("<stdin>",8688,&
+       CALL wrf_error_fatal3("<stdin>",8561,&
 'Can not find unused fortran unit to read in BREAKINIT_KS lookup table, model stop' )
      ENDIF
 
@@ -8719,7 +8592,7 @@ end if
      CALL wrf_dm_bcast_bytes ( hujisbm_unit1 , 4 )
 
      IF ( hujisbm_unit1 < 0 ) THEN
-       CALL wrf_error_fatal3("<stdin>",8722,&
+       CALL wrf_error_fatal3("<stdin>",8595,&
 'Can not find unused fortran unit to read in BREAKINIT_KS lookup table, model stop' )
      ENDIF
 
@@ -8752,7 +8625,7 @@ end if
        WRITE( errmess , '(A,I4)' )                                          &
         'module_FAST_SBM: error opening hujisbm_DATA on unit, model stop'  &
         , hujisbm_unit1
-       CALL wrf_error_fatal3("<stdin>",8755,&
+       CALL wrf_error_fatal3("<stdin>",8628,&
 errmess)
        END SUBROUTINE BREAKINIT_KS
 

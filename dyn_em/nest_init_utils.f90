@@ -917,8 +917,6 @@ SUBROUTINE input_terrain_rsmas ( grid ,                        &
    CHARACTER*256 :: rsmas_data_path
 
 
-   REAL , DIMENSION(ids:ide,jds:jde) :: ht_g, xlat_g, xlon_g
-
    CALL wrf_get_myproc ( myproc )
 
 
@@ -928,25 +926,10 @@ SUBROUTINE input_terrain_rsmas ( grid ,                        &
    enddo
 
 
-   CALL wrf_patch_to_global_real ( grid%xlat , xlat_g , grid%domdesc, ' ' , 'xy' ,       &
-                                   ids, ide-1 , jds , jde-1 , 1 , 1 , &
-                                   ims, ime   , jms , jme   , 1 , 1 , &
-                                   ips, ipe   , jps , jpe   , 1 , 1   )
-   CALL wrf_patch_to_global_real ( grid%xlong , xlon_g , grid%domdesc, ' ' , 'xy' ,       &
-                                   ids, ide-1 , jds , jde-1 , 1 , 1 , &
-                                   ims, ime   , jms , jme   , 1 , 1 , &
-                                   ips, ipe   , jps , jpe   , 1 , 1   )
+   CALL get_terrain ( grid%dx/1000., grid%xlat(ids:ide,jds:jde), grid%xlong(ids:ide,jds:jde), grid%ht(ids:ide,jds:jde), &
+                       ide-ids+1,jde-jds+1,ide-ids+1,jde-jds+1, ipath, LEN(TRIM(rsmas_data_path)) )
+   WHERE ( grid%ht(ids:ide,jds:jde) < -1000. ) grid%ht(ids:ide,jds:jde) = 0.
 
-   IF ( wrf_dm_on_monitor() ) THEN
-     CALL get_terrain ( grid%dx/1000., xlat_g(ids:ide,jds:jde), xlon_g(ids:ide,jds:jde), ht_g(ids:ide,jds:jde), &
-                        ide-ids+1,jde-jds+1,ide-ids+1,jde-jds+1, ipath, LEN(TRIM(rsmas_data_path)) )
-     WHERE ( ht_g(ids:ide,jds:jde) < -1000. ) ht_g(ids:ide,jds:jde) = 0.
-   ENDIF
-
-   CALL wrf_global_to_patch_real ( ht_g , grid%ht , grid%domdesc, ' ' , 'xy' ,         &
-                                   ids, ide-1 , jds , jde-1 , 1 , 1 , &
-                                   ims, ime   , jms , jme   , 1 , 1 , &
-                                   ips, ipe   , jps , jpe   , 1 , 1   )
 
 
 END SUBROUTINE input_terrain_rsmas
@@ -979,8 +962,7 @@ nba_mij,nba_rij,sbmradar,chem &
    USE module_driver_constants
    USE module_machine
    USE module_tiles
-   USE module_dm, ONLY : ntasks, ntasks_x, ntasks_y, itrace, local_communicator, mytask
-   USE module_comm_dm, ONLY : HALO_EM_FEEDBACK_sub
+   USE module_dm
    USE module_bc
 
 
@@ -1073,29 +1055,6 @@ real      ,DIMENSION(grid%sm31:grid%em31,grid%sm32:grid%em32,grid%sm33:grid%em33
                             ips, ipe, jps, jpe, kps, kpe    )
 
   CALL wrf_debug( 500, "before HALO_EM_FEEDBACK.inc in update_after_feedback_em" )
-
-
-
-
-
-
-CALL HALO_EM_FEEDBACK_sub ( grid, &
-  num_moist, &
-  moist, &
-  num_dfi_moist, &
-  dfi_moist, &
-  num_scalar, &
-  scalar, &
-  num_dfi_scalar, &
-  dfi_scalar, &
-  num_tracer, &
-  tracer, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
   CALL wrf_debug( 500, "leaving update_after_feedback_em" )
 
 END SUBROUTINE update_after_feedback_em
@@ -1170,7 +1129,7 @@ SUBROUTINE compute_vcoord_1d_coeffs ( ht, etac, znw, &
          CALL wrf_message     ( 'ERROR: --- hybrid_opt=1    ==> Standard WRF terrain-following coordinate, hybrid c1, c2, c3, c4' )
          CALL wrf_message     ( 'ERROR: --- hybrid_opt=2    ==> Hybrid, Klemp polynomial' )
          CALL wrf_message     ( 'ERROR: --- hybrid_opt=3    ==> Hybrid, sin^2' )
-         CALL wrf_error_fatal3("<stdin>",1173,&
+         CALL wrf_error_fatal3("<stdin>",1132,&
 'ERROR: --- Invalid option' )
       END IF
    END DO
@@ -1246,7 +1205,7 @@ SUBROUTINE compute_vcoord_1d_coeffs ( ht, etac, znw, &
                WRITE (a_message,*) 'k = ',k+1,', reference pressure = ',press_above,' Pa'
                CALL wrf_message ( TRIM(a_message) )
                WRITE (a_message,*) 'In the dynamics namelist record, reduce etac from ',etac
-               CALL wrf_error_fatal3("<stdin>",1249,&
+               CALL wrf_error_fatal3("<stdin>",1208,&
 TRIM(a_message) )
             END IF
          ENDDO

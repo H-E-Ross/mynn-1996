@@ -2940,8 +2940,6 @@ wrf_err_message )
               ,num_tiles                                                  )
 
    USE module_domain  , ONLY : domain
-   USE module_dm        , ONLY : ntasks_x,ntasks_y,local_communicator,mytask,ntasks,wrf_dm_minval_integer
-   USE module_comm_dm   , ONLY : halo_toposhad_sub
    USE module_bc
    USE module_model_constants
 
@@ -3003,11 +3001,6 @@ wrf_err_message )
      jdum = 0
    endif
 
-   if (itimestep .eq. 1) then
-     call wrf_dm_minval_integer (psx,idum,jdum)
-     call wrf_dm_minval_integer (psy,idum,jdum)
-     min_ptchsz = min(psx,psy)
-   endif
 
 
    
@@ -3086,19 +3079,6 @@ wrf_err_message )
 
        enddo
    !$OMP END PARALLEL DO
-
-
-
-
-
-
-
-CALL HALO_TOPOSHAD_sub ( grid, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
 
      enddo
    endif
@@ -3833,7 +3813,7 @@ CALL HALO_TOPOSHAD_sub ( grid, &
            WRITE (dbg_msg,*) 'DEBUG-GT,  k,  P, T : ', k,P1d(k)*0.01,T1d(k)-273.15
            CALL wrf_debug (0, dbg_msg)
         enddo
-        call wrf_error_fatal3("<stdin>",3836,&
+        call wrf_error_fatal3("<stdin>",3816,&
 'FATAL ERROR, problem in temperature profile.')
       endif
 
@@ -4738,7 +4718,7 @@ SUBROUTINE ozn_p_int(p ,pin, levsiz, ozmixt, o3vmr, &
 
       if (kount.gt.ncol) then
 
-         call wrf_error_fatal3("<stdin>",4741,&
+         call wrf_error_fatal3("<stdin>",4721,&
 'OZN_P_INT: Bad ozone data: non-monotonicity suspected')
       end if
 35    continue
@@ -4994,7 +4974,7 @@ SUBROUTINE aer_p_int(p ,pin, levsiz, aerodt, aerod, no_src, pf, totaod,   &
       end do
 
       if (kount.gt.ncol) then
-         call wrf_error_fatal3("<stdin>",4997,&
+         call wrf_error_fatal3("<stdin>",4977,&
 'AER_P_INT: Bad aerosol data: non-monotonicity suspected')
       end if
 35    continue

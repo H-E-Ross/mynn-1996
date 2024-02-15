@@ -2,7 +2,7 @@ MODULE module_ra_cam_support
   use module_cam_support, only: endrun
   implicit none
 
-  include 'mpif.h'
+  integer, parameter :: MPI_UNDEFINED = -1
 
       integer, parameter :: r8 = 8
       real(r8), parameter:: inf = 1.e20 
@@ -3419,7 +3419,6 @@ subroutine oznini(ozmixm,pin,levsiz,num_months,XLAT,                &
 
 
 
-  use module_dm, only: local_communicator
       IMPLICIT NONE
 
    INTEGER,      INTENT(IN   )    ::   ids,ide, jds,jde, kds,kde, &
@@ -3460,8 +3459,6 @@ subroutine oznini(ozmixm,pin,levsiz,num_months,XLAT,                &
     plev=>plev_ozone_save
     lat_ozone=>lat_ozone_save
     ozmixin=>ozmixin_save
-    if_master: if(wrf_dm_on_monitor()) then
-    call wrf_debug(1,'Master rank reads ozone.')
 
 
      WRITE(message,*)'num_months = ',num_months
@@ -3504,24 +3501,18 @@ subroutine oznini(ozmixm,pin,levsiz,num_months,XLAT,                &
       enddo
       enddo
       close(29)
-     endif if_master
-     call wrf_debug(1,"Broadcast ozone to other ranks.")
-     call MPI_Bcast(ozmixin,size(ozmixin),MPI_REAL,0,local_communicator,ierr)
-     call MPI_Bcast(pin,size(pin),MPI_REAL,0,local_communicator,ierr)
-     plev=pin
-     call MPI_Bcast(lat_ozone,size(lat_ozone),MPI_REAL,0,local_communicator,ierr)
    else 
     
     if(levsiz/=levsiz_ozone_save) then
 3081   format('Logic error in caller: levsiz=',I0,' but prior call used ',I0,'.')
        write(message,3081) levsiz,levsiz_ozone_save
-       call wrf_error_fatal3("<stdin>",3518,&
+       call wrf_error_fatal3("<stdin>",3509,&
 message)
     endif
     if(.not.(associated(plev_ozone_save) .and. &
              associated(lat_ozone_save) .and. &
              associated(ozmixin_save))) then
-       call wrf_error_fatal3("<stdin>",3524,&
+       call wrf_error_fatal3("<stdin>",3515,&
 'Ozone save arrays are not allocated.')
     endif
     
@@ -3759,7 +3750,7 @@ USE module_wrf_error
       ENDIF
       CALL wrf_dm_bcast_bytes ( cam_aer_unit , 4 )
       IF ( cam_aer_unit < 0 ) THEN
-        CALL wrf_error_fatal3("<stdin>",3762,&
+        CALL wrf_error_fatal3("<stdin>",3753,&
 'module_ra_cam: aer_optics_initialize: Can not find unused fortran unit to read in lookup table.' )
       ENDIF
 
@@ -3883,7 +3874,7 @@ USE module_wrf_error
      RETURN
 9010 CONTINUE
      WRITE( errmess , '(A35,I4)' ) 'module_ra_cam: error reading unit ',cam_aer_unit
-     CALL wrf_error_fatal3("<stdin>",3886,&
+     CALL wrf_error_fatal3("<stdin>",3877,&
 errmess)
 
 END subroutine aer_optics_initialize
@@ -3996,7 +3987,7 @@ USE module_wrf_error
       ENDIF
       CALL wrf_dm_bcast_bytes ( cam_abs_unit , 4 )
       IF ( cam_abs_unit < 0 ) THEN
-        CALL wrf_error_fatal3("<stdin>",3999,&
+        CALL wrf_error_fatal3("<stdin>",3990,&
 'module_ra_cam: radaeinit: Can not find unused fortran unit to read in lookup table.' )
       ENDIF
 
@@ -4046,7 +4037,7 @@ USE module_wrf_error
      RETURN
 9010 CONTINUE
      WRITE( errmess , '(A35,I4)' ) 'module_ra_cam: error reading unit ',cam_abs_unit
-     CALL wrf_error_fatal3("<stdin>",4049,&
+     CALL wrf_error_fatal3("<stdin>",4040,&
 errmess)
 end subroutine radaeini
 

@@ -70,12 +70,6 @@ SUBROUTINE sfs_driver( grid, config_flags, &
 
 
   USE module_sfs_nba
-   USE module_dm
-   USE module_comm_dm, ONLY : &
-                           HALO_EM_NBA_RIJ_sub   &
-                          ,PERIOD_EM_NBA_RIJ_sub   &
-                          ,HALO_EM_NBA_MIJ_sub   &
-                          ,PERIOD_EM_NBA_MIJ_sub
 
   IMPLICIT NONE
 
@@ -186,37 +180,6 @@ SUBROUTINE sfs_driver( grid, config_flags, &
 
 
 
-
-
-
-
-
-
-
-CALL HALO_EM_NBA_RIJ_sub ( grid, &
-  num_nba_rij, &
-  nba_rij, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL PERIOD_EM_NBA_RIJ_sub ( grid, &
-  config_flags, &
-  num_nba_rij, &
-  nba_rij, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
 
 
     !$OMP PARALLEL DO   &
@@ -389,37 +352,6 @@ CALL PERIOD_EM_NBA_RIJ_sub ( grid, &
 
 
 
-
-
-
-
-
-
-
-CALL HALO_EM_NBA_MIJ_sub ( grid, &
-  num_nba_mij, &
-  nba_mij, &
-  local_communicator, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
-
-
-
-
-
-
-
-CALL PERIOD_EM_NBA_MIJ_sub ( grid, &
-  config_flags, &
-  num_nba_mij, &
-  nba_mij, &
-  local_communicator_periodic, &
-  mytask, ntasks, ntasks_x, ntasks_y, &
-  ids, ide, jds, jde, kds, kde,       &
-  ims, ime, jms, jme, kms, kme,       &
-  ips, ipe, jps, jpe, kps, kpe )
 
 
     !$OMP PARALLEL DO   &

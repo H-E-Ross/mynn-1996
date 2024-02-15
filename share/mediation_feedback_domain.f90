@@ -6,7 +6,7 @@ SUBROUTINE med_feedback_domain ( parent_grid , nested_grid )
    USE module_domain
    USE module_configure
 
-   USE module_dm, ONLY: local_communicator, intercomm_active
+   USE module_dm, ONLY: intercomm_active
    IMPLICIT NONE
    TYPE(domain), POINTER :: parent_grid , nested_grid
    TYPE(domain), POINTER :: grid
@@ -306,80 +306,6 @@ real      ,DIMENSION(grid%sm31:grid%em31,grid%sm32:grid%em32,grid%sm33:grid%em33
 
 
 
-   CALL model_to_grid_config_rec ( nested_grid%id , model_config_rec , config_flags )
-   parent_grid%ht_coarse = parent_grid%ht
-   grid => nested_grid%intermediate_grid
-   CALL wrf_dm_nestexchange_init
-  IF ( nested_grid%active_this_task ) THEN
-   grid => nested_grid%intermediate_grid
-   CALL feedback_domain_em_part1 ( grid, nested_grid, config_flags   &
-
-
-
-
-
-
-
-,grid%moist,grid%moist_bxs,grid%moist_bxe,grid%moist_bys,grid%moist_bye,grid%moist_btxs,grid%moist_btxe,grid%moist_btys, &
-grid%moist_btye,grid%dfi_moist,grid%dfi_moist_bxs,grid%dfi_moist_bxe,grid%dfi_moist_bys,grid%dfi_moist_bye,grid%dfi_moist_btxs, &
-grid%dfi_moist_btxe,grid%dfi_moist_btys,grid%dfi_moist_btye,grid%scalar,grid%scalar_bxs,grid%scalar_bxe,grid%scalar_bys, &
-grid%scalar_bye,grid%scalar_btxs,grid%scalar_btxe,grid%scalar_btys,grid%scalar_btye,grid%dfi_scalar,grid%dfi_scalar_bxs, &
-grid%dfi_scalar_bxe,grid%dfi_scalar_bys,grid%dfi_scalar_bye,grid%dfi_scalar_btxs,grid%dfi_scalar_btxe,grid%dfi_scalar_btys, &
-grid%dfi_scalar_btye,grid%aerod,grid%aerocu,grid%ozmixm,grid%aerosolc_1,grid%aerosolc_2,grid%fdda3d,grid%fdda2d,grid%advh_t, &
-grid%advz_t,grid%tracer,grid%tracer_bxs,grid%tracer_bxe,grid%tracer_bys,grid%tracer_bye,grid%tracer_btxs,grid%tracer_btxe, &
-grid%tracer_btys,grid%tracer_btye,grid%pert3d,grid%nba_mij,grid%nba_rij,grid%sbmradar,grid%chem &
-
-
-                                   )
-  ENDIF
-   grid => parent_grid
-
-   grid%nest_mask = 0.
-
-   CALL feedback_domain_em_part2 ( grid , nested_grid%intermediate_grid, nested_grid , config_flags   &
-
-
-
-
-
-
-
-,grid%moist,grid%moist_bxs,grid%moist_bxe,grid%moist_bys,grid%moist_bye,grid%moist_btxs,grid%moist_btxe,grid%moist_btys, &
-grid%moist_btye,grid%dfi_moist,grid%dfi_moist_bxs,grid%dfi_moist_bxe,grid%dfi_moist_bys,grid%dfi_moist_bye,grid%dfi_moist_btxs, &
-grid%dfi_moist_btxe,grid%dfi_moist_btys,grid%dfi_moist_btye,grid%scalar,grid%scalar_bxs,grid%scalar_bxe,grid%scalar_bys, &
-grid%scalar_bye,grid%scalar_btxs,grid%scalar_btxe,grid%scalar_btys,grid%scalar_btye,grid%dfi_scalar,grid%dfi_scalar_bxs, &
-grid%dfi_scalar_bxe,grid%dfi_scalar_bys,grid%dfi_scalar_bye,grid%dfi_scalar_btxs,grid%dfi_scalar_btxe,grid%dfi_scalar_btys, &
-grid%dfi_scalar_btye,grid%aerod,grid%aerocu,grid%ozmixm,grid%aerosolc_1,grid%aerosolc_2,grid%fdda3d,grid%fdda2d,grid%advh_t, &
-grid%advz_t,grid%tracer,grid%tracer_bxs,grid%tracer_bxe,grid%tracer_bys,grid%tracer_bye,grid%tracer_btxs,grid%tracer_btxe, &
-grid%tracer_btys,grid%tracer_btye,grid%pert3d,grid%nba_mij,grid%nba_rij,grid%sbmradar,grid%chem &
-
-
-                                   )
-
-   WHERE   ( grid%nest_pos .NE. 9021000.  ) grid%ht = grid%ht_coarse
-   CALL push_communicators_for_domain(grid%id)
-   CALL update_after_feedback_em ( grid  &
-
-
-
-
-
-
-
-,grid%moist,grid%moist_bxs,grid%moist_bxe,grid%moist_bys,grid%moist_bye,grid%moist_btxs,grid%moist_btxe,grid%moist_btys, &
-grid%moist_btye,grid%dfi_moist,grid%dfi_moist_bxs,grid%dfi_moist_bxe,grid%dfi_moist_bys,grid%dfi_moist_bye,grid%dfi_moist_btxs, &
-grid%dfi_moist_btxe,grid%dfi_moist_btys,grid%dfi_moist_btye,grid%scalar,grid%scalar_bxs,grid%scalar_bxe,grid%scalar_bys, &
-grid%scalar_bye,grid%scalar_btxs,grid%scalar_btxe,grid%scalar_btys,grid%scalar_btye,grid%dfi_scalar,grid%dfi_scalar_bxs, &
-grid%dfi_scalar_bxe,grid%dfi_scalar_bys,grid%dfi_scalar_bye,grid%dfi_scalar_btxs,grid%dfi_scalar_btxe,grid%dfi_scalar_btys, &
-grid%dfi_scalar_btye,grid%aerod,grid%aerocu,grid%ozmixm,grid%aerosolc_1,grid%aerosolc_2,grid%fdda3d,grid%fdda2d,grid%advh_t, &
-grid%advz_t,grid%tracer,grid%tracer_bxs,grid%tracer_bxe,grid%tracer_bys,grid%tracer_bye,grid%tracer_btxs,grid%tracer_btxe, &
-grid%tracer_btys,grid%tracer_btye,grid%pert3d,grid%nba_mij,grid%nba_rij,grid%sbmradar,grid%chem &
-
-
-                                   )
-   CALL pop_communicators_for_domain
-
-   grid => nested_grid%intermediate_grid
 
 
 
