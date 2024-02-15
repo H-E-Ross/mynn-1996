@@ -298,7 +298,11 @@ MODULE module_bl_mynn_driver
 !    END SUBROUTINE
 !  end interface
 
+  interface
 
+  SUBROUTINE helloworld()
+
+  end interface
 
   !>Use Ito et al. (2015, BLM) scale-aware (0: no, 1: yes). Note that this also has impacts
   !!on the cloud PDF and mass-flux scheme, using LES-derived similarity function.
@@ -562,6 +566,7 @@ CONTAINS
     real(kind_phys) :: delt2
 
 
+    CALL helloworld()
     if (debug_code) then !check incoming values
       do i=its,ite
         problem = .false.

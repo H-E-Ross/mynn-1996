@@ -318,7 +318,8 @@ module_bl_mynn_1d.o: \
 
 module_bl_mynn_driver.o: \
 	module_bl_mynn_common.o \
-	module_bl_mynn_1d.o
+	module_bl_mynn_1d.o \
+	helloworld.o
 
 
 module_bl_mynn_wrapper.o: \

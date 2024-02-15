@@ -395,6 +395,10 @@ setfeenv.o : setfeenv.c
 	$(RM) $@
 	$(CC) -o $@ -c $(CFLAGS) $*.c
 
+.cpp.o:
+	$(RM) $@
+	$(CC) -o $@ -c $(CFLAGS) $*.cpp
+
 # A little more adventurous.  Allow full opt on 
 # mediation_integrate.o \
 # shift_domain_em.o \
