@@ -1,6 +1,5 @@
 #include <algorithm> 
 #include <functional>
-#include <vector>
 
 extern "C" void mym_predict(int kts, int kte, float closure, float delt, float* dz, float* ust, float flt, float flq, float pmz, float phh, float* el, float* dfq, float* rho, float* pdk, float* pdt, float* pdq, float* pdc, float* qke, float* tsq, float* qsq, float* cov, float* s_aw, float* s_awqke, int bl_mynn_edmf_tke, int tke_budget, float xlvcp, float xlscp, float karman);
 
@@ -60,7 +59,7 @@ constexpr bool env_subs = false;
 
 #include <iostream>
 
-void tridiag2(int n, float* a, float* b, float* c, float* d, float* x) {
+void tridiag2_c(int n, float* a, float* b, float* c, float* d, float* x) {
     float* cp = new float[n];
     float* dp = new float[n];
     float m;
@@ -89,7 +88,7 @@ void tridiag2(int n, float* a, float* b, float* c, float* d, float* x) {
 }
 
  
-void moisture_check(int kte, float delt, float* dp, float* exner,
+void moisture_check_c(int kte, float delt, float* dp, float* exner,
                     float* qv, float* qc, float* qi, float* qs, float* th,
                     float* dqv, float* dqc, float* dqi, float* dqs, float* dth, 
 		    float dqv2, float xlvcp, float xlscp) {
@@ -288,7 +287,7 @@ void mym_predict(int kts, int kte, float closure, float delt, float* dz, float* 
     b[kte] = 1.0;
     c[kte] = 0.0;
     d[kte] = qke[kte];
-    tridiag2(kte, a, b, c, d, x);
+    tridiag2_c(kte, a, b, c, d, x);
     for (int k = kts; k <= kte; k++) {
         qke[k] = std::max(x[k], 1e-4f);
         qke[k] = std::min(qke[k], 150.0f);
@@ -337,7 +336,7 @@ void mym_predict(int kts, int kte, float closure, float delt, float* dz, float* 
         b[kte] = 1.0;
         c[kte] = 0.0;
         d[kte] = 0.0;
-        tridiag2(kte, a, b, c, d, x);
+        tridiag2_c(kte, a, b, c, d, x);
         for (int k = kts; k <= kte; k++) {
             qsq[k] = std::max(x[k], 1e-17f);
         }
@@ -371,7 +370,7 @@ void mym_predict(int kts, int kte, float closure, float delt, float* dz, float* 
         b[kte] = 1.0;
         c[kte] = 0.0;
         d[kte] = tsq[kte];
-        tridiag2(kte, a, b, c, d, x);
+        tridiag2_c(kte, a, b, c, d, x);
         for (int k = kts; k <= kte; k++) {
             tsq[k] = x[k];
         }
@@ -392,7 +391,7 @@ void mym_predict(int kts, int kte, float closure, float delt, float* dz, float* 
         b[kte] = 1.0;
         c[kte] = 0.0;
         d[kte] = 0.0;
-        tridiag2(kte, a, b, c, d, x);
+        tridiag2_c(kte, a, b, c, d, x);
         for (int k = kts; k <= kte; k++) {
             cov[k] = x[k];
         }

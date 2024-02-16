@@ -11,7 +11,7 @@ RM      =       rm -f
 
 
 MODULES = \
-	helloworld.o \
+	module_bl_mynn_1d_cc.o \
 	ccpp_kind_types.o \
 	module_bep_bem_helper.o \
 	complex_number_module.o \
