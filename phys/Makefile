@@ -6,6 +6,9 @@ RM      =       rm -f
 
 #cc -c module_bl_mynn_1d_cc.cpp
 #module_bl_mynn_driver.o : module_bl_mynn_1d_cc.o
+#helloworld.o : helloworld.cpp
+#	cc -o helloworld.o -c helloworld.cpp
+
 
 MODULES = \
 	helloworld.o \

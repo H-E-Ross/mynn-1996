@@ -8,11 +8,11 @@ set -o pipefail
 
 imach="pm" #system name, pm for perlmutter
 
-doclean_all=true #true if compiled different configure options
+doclean_all=false #true if compiled different configure options
 
-doclean=true
+doclean=false
 
-runconf=true
+runconf=false
 
 docompile=true
 

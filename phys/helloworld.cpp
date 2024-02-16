@@ -2,7 +2,7 @@
 #include <functional>
 #include <stdio.h>
 
-extern "C" void hellworld();
+extern "C" void helloworld();
 
 using std::bind;
 

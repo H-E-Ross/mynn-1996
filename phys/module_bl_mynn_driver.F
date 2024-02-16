@@ -264,7 +264,7 @@ MODULE module_bl_mynn_driver
         tice      , kind_phys
 
   use module_bl_mynn_1d
-  use iso_c_binding, only: c_double, c_int, c_float
+  use iso_c_binding !, only: c_double, c_int, c_float
 
   IMPLICIT NONE
 
@@ -300,8 +300,8 @@ MODULE module_bl_mynn_driver
 
   interface
 
-  SUBROUTINE helloworld()
-
+  SUBROUTINE helloworld() bind(c)
+  END SUBROUTINE helloworld
   end interface
 
   !>Use Ito et al. (2015, BLM) scale-aware (0: no, 1: yes). Note that this also has impacts
