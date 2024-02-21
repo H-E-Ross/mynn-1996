@@ -4,3 +4,11 @@
 *.mod
 *.inc
 tools/*
+phys/*o
+phys/*mod
+phys/*f90
+phys/*swp
+phys/*bak
+run/namelist*
+run/slurm*
+share/*f90

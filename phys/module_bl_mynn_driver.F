@@ -329,6 +329,78 @@ MODULE module_bl_mynn_driver
   end interface
 
 
+  interface
+
+  SUBROUTINE mynn_tendencies(kts,kte,i,       &
+       &delt,dz,rho,                          &
+       &u,v,th,tk,qv,qc,qi,qs,qnc,qni,        &
+       &psfc,p,exner,                         &
+       &thl,sqv,sqc,sqi,sqs,sqw,              &
+       &qnwfa,qnifa,qnbca,ozone,              &
+       &ust,flt,flq,flqv,flqc,wspd,           &
+       &uoce,voce,                            &
+       &tsq,qsq,cov,                          &
+       &tcd,qcd,                              &
+       &dfm,dfh,dfq,                          &
+       &Du,Dv,Dth,Dqv,Dqc,Dqi,Dqs,Dqnc,Dqni,  &
+       &Dqnwfa,Dqnifa,Dqnbca,Dozone,          &
+       &diss_heat,                            &
+       &s_aw,s_awthl,s_awqt,s_awqv,s_awqc,    &
+       &s_awu,s_awv,                          &
+       &s_awqnc,s_awqni,                      &
+       &s_awqnwfa,s_awqnifa,s_awqnbca,        &
+       &sd_aw,sd_awthl,sd_awqt,sd_awqv,       &
+       &sd_awqc,sd_awu,sd_awv,                &
+       &sub_thl,sub_sqv,                      &
+       &sub_u,sub_v,                          &
+       &det_thl,det_sqv,det_sqc,              &
+       &det_u,det_v,                          &
+       &FLAG_QC,FLAG_QI,FLAG_QNC,FLAG_QNI,    &
+       &FLAG_QS,                              &
+       &FLAG_QNWFA,FLAG_QNIFA,FLAG_QNBCA,     &
+       &FLAG_OZONE,                           &
+       &cldfra_bl1d,                          &
+       &bl_mynn_cloudmix,                     &
+       &bl_mynn_mixqt,                        &
+       &bl_mynn_edmf,                         &
+       &bl_mynn_edmf_mom,                     &
+       &bl_mynn_mixscalars,debug_code,        &
+       &rhoinv, sqw2, R_d, p608               ) bind(c)
+
+!-------------------------------------------------------------------
+     import c_int,c_float,c_bool
+
+    integer(kind=c_int), intent(in) :: kts,kte,i
+    logical(kind=c_bool), intent(in) :: debug_code
+
+    integer(kind=c_int), intent(in) :: bl_mynn_cloudmix,bl_mynn_mixqt,                &
+                           bl_mynn_edmf,bl_mynn_edmf_mom,                 &
+                           bl_mynn_mixscalars
+    logical(kind=c_bool), intent(in) :: FLAG_QI,FLAG_QNI,FLAG_QC,FLAG_QS,              &
+         &FLAG_QNC,FLAG_QNWFA,FLAG_QNIFA,FLAG_QNBCA,FLAG_OZONE
+    real(kind=c_float), dimension(kts:kte+1), intent(in) :: s_aw,            &
+         &s_awthl,s_awqt,s_awqnc,s_awqni,s_awqv,s_awqc,s_awu,s_awv,       &
+         &s_awqnwfa,s_awqnifa,s_awqnbca,                                  &
+         &sd_aw,sd_awthl,sd_awqt,sd_awqv,sd_awqc,sd_awu,sd_awv
+! tendencies from mass-flux environmental subsidence and detrainment
+    real(kind=c_float), dimension(kts:kte), intent(in) :: sub_thl,sub_sqv,   &
+         &sub_u,sub_v,det_thl,det_sqv,det_sqc,det_u,det_v
+    real(kind=c_float), dimension(kts:kte), intent(in) :: u,v,th,tk,qv,qc,qi,&
+         &qs,qni,qnc,rho,p,exner,dfq,dz,tsq,qsq,cov,tcd,qcd,              &
+         &cldfra_bl1d,diss_heat
+    real(kind=c_float), dimension(kts:kte), intent(inout) :: thl,sqw,sqv,sqc,&
+         &sqi,sqs,qnwfa,qnifa,qnbca,ozone,dfm,dfh
+    real(kind=c_float), dimension(kts:kte), intent(inout) :: du,dv,dth,dqv,  &
+         &dqc,dqi,dqs,dqni,dqnc,dqnwfa,dqnifa,dqnbca,dozone
+    real(kind=c_float), intent(in) :: flt,flq,flqv,flqc,uoce,voce
+    real(kind=c_float), intent(in) :: ust,delt,psfc,wspd
+
+    real(kind=c_float), intent(in) :: rhoinv, sqw2, R_d, p608
+  END SUBROUTINE mynn_tendencies
+
+  end interface
+
+
   !>Use Ito et al. (2015, BLM) scale-aware (0: no, 1: yes). Note that this also has impacts
   !!on the cloud PDF and mass-flux scheme, using LES-derived similarity function.
   real(kind_phys), parameter :: scaleaware=1.

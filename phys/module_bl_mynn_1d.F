@@ -2069,7 +2069,7 @@ CONTAINS
 !>\ingroup gsd_mynn_edmf
 !! This subroutine solves for tendencies of U, V, \f$\theta\f$, qv,
 !! qc, and qi
-  SUBROUTINE mynn_tendencies(kts,kte,i,       &
+  SUBROUTINE mynn_tendencies_red(kts,kte,i,       &
        &delt,dz,rho,                          &
        &u,v,th,tk,qv,qc,qi,qs,qnc,qni,        &
        &psfc,p,exner,                         &
@@ -3177,7 +3177,7 @@ ENDIF
 # undef kte
 #endif
 
-  END SUBROUTINE mynn_tendencies
+  END SUBROUTINE mynn_tendencies_red
 
 ! ==================================================================
   SUBROUTINE moisture_check(kte, delt, dp, exner,   &
