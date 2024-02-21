@@ -10,7 +10,7 @@ imach="pm" #system name, pm for perlmutter
 
 doclean_all=false #true if compiled different configure options
 
-doclean=false
+doclean=true
 
 runconf=false
 

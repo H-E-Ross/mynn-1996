@@ -280,7 +280,7 @@ MODULE module_bl_mynn_driver
        &            s_aw,s_awqke,bl_mynn_edmf_tke,                      &
        &            qWT1D, qDISS1D,tke_budget,                          &
        &            xlvcp,xlscp) bind(c)
-      import c_double,c_int,c_float
+      import c_int,c_float
 
       real(kind=c_float), intent(in)    :: closure
       real(kind=c_float), intent(in)  :: xlvcp, xlscp
@@ -296,13 +296,38 @@ MODULE module_bl_mynn_driver
       !!  TKE budget  (Puhales, 2020, WRF 4.2.1)  << EOB
       real(kind=c_float), dimension(kts:kte), intent(out) :: qWT1D, qDISS1D
     END SUBROUTINE mym_predict
+   end interface
+      
+   interface
+    SUBROUTINE mynn_mix_chem_cc (kts,kte,i,           &
+     &          delt,dz,pblh,                      &
+     &          nchem, kdvel, ndvel,               &
+     &          chem1, vd1,                        &
+     &          rho,                               &
+     &          flt, tcd, qcd,                     &
+     &          dfh,                               &
+     &          s_aw, s_awchem,                    &
+     &          emis_ant_no, frp, rrfs_sd,         &
+     &          enh_mix                            ) bind(c)
+      
+     import c_int,c_float,c_bool
+
+    integer(kind=c_int), intent(in) :: kts,kte,i
+    real(kind=c_float), dimension(kts:kte), intent(in)    :: dfh,dz,tcd,qcd
+    real(kind=c_float), dimension(kts:kte), intent(inout) :: rho
+    real(kind=c_float), intent(in)    :: flt
+    real(kind=c_float), intent(in)    :: delt,pblh
+    integer(kind=c_int), intent(in) :: nchem, kdvel, ndvel
+    real(kind=c_float), dimension( kts:kte+1), intent(in) :: s_aw
+    real(kind=c_float), dimension( kts:kte, nchem ), intent(inout) :: chem1
+    real(kind=c_float), dimension( kts:kte+1,nchem), intent(in) :: s_awchem
+    real(kind=c_float), dimension( ndvel ), intent(in) :: vd1
+    real(kind=c_float), intent(in) :: emis_ant_no,frp
+    integer(kind=c_int), intent(in) :: rrfs_sd, enh_mix
+    END SUBROUTINE mynn_mix_chem_cc
+
   end interface
 
-!  interface
-
-!  SUBROUTINE helloworld() bind(c)
-!  END SUBROUTINE helloworld
-!  end interface
 
   !>Use Ito et al. (2015, BLM) scale-aware (0: no, 1: yes). Note that this also has impacts
   !!on the cloud PDF and mass-flux scheme, using LES-derived similarity function.
@@ -439,7 +464,7 @@ CONTAINS
 ! SGT: Changed this to use assumed shape arrays (dimension(:,:,:)) with no "optional" arguments
 !      to prevent a crash on Cheyenne. Do not change it back without testing if the code runs
 !      on Cheyenne with the GNU compiler.
-    
+    integer :: enh_mix_in 
     real(kind_phys), intent(in) :: delt
     real(kind_phys), dimension(ims:ime),   intent(in) :: dx
     real(kind_phys), dimension(ims:ime,kms:kme), intent(in) :: dz,              &
@@ -565,7 +590,7 @@ CONTAINS
     integer :: nsub
     real(kind_phys) :: delt2
 
-
+    write(*,*) "Calling mynn"
    !! CALL helloworld()
     if (debug_code) then !check incoming values
       do i=its,ite
@@ -1260,8 +1285,13 @@ CONTAINS
 
 
        if ( mix_chem ) then
+          if (enh_mix) then
+                  enh_mix_in=1
+          else
+                  enh_mix_in=0
+          endif
           if ( rrfs_sd ) then 
-             call mynn_mix_chem(kts,kte,i,               &
+             call mynn_mix_chem_cc(kts,kte,i,               &
                   &delt, dz1, pblh(i),                   &
                   &nchem, kdvel, ndvel,                  &
                   &chem1, vd1,                           &
@@ -1270,10 +1300,10 @@ CONTAINS
                   &dfh,                                  &
                   &s_aw1,s_awchem1,                      &
                   &emis_ant_no(i),                       &
-                  &frp(i), rrfs_sd,                      &
-                  &enh_mix, smoke_dbg                    )
+                  &frp(i), 1,                            & !//rrfs_sd passed as integer
+                  &enh_mix_in                            )
           else
-             call mynn_mix_chem(kts,kte,i,               &
+             call mynn_mix_chem_cc(kts,kte,i,               &
                   &delt, dz1, pblh(i),                   &
                   &nchem, kdvel, ndvel,                  &
                   &chem1, vd1,                           &
@@ -1282,8 +1312,8 @@ CONTAINS
                   &dfh,                                  &
                   &s_aw1,s_awchem1,                      &
                   &zero,                                 &
-                  &zero, rrfs_sd,                        &
-                  &enh_mix, smoke_dbg                    )
+                  &zero, 0,                              &
+                  &enh_mix_in                            )
           endif
           do ic = 1,nchem
              do k = kts,kte

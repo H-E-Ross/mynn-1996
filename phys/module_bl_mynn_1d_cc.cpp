@@ -1,13 +1,22 @@
 #include <algorithm> 
+#include <iostream>
+#include <vector>
+#include <cmath>
 #include <functional>
 
 extern "C" void mym_predict(int kts, int kte, float closure, float delt, float* dz, float* ust, float flt, float flq, float pmz, float phh, float* el, float* dfq, float* rho, float* pdk, float* pdt, float* pdq, float* pdc, float* qke, float* tsq, float* qsq, float* cov, float* s_aw, float* s_awqke, int bl_mynn_edmf_tke, int tke_budget, float xlvcp, float xlscp, float karman);
+
+extern "C" void mynn_mix_chem_cc(int kts, int kte, int i,double delt, std::vector<double>& dz, double pblh, int nchem, int kdvel, int ndvel,std::vector<std::vector<double>>& chem1, std::vector<double>& vd1, std::vector<double>& rho,double flt, std::vector<double>& tcd, std::vector<double>& qcd, std::vector<double>& dfh,std::vector<double>& s_aw, std::vector<std::vector<double>>& s_awchem, double emis_ant_no, double frp, int rrfs_sd, int enh_mix); 
 
 
 using std::bind;
 
 //----------------------------------------CONTSTANTS-------------------------------------------
-#include <cmath> // For pow function, if needed
+
+// Constants
+const double NO_threshold = 10.0;     // For anthropogenic sources
+const double frp_threshold = 10.0;    // Increased the frp threshold to enhance mixing over big fires
+const double pblh_threshold = 100.0;
 
 // Assuming kind_phys corresponds to float precision
 constexpr float cphm_st = 5.0, cphm_unst = 16.0,
@@ -57,7 +66,28 @@ constexpr bool env_subs = false;
 
 // Interally used
 
-#include <iostream>
+
+// Function to solve system of linear equations on tridiagonal matrix n times n
+// after Peaceman and Rachford, 1955
+// a, b, c, d - are vectors of order n
+// a, b, c - are coefficients on the LHS
+// d - is initially RHS on the output becomes a solution vector
+void tridiag(int n, const std::vector<double>& a, const std::vector<double>& b, std::vector<double>& c, std::vector<double>& d) {
+    std::vector<double> q(n);
+    c[n-1] = 0.0;
+    q[0] = -c[0] / b[0];
+    d[0] = d[0] / b[0];
+
+    for (int i = 1; i < n; ++i) {
+        double p = 1.0 / (b[i] + a[i] * q[i - 1]);
+        q[i] = -c[i] * p;
+        d[i] = (d[i] - a[i] * d[i - 1]) * p;
+    }
+
+    for (int i = n - 2; i >= 0; --i) {
+        d[i] = d[i] + q[i] * d[i + 1];
+    }
+}
 
 void tridiag2_c(int n, float* a, float* b, float* c, float* d, float* x) {
     float* cp = new float[n];
@@ -86,6 +116,29 @@ void tridiag2_c(int n, float* a, float* b, float* c, float* d, float* x) {
     delete[] cp;
     delete[] dp;
 }
+
+// Function to perform tridiagonal matrix algorithm
+void tridiag3(int kte, std::vector<double>& a, std::vector<double>& b, std::vector<double>& c, std::vector<double>& d, std::vector<double>& x) {
+    // Inversion and resolution of a tridiagonal matrix A X = D
+    // a - lower diagonal (Ai,i-1)
+    // b - principal diagonal (Ai,i)
+    // c - upper diagonal (Ai,i+1)
+    // d - right-hand side vector
+    // x - solution vector
+
+    for (int in = kte - 1; in >= 1; --in) {
+        d[in] = d[in] - c[in] * d[in + 1] / b[in + 1];
+        b[in] = b[in] - c[in] * a[in + 1] / b[in + 1];
+    }
+    for (int in = 1 + 1; in < kte; ++in) {
+        d[in] = d[in] - a[in] * d[in - 1] / b[in - 1];
+    }
+    for (int in = 1; in < kte; ++in) {
+        x[in] = d[in] / b[in];
+    }
+}
+
+
 
  
 void moisture_check_c(int kte, float delt, float* dp, float* exner,
@@ -427,5 +480,84 @@ void mym_predict(int kts, int kte, float closure, float delt, float* dz, float* 
     delete[] tke_up;
     delete[] dzinv;
 }
+
+void mynn_mix_chem_cc(int kts, int kte, int i,
+                   double delt, std::vector<double>& dz, double pblh,
+                   int nchem, int kdvel, int ndvel,
+                   std::vector<std::vector<double>>& chem1, std::vector<double>& vd1,
+                   std::vector<double>& rho,
+                   double flt, std::vector<double>& tcd, std::vector<double>& qcd,
+                   std::vector<double>& dfh,
+                   std::vector<double>& s_aw, std::vector<std::vector<double>>& s_awchem,
+                   double emis_ant_no, double frp, int rrfs_sd, int enh_mix) {
+
+    // Local vars
+    std::vector<double> dtz(kte - kts + 1);
+    std::vector<double> a(kte - kts + 1), b(kte - kts + 1), c(kte - kts + 1), d(kte - kts + 1), x(kte - kts + 1);
+    double dztop = 0.5 * (dz[kte - 1] + dz[kte - 2]);
+    for (int k = kts; k <= kte; ++k) {
+        dtz[k - kts] = delt / dz[k - 1];
+    }
+    // Prepare "constants" for diffusion equation.
+    std::vector<double> rhoz(kte - kts + 2), khdz(kte - kts + 2), rhoinv(kte - kts + 1);
+    rhoz[0] = rho[kts - 1];
+    rhoinv[0] = 1.0 / rho[kts - 1];
+    khdz[0] = rhoz[0] * dfh[kts - 1];
+    for (int k = kts + 1; k <= kte; ++k) {
+        rhoz[k - kts] = (rho[k - 1] * dz[k - 2] + rho[k - 2] * dz[k - 1]) / (dz[k - 2] + dz[k - 1]);
+        rhoz[k - kts] = std::max(rhoz[k - kts], 1E-4);
+        rhoinv[k - kts] = 1.0 / std::max(rho[k - 1], 1E-4);
+        double dzk = 0.5 * (dz[k - 1] + dz[k - 2]);
+        khdz[k - kts] = rhoz[k - kts] * dfh[k - 1];
+    }
+    rhoz[kte - kts + 1] = rhoz[kte - kts];
+    khdz[kte - kts + 1] = rhoz[kte - kts + 1] * dfh[kte - 1];
+    // Stability criteria for mf
+    for (int k = kts + 1; k <= kte - 1; ++k) {
+        khdz[k - kts] = std::max(khdz[k - kts], 0.5 * s_aw[k - kts]);
+        khdz[k - kts] = std::max(khdz[k - kts], -0.5 * (s_aw[k - kts] - s_aw[k - kts + 1]));
+    }
+    // Enhanced mixing over fires
+    if (rrfs_sd==1 && enh_mix==1) {
+        for (int k = kts + 1; k <= kte - 1; ++k) {
+            double khdz_old = khdz[k - kts];
+            double khdz_back = pblh * 0.15 / dz[k - 1];
+            // Modify based on anthropogenic emissions of NO and FRP
+            if (pblh < pblh_threshold) {
+                if (emis_ant_no > NO_threshold) {
+                    khdz[k - kts] = std::max(1.1 * khdz[k - kts], std::sqrt((emis_ant_no / NO_threshold)) / dz[k - 1] * rhoz[k - kts]);
+                }
+                if (frp > frp_threshold) {
+                    int kmaxfire = std::ceil(std::log(frp));
+                    khdz[k - kts] = std::max(1.1 * khdz[k - kts], (1.0 - k / (kmaxfire * 2.0)) * (std::pow(std::log(frp), 2.0) - 2.0 * std::log(frp)) / dz[k - 1] * rhoz[k - kts]);
+                }
+            }
+        }
+    }
+    // Mixing of chemical species
+    for (int ic = 0; ic < nchem; ++ic) {
+        int k = kts;
+        a[0] = -dtz[0] * khdz[0] * rhoinv[0];
+        b[0] = 1.0 + dtz[0] * (khdz[1] + khdz[0]) * rhoinv[0] - 0.5 * dtz[0] * rhoinv[0] * s_aw[1];
+        c[0] = -dtz[0] * khdz[1] * rhoinv[0] - 0.5 * dtz[0] * rhoinv[0] * s_aw[1];
+        d[0] = chem1[k - 1][ic] - dtz[0] * vd1[ic] * chem1[k - 1][ic] - dtz[0] * rhoinv[0] * s_awchem[1][ic];
+        for (k = kts + 1; k <= kte - 1; ++k) {
+            a[k - kts] = -dtz[k - kts] * khdz[k - kts] * rhoinv[k - kts] + 0.5 * dtz[k - kts] * rhoinv[k - kts] * s_aw[k - kts];
+            b[k - kts] = 1.0 + dtz[k - kts] * (khdz[k - kts] + khdz[k - kts + 1]) * rhoinv[k - kts] + 0.5 * dtz[k - kts] * rhoinv[k - kts] * (s_aw[k - kts] - s_aw[k - kts + 1]);
+            c[k - kts] = -dtz[k - kts] * khdz[k - kts + 1] * rhoinv[k - kts] - 0.5 * dtz[k - kts] * rhoinv[k - kts] * s_aw[k - kts + 1];
+            d[k - kts] = chem1[k - 1][ic] + dtz[k - kts] * rhoinv[k - kts] * (s_awchem[k - kts][ic] - s_awchem[k - kts + 1][ic]);
+        }
+        // Prescribed value at top
+        a[kte - kts] = 0.0;
+        b[kte - kts] = 1.0;
+        c[kte - kts] = 0.0;
+        d[kte - kts] = chem1[kte - 1][ic];
+        tridiag3(kte, a, b, c, d, x);
+        for (k = kts; k <= kte; ++k) {
+            chem1[k - 1][ic] = x[k - kts];
+        }
+    }
+}
+
 
 
