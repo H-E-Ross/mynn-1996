@@ -269,7 +269,7 @@ MODULE module_bl_mynn_driver
   IMPLICIT NONE
 
   interface
-    SUBROUTINE  mym_predict (kts,kte,                                   &
+    SUBROUTINE  mym_predict_cc (kts,kte,                                &
        &            closure,                                            &
        &            delt,                                               &
        &            dz,                                                 &
@@ -295,11 +295,43 @@ MODULE module_bl_mynn_driver
 
       !!  TKE budget  (Puhales, 2020, WRF 4.2.1)  << EOB
       real(kind=c_float), dimension(kts:kte), intent(out) :: qWT1D, qDISS1D
-    END SUBROUTINE mym_predict
+    END SUBROUTINE mym_predict_cc
    end interface
       
-   interface
-    SUBROUTINE mynn_mix_chem_cc (kts,kte,i,           &
+  interface
+  SUBROUTINE mynn_tendencies_cc(kts,kte,delt,dz,rho,              &
+       &        u,v,tk,qv,psfc,p,thl,sqv,sqc,sqw,ust,flt,flq,flqv,   &
+       &        flqc,wspd,uoce,voce,tcd,qcd,dfm,dfh,Du,Dv,        &
+       &        Dth,diss_heat,s_aw,s_awthl,s_awqt,s_awqv,s_awqc,  &
+       &        s_awu,s_awv,sub_thl,sub_sqv,sub_u,sub_v,    &
+       &        det_thl,det_sqv,det_sqc,det_u,det_v,FLAG_QC_I,    &
+       &        bl_mynn_cloudmix,bl_mynn_mixqt,bl_mynn_edmf,      &
+       &        bl_mynn_edmf_mom,debug_code,r_d, p608) bind(c)
+
+     import c_int,c_float
+
+    integer(kind=c_int), intent(in) :: kts,kte
+    integer(kind=c_int), intent(in) :: debug_code, FLAG_QC_I
+    integer(kind=c_int), intent(in) :: bl_mynn_cloudmix,bl_mynn_mixqt,  &
+                           bl_mynn_edmf,bl_mynn_edmf_mom               
+    real(kind=c_float), dimension(kts:kte+1), intent(in) :: s_awthl,    &
+         &s_aw,s_awqt,s_awqv,s_awqc,s_awu,s_awv 
+! tendencies from mass-flux environmental subsidence and detrainment
+    real(kind=c_float), dimension(kts:kte), intent(in) :: sub_thl,sub_sqv,   &
+         &sub_u,sub_v,det_thl,det_sqv,det_sqc,det_u,det_v
+    real(kind=c_float), dimension(kts:kte), intent(in) ::u,v,tk,rho,p,dz,   &
+    & qv,tcd,qcd,diss_heat
+    real(kind=c_float), dimension(kts:kte), intent(inout) :: thl,sqw,sqv,sqc,&
+         &dfm,dfh
+    real(kind=c_float), dimension(kts:kte), intent(inout) ::Du,Dv,Dth
+    real(kind=c_float), intent(in) :: flt,flq,flqv,flqc,uoce,voce
+    real(kind=c_float), intent(in) :: ust,delt,psfc,wspd,r_d, p608
+  END SUBROUTINE mynn_tendencies_cc
+
+  end interface
+
+interface
+    SUBROUTINE mynn_mix_chem_cc (kts,kte,i,        &
      &          delt,dz,pblh,                      &
      &          nchem, kdvel, ndvel,               &
      &          chem1, vd1,                        &
@@ -309,8 +341,8 @@ MODULE module_bl_mynn_driver
      &          s_aw, s_awchem,                    &
      &          emis_ant_no, frp, rrfs_sd,         &
      &          enh_mix                            ) bind(c)
-      
-     import c_int,c_float,c_bool
+
+     import c_int,c_float
 
     integer(kind=c_int), intent(in) :: kts,kte,i
     real(kind=c_float), dimension(kts:kte), intent(in)    :: dfh,dz,tcd,qcd
@@ -325,78 +357,6 @@ MODULE module_bl_mynn_driver
     real(kind=c_float), intent(in) :: emis_ant_no,frp
     integer(kind=c_int), intent(in) :: rrfs_sd, enh_mix
     END SUBROUTINE mynn_mix_chem_cc
-
-  end interface
-
-
-  interface
-
-  SUBROUTINE mynn_tendencies(kts,kte,i,       &
-       &delt,dz,rho,                          &
-       &u,v,th,tk,qv,qc,qi,qs,qnc,qni,        &
-       &psfc,p,exner,                         &
-       &thl,sqv,sqc,sqi,sqs,sqw,              &
-       &qnwfa,qnifa,qnbca,ozone,              &
-       &ust,flt,flq,flqv,flqc,wspd,           &
-       &uoce,voce,                            &
-       &tsq,qsq,cov,                          &
-       &tcd,qcd,                              &
-       &dfm,dfh,dfq,                          &
-       &Du,Dv,Dth,Dqv,Dqc,Dqi,Dqs,Dqnc,Dqni,  &
-       &Dqnwfa,Dqnifa,Dqnbca,Dozone,          &
-       &diss_heat,                            &
-       &s_aw,s_awthl,s_awqt,s_awqv,s_awqc,    &
-       &s_awu,s_awv,                          &
-       &s_awqnc,s_awqni,                      &
-       &s_awqnwfa,s_awqnifa,s_awqnbca,        &
-       &sd_aw,sd_awthl,sd_awqt,sd_awqv,       &
-       &sd_awqc,sd_awu,sd_awv,                &
-       &sub_thl,sub_sqv,                      &
-       &sub_u,sub_v,                          &
-       &det_thl,det_sqv,det_sqc,              &
-       &det_u,det_v,                          &
-       &FLAG_QC,FLAG_QI,FLAG_QNC,FLAG_QNI,    &
-       &FLAG_QS,                              &
-       &FLAG_QNWFA,FLAG_QNIFA,FLAG_QNBCA,     &
-       &FLAG_OZONE,                           &
-       &cldfra_bl1d,                          &
-       &bl_mynn_cloudmix,                     &
-       &bl_mynn_mixqt,                        &
-       &bl_mynn_edmf,                         &
-       &bl_mynn_edmf_mom,                     &
-       &bl_mynn_mixscalars,debug_code,        &
-       &rhoinv, sqw2, R_d, p608               ) bind(c)
-
-!-------------------------------------------------------------------
-     import c_int,c_float,c_bool
-
-    integer(kind=c_int), intent(in) :: kts,kte,i
-    logical(kind=c_bool), intent(in) :: debug_code
-
-    integer(kind=c_int), intent(in) :: bl_mynn_cloudmix,bl_mynn_mixqt,                &
-                           bl_mynn_edmf,bl_mynn_edmf_mom,                 &
-                           bl_mynn_mixscalars
-    logical(kind=c_bool), intent(in) :: FLAG_QI,FLAG_QNI,FLAG_QC,FLAG_QS,              &
-         &FLAG_QNC,FLAG_QNWFA,FLAG_QNIFA,FLAG_QNBCA,FLAG_OZONE
-    real(kind=c_float), dimension(kts:kte+1), intent(in) :: s_aw,            &
-         &s_awthl,s_awqt,s_awqnc,s_awqni,s_awqv,s_awqc,s_awu,s_awv,       &
-         &s_awqnwfa,s_awqnifa,s_awqnbca,                                  &
-         &sd_aw,sd_awthl,sd_awqt,sd_awqv,sd_awqc,sd_awu,sd_awv
-! tendencies from mass-flux environmental subsidence and detrainment
-    real(kind=c_float), dimension(kts:kte), intent(in) :: sub_thl,sub_sqv,   &
-         &sub_u,sub_v,det_thl,det_sqv,det_sqc,det_u,det_v
-    real(kind=c_float), dimension(kts:kte), intent(in) :: u,v,th,tk,qv,qc,qi,&
-         &qs,qni,qnc,rho,p,exner,dfq,dz,tsq,qsq,cov,tcd,qcd,              &
-         &cldfra_bl1d,diss_heat
-    real(kind=c_float), dimension(kts:kte), intent(inout) :: thl,sqw,sqv,sqc,&
-         &sqi,sqs,qnwfa,qnifa,qnbca,ozone,dfm,dfh
-    real(kind=c_float), dimension(kts:kte), intent(inout) :: du,dv,dth,dqv,  &
-         &dqc,dqi,dqs,dqni,dqnc,dqnwfa,dqnifa,dqnbca,dozone
-    real(kind=c_float), intent(in) :: flt,flq,flqv,flqc,uoce,voce
-    real(kind=c_float), intent(in) :: ust,delt,psfc,wspd
-
-    real(kind=c_float), intent(in) :: rhoinv, sqw2, R_d, p608
-  END SUBROUTINE mynn_tendencies
 
   end interface
 
@@ -420,6 +380,7 @@ MODULE module_bl_mynn_driver
 
   !option to print out more stuff for debugging purposes
   logical, parameter :: debug_code = .false.
+  integer, parameter :: debug_code_i = 0
   integer, parameter :: idbg = 23 !specific i-point to write out
 
   ! Used in WRF-ARW module_physics_init.F
@@ -661,6 +622,15 @@ CONTAINS
     ! Substepping TKE
     integer :: nsub
     real(kind_phys) :: delt2
+
+    integer :: FLAG_QC_I
+    
+    if (FLAG_QC .eqv. .true.) then
+      FLAG_QC_I=1
+    else
+      FLAG_QC_I=0
+    endif
+
 
     write(*,*) "Calling mynn"
    !! CALL helloworld()
@@ -1292,7 +1262,7 @@ CONTAINS
 !>  - Call mym_predict() to solve TKE and 
 !! \f$\theta^{'2}, q^{'2}, and \theta^{'}q^{'}\f$
 !! for the following time step.
-       call mym_predict(kts,kte,closure,                 &
+       call mym_predict_cc(kts,kte,closure,                 &
                &delt2, dz1,                              &
                &ust(i), flt, flq, pmz, phh,              &
                &el, dfq, rho1, pdk, pdt, pdq, pdc,       &
@@ -1315,45 +1285,17 @@ CONTAINS
 
 !>  - Call mynn_tendencies() to solve for tendencies of 
 !! \f$U, V, \theta, q_{v}, q_{c}, and q_{i}\f$.
-       call mynn_tendencies(kts,kte,i,                   &
-               &delt, dz1, rho1,                         &
-               &u1, v1, th1, tk1, qv1,                   &
-               &qc1, qi1, kzero, qnc1, qni1,             & !kzero replaces qs1 - not mixing snow
-               &ps(i), p1, ex1, thl,                     &
-               &sqv, sqc, sqi, kzero, sqw,               & !kzero replaces sqs - not mixing snow
-               &qnwfa1, qnifa1, qnbca1, ozone1,          &
-               &ust(i),flt,flq,flqv,flqc,                &
-               &wspd(i),uoce(i),voce(i),                 &
-               &tsq1, qsq1, cov1,                        &
-               &tcd, qcd,                                &
-               &dfm, dfh, dfq,                           &
-               &Du1, Dv1, Dth1, Dqv1,                    &
-               &Dqc1, Dqi1, Dqs1, Dqnc1, Dqni1,          &
-               &Dqnwfa1, Dqnifa1, Dqnbca1,               &
-               &Dozone1,                                 &
-               &diss_heat,                               &
+       call mynn_tendencies_cc(kts,kte,delt, dz1, rho1,    &
+               &u1,v1,tk1,qv1,ps(i),p1,thl,sqv,sqc,sqw,ust(i),flt,   &
+               &flq,flqv,flqc,wspd(i),uoce(i),voce(i),tcd, & 
+               &qcd,dfm,dfh,Du1,Dv1,Dth1,diss_heat,        &
                ! mass flux components
-               &s_aw1,s_awthl1,s_awqt1,                  &
-               &s_awqv1,s_awqc1,s_awu1,s_awv1,           &
-               &s_awqnc1,s_awqni1,                       &
-               &s_awqnwfa1,s_awqnifa1,s_awqnbca1,        &
-               &sd_aw1,sd_awthl1,sd_awqt1,               &
-               &sd_awqv1,sd_awqc1,                       &
-               &sd_awu1,sd_awv1,                         &
-               &sub_thl,sub_sqv,                         &
-               &sub_u,sub_v,                             &
-               &det_thl,det_sqv,det_sqc,                 &
-               &det_u,det_v,                             &
-               &FLAG_QC,FLAG_QI,FLAG_QNC,                &
-               &FLAG_QNI,FLAG_QS,                        &
-               &FLAG_QNWFA,FLAG_QNIFA,                   &
-               &FLAG_QNBCA,FLAG_OZONE,                   &
-               &cldfra_bl1d,                             &
-               &bl_mynn_cloudmix,                        &
-               &bl_mynn_mixqt,                           &
-               &bl_mynn_edmf,                            &
-               &bl_mynn_edmf_mom,                        &
-               &bl_mynn_mixscalars,debug_code            )
+               &s_aw1,s_awthl1,s_awqt1,s_awqv1,s_awqc1,    &
+               &s_awu1,s_awv1,sub_thl,sub_sqv,sub_u,sub_v, &
+               &det_thl,det_sqv,det_sqc,det_u,det_v,       &      
+               &FLAG_QC_I,bl_mynn_cloudmix,bl_mynn_mixqt,  &
+               &bl_mynn_edmf,bl_mynn_edmf_mom,             &
+               &debug_code_i,r_d, p608    )
 
 
        if ( mix_chem ) then

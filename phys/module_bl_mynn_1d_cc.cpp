@@ -4,11 +4,12 @@
 #include <cmath>
 #include <functional>
 
-extern "C" void mym_predict(int kts, int kte, float closure, float delt, float* dz, float* ust, float flt, float flq, float pmz, float phh, float* el, float* dfq, float* rho, float* pdk, float* pdt, float* pdq, float* pdc, float* qke, float* tsq, float* qsq, float* cov, float* s_aw, float* s_awqke, int bl_mynn_edmf_tke, int tke_budget, float xlvcp, float xlscp, float karman);
+extern "C" void mynn_tendencies_cc(int kts, int kte, float delt, float* dz, float* rho, float* u, float* v, float* tk, float* qv, float* psfc, float* p, float* thl, float* sqv, float* sqc, float* sqw, float* ust, float flt, float flq, float flqv, float flqc, float wspd, float uoce, float voce, float* tcd, float* qcd, float* dfm, float* dfh, float* Du, float* Dv, float* Dth, float* diss_heat, float* s_aw, float* s_awthl, float* s_awqt, float* s_awqv, float* s_awqc, float* s_awu, float* s_awv, float* sd_aw, float* sd_awthl, float* sd_awqt, float* sd_awqv, float* sd_awqc, float* sd_awu, float* sd_awv, float* sub_thl, float* sub_sqv, float* sub_u, float* sub_v, float* det_thl, float* det_sqv, float* det_sqc, float* det_u, float* det_v, int FLAG_QC, int bl_mynn_cloudmix, int bl_mynn_mixqt, int bl_mynn_edmf_mom, int debug_code, float r_d, float p608);
+
+extern "C" void mym_predict_cc(int kts, int kte, float closure, float delt, float* dz, float* ust, float flt, float flq, float pmz, float phh, float* el, float* dfq, float* rho, float* pdk, float* pdt, float* pdq, float* pdc, float* qke, float* tsq, float* qsq, float* cov, float* s_aw, float* s_awqke, int bl_mynn_edmf_tke, int tke_budget, float xlvcp, float xlscp, float karman);
 
 extern "C" void mynn_mix_chem_cc(int kts, int kte, int i,float delt, std::vector<float>& dz, float pblh, int nchem, int kdvel, int ndvel,std::vector<std::vector<float>>& chem1, std::vector<float>& vd1, std::vector<float>& rho,float flt, std::vector<float>& tcd, std::vector<float>& qcd, std::vector<float>& dfh,std::vector<float>& s_aw, std::vector<std::vector<float>>& s_awchem, float emis_ant_no, float frp, int rrfs_sd, int enh_mix); 
 
-extern "C" void mynn_tendencies(int kts, int kte, int i, float delt, float* dz, float* rho, float* u, float* v, float* th, float* tk, float* qv, float* qc, float* qi, float* qs, float* qnc, float* qni, float* psfc, float* p, float* exner, float* thl, float* sqv, float* sqc, float* sqi, float* sqs, float* sqw, float* qnwfa, float* qnifa, float* qnbca, float* ozone, float* ust, float flt, float flq, float flqv, float flqc, float wspd, float uoce, float voce, float* tsq, float* qsq, float* cov, float* tcd, float* qcd, float* dfm, float* dfh, float* dfq, float* Du, float* Dv, float* Dth, float* Dqv, float* Dqc, float* Dqi, float* Dqs, float* Dqnc, float* Dqni, float* Dqnwfa, float* Dqnifa, float* Dqnbca, float* Dozone, float* diss_heat, float* s_aw, float* s_awthl, float* s_awqt, float* s_awqv, float* s_awqc, float* s_awu, float* s_awv, float* s_awqnc, float* s_awqni, float* s_awqnwfa, float* s_awqnifa, float* s_awqnbca, float* sd_aw, float* sd_awthl, float* sd_awqt, float* sd_awqv, float* sd_awqc, float* sd_awu, float* sd_awv, float* sub_thl, float* sub_sqv, float* sub_u, float* sub_v, float* det_thl, float* det_sqv, float* det_sqc, float* det_u, float* det_v, bool FLAG_QC, bool FLAG_QI, bool FLAG_QNC, bool FLAG_QNI, bool FLAG_QS, bool FLAG_QNWFA, bool FLAG_QNIFA, bool FLAG_QNBCA, bool FLAG_OZONE, float* cldfra_bl1d, int bl_mynn_cloudmix, int bl_mynn_mixqt, int bl_mynn_edmf, int bl_mynn_edmf_mom, int bl_mynn_mixscalars, bool debug_code, float* rhoinv, float* sqw2, float R_d, float p608);
 
 using std::bind;
 
@@ -610,7 +611,7 @@ void moisture_check_c(int kte, float delt, float* dp, float* exner,
 !>\ingroup gsd_mynn_edmf
 !! This subroutine predicts the turbulent quantities at the next step.
 */
-void mym_predict_c(int kts, int kte, float closure, float delt, float* dz, float* ust, float flt, float flq, float pmz, float phh, float* el, float* dfq, float* rho, float* pdk, float* pdt, float* pdq, float* pdc, float* qke, float* tsq, float* qsq, float* cov, float* s_aw, float* s_awqke, int bl_mynn_edmf_tke, int tke_budget, float xlvcp, float xlscp, float karman) {
+void mym_predict_cc(int kts, int kte, float closure, float delt, float* dz, float* ust, float flt, float flq, float pmz, float phh, float* el, float* dfq, float* rho, float* pdk, float* pdt, float* pdq, float* pdc, float* qke, float* tsq, float* qsq, float* cov, float* s_aw, float* s_awqke, int bl_mynn_edmf_tke, int tke_budget, float xlvcp, float xlscp, float karman) {
     float vkz, pdk1, phm, pdt1, pdq1, pdc1, b1l, b2l, onoff;
     float* dtz = new float[kte-kts+1];
     float* a = new float[kte-kts+1];
@@ -915,14 +916,27 @@ void mynn_mix_chem_cc(int kts, int kte, int i,
 //>\ingroup gsd_mynn_edmf
 // This subroutine solves for tendencies of U, V, \f$\theta\f$, qv,
 // qc, and qi
-void mynn_tendencies(int kts, int kte, int i, float delt, float* dz, float* rho, float* u, float* v, float* th, float* tk, float* qv, float* qc, float* qi, float* qs, float* qnc, float* qni, float* psfc, float* p, float* exner, float* thl, float* sqv, float* sqc, float* sqi, float* sqs, float* sqw, float* qnwfa, float* qnifa, float* qnbca, float* ozone, float* ust, float flt, float flq, float flqv, float flqc, float wspd, float uoce, float voce, float* tsq, float* qsq, float* cov, float* tcd, float* qcd, float* dfm, float* dfh, float* dfq, float* Du, float* Dv, float* Dth, float* Dqv, float* Dqc, float* Dqi, float* Dqs, float* Dqnc, float* Dqni, float* Dqnwfa, float* Dqnifa, float* Dqnbca, float* Dozone, float* diss_heat, float* s_aw, float* s_awthl, float* s_awqt, float* s_awqv, float* s_awqc, float* s_awu, float* s_awv, float* s_awqnc, float* s_awqni, float* s_awqnwfa, float* s_awqnifa, float* s_awqnbca, float* sd_aw, float* sd_awthl, float* sd_awqt, float* sd_awqv, float* sd_awqc, float* sd_awu, float* sd_awv, float* sub_thl, float* sub_sqv, float* sub_u, float* sub_v, float* det_thl, float* det_sqv, float* det_sqc, float* det_u, float* det_v, bool FLAG_QC, bool FLAG_QI, bool FLAG_QNC, bool FLAG_QNI, bool FLAG_QS, bool FLAG_QNWFA, bool FLAG_QNIFA, bool FLAG_QNBCA, bool FLAG_OZONE, float* cldfra_bl1d, int bl_mynn_cloudmix, int bl_mynn_mixqt, int bl_mynn_edmf, int bl_mynn_edmf_mom, int bl_mynn_mixscalars, bool debug_code, float* rhoinv, float* sqw2, float R_d, float p608) {
+void mynn_tendencies_cc(int kts, int kte, float delt, float* dz, float* rho, float* u, float* v, float* tk, float* qv, float* psfc, float* p, float* thl, float* sqv, float* sqc, float* sqw, float* ust, float flt, float flq, float flqv, float flqc, float wspd, float uoce, float voce, float* tcd, float* qcd, float* dfm, float* dfh, float* Du, float* Dv, float* Dth, float* diss_heat, float* s_aw, float* s_awthl, float* s_awqt, float* s_awqv, float* s_awqc, float* s_awu, float* s_awv, float* sd_aw, float* sd_awthl, float* sd_awqt, float* sd_awqv, float* sd_awqc, float* sd_awu, float* sd_awv, float* sub_thl, float* sub_sqv, float* sub_u, float* sub_v, float* det_thl, float* det_sqv, float* det_sqc, float* det_u, float* det_v, int FLAG_QC, int bl_mynn_cloudmix, int bl_mynn_mixqt, int bl_mynn_edmf_mom, int debug_code, float r_d, float p608) {
     float nonloc = 1.0;
     float dztop = 0.5 * (dz[kte] + dz[kte-1]);
     float onoff = (bl_mynn_edmf_mom == 0) ? 0.0 : 1.0;
-    float rhosfc = *psfc / (R_d * (tk[kts] + p608 * qv[kts]));
-    float dtz[kte+1], dfhc[kte], dfmc[kte], delp[kte], sqv2[kte], sqc2[kte];
-    float rhoz[kte+1], khdz[kte+1], kmdz[kte+1];
-    float a[kte+1], b[kte+1], c[kte+1], d[kte+1], x[kte+1];
+    float rhosfc = *psfc / (r_d * (tk[kts] + p608 * qv[kts]));
+    float* dtz = new float[kte+1];
+    float* dfhc = new float[kte]; 
+    float* dfmc = new float[kte];
+    float* delp = new float[kte]; 
+    float* sqv2 = new float[kte]; 
+    float* sqc2 = new float[kte];
+    float* rhoz = new float[kte+1];
+    float* khdz = new float[kte+1];
+    float* kmdz = new float[kte+1];
+    float* rhoinv = new float[kte+1];
+    float* sqw2 = new float[kte+1];
+    float* a = new float[kte+1];
+    float* b = new float[kte+1]; 
+    float* c = new float[kte+1];
+    float* d = new float[kte+1];
+    float* x = new float[kte+1];
     float qvflux;
     float ust_v=*ust;
     
@@ -1058,7 +1072,7 @@ void mynn_tendencies(int kts, int kte, int i, float delt, float* dz, float* rho,
     }
     
     if (bl_mynn_mixqt == 0) {
-        if (bl_mynn_cloudmix > 0 && FLAG_QC) {
+        if (bl_mynn_cloudmix > 0 && FLAG_QC==1) {
             k = kts;
             a[k] = -dtz[k] * khdz[k] * rhoinv[k];
             b[k] = 1.0 + dtz[k] * (khdz[k+1] + khdz[k]) * rhoinv[k] - 0.5 * dtz[k] * rhoinv[k] * s_aw[k+1] - 0.5 * dtz[k] * rhoinv[k] * sd_aw[k+1];
@@ -1112,6 +1126,24 @@ void mynn_tendencies(int kts, int kte, int i, float delt, float* dz, float* rho,
             sqv2[k] = sqv[k];
         }
     }
+
+    delete [] dtz;
+    delete [] dfhc;
+    delete [] dfmc;
+    delete [] delp;
+    delete [] sqv2;
+    delete [] sqc2;
+    delete [] rhoz;
+    delete [] khdz;
+    delete [] kmdz;
+    delete [] rhoinv;
+    delete [] sqw2;
+    delete [] a;
+    delete [] b;
+    delete [] c;
+    delete [] d;
+    delete [] x;
+
 }
 
 

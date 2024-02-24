@@ -10,5 +10,11 @@ phys/*f90
 phys/*swp
 phys/*bak
 run/namelist*
+run/input*
 run/slurm*
 share/*f90
+test/em_seabreeze2d_x/*exe
+chem/*f90
+dyn_em/*f90
+frame/*f90
+test/em_seabreeze2d_x/*
