@@ -360,6 +360,35 @@ interface
 
   end interface
 
+  interface
+
+  SUBROUTINE moisture_check_cc(kte, delt, dp, exner,   &
+                            qv, qc, qi, qs, th,     &
+                            dqv, dqc, dqi, dqs, dth ) bind (c)
+
+  ! This subroutine was adopted from the CAM-UW ShCu scheme and
+  ! adapted for use here.
+  !
+  ! If qc < qcmin, qi < qimin, or qv < qvmin happens in any layer,
+  ! force them to be larger than minimum value by (1) condensating
+  ! water vapor into liquid or ice, and (2) by transporting water vapor
+  ! from the very lower layer.
+  !
+  ! We then update the final state variables and tendencies associated
+  ! with this correction. If any condensation happens, update theta too.
+  ! Note that (qv,qc,qi,th) are the final state variables after
+  ! applying corresponding input tendencies and corrective tendencies.
+
+    import c_int, c_float
+    integer(kind=c_int),         intent(in)     :: kte
+    real(kind=c_float), intent(in)     :: delt
+    real(kind=c_float), dimension(kte), intent(in)     :: dp, exner
+    real(kind=c_float), dimension(kte), intent(inout)  :: qv, qc, qi, qs, th
+    real(kind=c_float), dimension(kte), intent(inout)  :: dqv, dqc, dqi, dqs, dth
+  END SUBROUTINE moisture_check_cc
+
+  end interface
+
 
   !>Use Ito et al. (2015, BLM) scale-aware (0: no, 1: yes). Note that this also has impacts
   !!on the cloud PDF and mass-flux scheme, using LES-derived similarity function.

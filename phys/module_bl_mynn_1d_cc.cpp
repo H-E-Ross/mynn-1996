@@ -10,8 +10,7 @@ extern "C" void mym_predict_cc(int kts, int kte, float closure, float delt, floa
 
 extern "C" void mynn_mix_chem_cc(int kts, int kte, int i,float delt, std::vector<float>& dz, float pblh, int nchem, int kdvel, int ndvel,std::vector<std::vector<float>>& chem1, std::vector<float>& vd1, std::vector<float>& rho,float flt, std::vector<float>& tcd, std::vector<float>& qcd, std::vector<float>& dfh,std::vector<float>& s_aw, std::vector<std::vector<float>>& s_awchem, float emis_ant_no, float frp, int rrfs_sd, int enh_mix); 
 
-
-using std::bind;
+extern "C" void moisture_check_cc(int kte, float delt, float* dp, float* exner,float* qv, float* qc, float* qi, float* qs, float* th,float* dqv, float* dqc, float* dqi, float* dqs, float* dth,float dqv2, float xlvcp, float xlscp); 
 
 //----------------------------------------CONTSTANTS-------------------------------------------
 
@@ -493,7 +492,7 @@ void mym_length(int kts, int kte, float xland, float* dz, float* zw, float rmo, 
 
 
 // called from driver 
-void moisture_check_c(int kte, float delt, float* dp, float* exner,
+void moisture_check_cc(int kte, float delt, float* dp, float* exner,
                     float* qv, float* qc, float* qi, float* qs, float* th,
                     float* dqv, float* dqc, float* dqi, float* dqs, float* dth, 
 		    float dqv2, float xlvcp, float xlscp) {
