@@ -18,3 +18,6 @@ chem/*f90
 dyn_em/*f90
 frame/*f90
 test/em_seabreeze2d_x/*
+external/fftpack/fftpack5/*a
+external/io_grib1/*a
+external/io_grib_share/
