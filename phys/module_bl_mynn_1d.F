@@ -1644,7 +1644,7 @@ CONTAINS
 !! subgrid cloud fraction and mixing ratio as well as the functions used to
 !! calculate the buoyancy flux. Different cloud PDFs can be selected by
 !! use of the namelist parameter \p bl_mynn_cloudpdf .
-  SUBROUTINE  mym_condensation (kts,kte,   &
+  SUBROUTINE  mym_condensation_red (kts,kte,   &
     &            dx, dz, zw, xland,        &
     &            thl, qw, qv, qc, qi, qs,  &
     &            p,exner,                  &
@@ -2063,7 +2063,7 @@ CONTAINS
 # undef kte
 #endif
 
-  END SUBROUTINE mym_condensation
+  END SUBROUTINE mym_condensation_red
 
 ! ==================================================================
 !>\ingroup gsd_mynn_edmf

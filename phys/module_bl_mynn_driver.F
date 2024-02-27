@@ -306,7 +306,8 @@ MODULE module_bl_mynn_driver
        &        s_awu,s_awv,sub_thl,sub_sqv,sub_u,sub_v,    &
        &        det_thl,det_sqv,det_sqc,det_u,det_v,FLAG_QC_I,    &
        &        bl_mynn_cloudmix,bl_mynn_mixqt,bl_mynn_edmf,      &
-       &        bl_mynn_edmf_mom,debug_code,r_d, p608) bind(c)
+       &        bl_mynn_edmf_mom,debug_code,r_d, p608, ep_2,      &
+       &        ep_3,tv0,xlv,xlvcp) bind(c)
 
      import c_int,c_float
 
@@ -316,6 +317,7 @@ MODULE module_bl_mynn_driver
                            bl_mynn_edmf,bl_mynn_edmf_mom               
     real(kind=c_float), dimension(kts:kte+1), intent(in) :: s_awthl,    &
          &s_aw,s_awqt,s_awqv,s_awqc,s_awu,s_awv 
+    real(kind=c_float) :: ep_2,ep_3,tv0,xlv,xlvcp
 ! tendencies from mass-flux environmental subsidence and detrainment
     real(kind=c_float), dimension(kts:kte), intent(in) :: sub_thl,sub_sqv,   &
          &sub_u,sub_v,det_thl,det_sqv,det_sqc,det_u,det_v
@@ -388,6 +390,47 @@ interface
   END SUBROUTINE moisture_check_cc
 
   end interface
+
+interface
+
+    SUBROUTINE  mym_condensation_cc (kts,kte,   &
+    &            dx, dz, zw, xland,        &
+    &            thl, qw, qv, qc, qi, qs,  &
+    &            p,exner,                  &
+    &            tsq, qsq, cov,            &
+    &            Sh, el, bl_mynn_cloudpdf, &
+    &            qc_bl1D, qi_bl1D,         &
+    &            cldfra_bl1D,              &
+    &            PBLH1,HFX1,               &
+    &            Vt, Vq, th, sgm, rmo,     &
+    &            spp_pbl,rstoch_col,ep_2,  &
+    &            ep_3,xlv,r_d,xlvcp,p608,  &
+    &            tv0, cpv, r_v, cice,cliq, & 
+    &            cp,xls) bind(c)
+
+!-------------------------------------------------------------------
+    import c_int, c_float
+
+    integer(kind=c_int), intent(in) :: kts,kte,bl_mynn_cloudpdf,spp_pbl
+    real(kind=c_float), intent(in)    :: ep_2, ep_3,xlv, r_d, xlvcp, &
+                  p608, tv0,cpv,r_v,cice,cliq,cp,xls 
+
+    real(kind=c_float), intent(in)      :: HFX1,rmo,xland
+    real(kind=c_float), intent(in)      :: dx,pblh1
+    real(kind=c_float), dimension(kts:kte), intent(in) :: dz
+    real(kind=c_float), dimension(kts:kte+1), intent(in) :: zw
+    real(kind=c_float), dimension(kts:kte), intent(in) :: p,exner,thl,qw,   &
+         &qv,qc,qi,qs,tsq,qsq,cov,th,rstoch_col
+
+    real(kind=c_float), dimension(kts:kte), intent(inout) :: vt,vq,sgm
+
+    real(kind=c_float), dimension(kts:kte) :: alp,a,bet,b,ql,q1,RH
+    real(kind=c_float), dimension(kts:kte), intent(out) :: qc_bl1D,qi_bl1D, &
+         &cldfra_bl1D
+    real(kind=c_float), dimension(kts:kte), intent(in) :: Sh,el
+
+ END SUBROUTINE mym_condensation_cc
+ end interface 
 
 
   !>Use Ito et al. (2015, BLM) scale-aware (0: no, 1: yes). Note that this also has impacts
@@ -647,6 +690,7 @@ CONTAINS
     integer,  intent(in)                         :: spp_pbl
     real(kind_phys), dimension(ims:ime,kms:kme), optional, intent(in)  :: pattern_spp_pbl
     real(kind_phys), dimension(kts:kte)          :: rstoch_col
+
 
     ! Substepping TKE
     integer :: nsub
@@ -1175,12 +1219,12 @@ CONTAINS
           phh   = phih(zet)
        end if
 
-!>  - Call mym_condensation() to calculate the nonconvective component
+!>  - Call mym_condensation_cc() to calculate the nonconvective component
 !! of the subgrid cloud fraction and mixing ratio as well as the functions
 !! used to calculate the buoyancy flux. Different cloud PDFs can be
 !! selected by use of the namelist parameter \p bl_mynn_cloudpdf.
 
-       call mym_condensation (kts,kte,                   &
+       call mym_condensation_cc (kts,kte,                   &
             &dx(i),dz1,zw,xland(i),                      &
             &thl,sqw,sqv,sqc,sqi,sqs,                    &
             &p1,ex1,tsq1,qsq1,cov1,                      &
@@ -1188,7 +1232,8 @@ CONTAINS
             &qc_bl1D,qi_bl1D,cldfra_bl1D,                &
             &PBLH(i),HFX(i),                             &
             &Vt, Vq, th1, sgm, rmol(i),                  &
-            &spp_pbl, rstoch_col                         )
+            &spp_pbl,rstoch_col,ep_2,ep_3,xlv,r_d,xlvcp, &
+            &p608,tv0,r_v,cice,cliq,cpv,cp,xls                            )
 
 !>  - Add TKE source driven by cloud top cooling
 !!  Calculate the buoyancy production of TKE from cloud-top cooling when
@@ -1324,7 +1369,8 @@ CONTAINS
                &det_thl,det_sqv,det_sqc,det_u,det_v,       &      
                &FLAG_QC_I,bl_mynn_cloudmix,bl_mynn_mixqt,  &
                &bl_mynn_edmf,bl_mynn_edmf_mom,             &
-               &debug_code_i,r_d, p608    )
+               &debug_code_i,r_d,p608,ep_2,ep_3,tv0,xlv,   &
+               &xlvcp)
 
 
        if ( mix_chem ) then
