@@ -21,3 +21,7 @@ test/em_seabreeze2d_x/*
 external/fftpack/fftpack5/*a
 external/io_grib1/*a
 external/io_grib_share/
+main/*a
+main/*exe
+main/*f90
+run/*exe
