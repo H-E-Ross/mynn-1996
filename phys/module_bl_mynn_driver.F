@@ -406,7 +406,7 @@ interface
     &            spp_pbl,rstoch_col,ep_2,  &
     &            ep_3,xlv,r_d,xlvcp,p608,  &
     &            tv0, cpv, r_v, cice,cliq, & 
-    &            cp,xls) bind(c)
+    &            cp,xls,rcp) bind(c)
 
 !-------------------------------------------------------------------
     import c_int, c_float
@@ -432,6 +432,60 @@ interface
  END SUBROUTINE mym_condensation_cc
  end interface 
 
+interface
+ SUBROUTINE topdown_cloudrad_cc(kts,kte,                         &
+               &dz1,zw,fltv,xland,kpbl,PBLH,                  &
+               &sqc,sqi,sqw,thl,th1,ex1,p1,rho1,thetav,       &
+               &cldfra_bl1D,rthraten,                         &
+               &maxKHtopdown,KHtopdown,TKEprodTD) bind(c)
+
+    import c_int, c_float
+
+    integer(kind=c_int),       intent(in)                :: kte,kts
+    real(kind=c_float), dimension(kts:kte), intent(in)   :: dz1,sqc,sqi,sqw,&
+          thl,th1,ex1,p1,rho1,thetav,cldfra_bl1D
+    real(kind=c_float), dimension(kts:kte), intent(in)   :: rthraten
+    real(kind=c_float), dimension(kts:kte+1), intent(in) :: zw
+    real(kind=c_float), intent(in)                       :: pblh,fltv
+    real(kind=c_float), intent(in)                       :: xland
+    integer(kind=c_int), intent(in)                      :: kpbl
+
+  END SUBROUTINE topdown_cloudrad_cc
+
+ end interface
+
+  interface
+
+  SUBROUTINE DDMF_JPL_cc(kts,kte,dt,zw,dz,p,         &
+              &u,v,th,thl,thv,tk,qt,qv,qc,           &
+              &rho,exner,ust,wthl,wqt,pblh,kpbl,     &
+              &edmf_a_dd,edmf_w_dd, edmf_qt_dd,      &
+              &edmf_thl_dd,edmf_ent_dd,edmf_qc_dd,   &
+              &sd_aw,sd_awthl,sd_awqt,               &
+              &sd_awqv,sd_awqc,sd_awu,sd_awv,        &
+              &sd_awqke,qc_bl1d,cldfra_bl1d,         &
+              &rthraten,svp1,grav,onethird,          &
+              & p1000mb,rcp,xlvcp                   ) bind(c)
+
+        import c_int, c_float
+
+        integer(kind=c_int), intent(in) :: kts,kte,kpbl
+        real(kind=c_float), dimension(kts:kte), intent(in) ::            &
+            u,v,th,thl,tk,qt,qv,qc,thv,p,rho,exner,dz
+        real(kind=c_float), dimension(kts:kte), intent(in) :: rthraten
+        real(kind=c_float), dimension(kts:kte), intent(in) :: edmf_a_dd,&
+                edmf_w_dd,edmf_thl_dd,edmf_ent_dd,edmf_qc_dd,edmf_qt_dd 
+        real(kind=c_float), dimension(kts:kte), intent(in) ::sd_aw, &
+                sd_awthl,sd_awqt,sd_awqv,sd_awqc,sd_awu,sd_awv,sd_awqke
+        real(kind=c_float), dimension(kts:kte), intent(in) :: qc_bl1d,cldfra_bl1d 
+        ! zw .. heights of the downdraft levels (edges of boxes)
+        real(kind=c_float), dimension(kts:kte+1), intent(in) :: zw
+        real(kind=c_float), intent(in)  :: dt,ust,pblh,wthl,wqt
+        real(kind=c_float), intent(in)  :: svp1,grav,onethird,p1000mb,rcp,xlvcp
+
+  END SUBROUTINE DDMF_JPL_cc
+
+  end interface
 
   !>Use Ito et al. (2015, BLM) scale-aware (0: no, 1: yes). Note that this also has impacts
   !!on the cloud PDF and mass-flux scheme, using LES-derived similarity function.
@@ -1233,13 +1287,13 @@ CONTAINS
             &PBLH(i),HFX(i),                             &
             &Vt, Vq, th1, sgm, rmol(i),                  &
             &spp_pbl,rstoch_col,ep_2,ep_3,xlv,r_d,xlvcp, &
-            &p608,tv0,r_v,cice,cliq,cpv,cp,xls                            )
+            &p608,tv0,r_v,cice,cliq,cpv,cp,xls,rcp)
 
 !>  - Add TKE source driven by cloud top cooling
 !!  Calculate the buoyancy production of TKE from cloud-top cooling when
 !! \p bl_mynn_topdown =1.
        if (bl_mynn_topdown.eq.1) then
-          call topdown_cloudrad(kts,kte,dz1,zw,fltv,     &
+          call topdown_cloudrad_cc(kts,kte,dz1,zw,fltv,     &
                &xland(i),kpbl(i),PBLH(i),                &
                &sqc,sqi,sqw,thl,th1,ex1,p1,rho1,thetav,  &
                &cldfra_bl1D,rthraten(i,:),               &
@@ -1294,7 +1348,7 @@ CONTAINS
        endif
 
        if (bl_mynn_edmf_dd == 1) then
-          call DDMF_JPL(kts,kte,delt,zw,dz1,p1,          &
+          call DDMF_JPL_cc(kts,kte,delt,zw,dz1,p1,       &
                &u1,v1,th1,thl,thetav,tk1,                &
                &sqw,sqv,sqc,rho1,ex1,                    &
                &ust(i),flt,flq,                          &
@@ -1304,9 +1358,9 @@ CONTAINS
                &edmf_qc_dd1,                             &
                &sd_aw1,sd_awthl1,sd_awqt1,               &
                &sd_awqv1,sd_awqc1,sd_awu1,sd_awv1,       &
-               &sd_awqke1,                               &
-               &qc_bl1d,cldfra_bl1d,                     &
-               &rthraten(i,:)                            )
+               &sd_awqke1,qc_bl1d,cldfra_bl1d,           &
+               &rthraten(i,:),svp1,grav,onethird,        &
+               &p1000mb,rcp, xlvcp                       )
        endif
 
        !Capability to substep the eddy-diffusivity portion
