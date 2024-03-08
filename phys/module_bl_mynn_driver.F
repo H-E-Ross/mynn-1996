@@ -487,6 +487,16 @@ interface
 
   end interface
 
+  interface
+
+SUBROUTINE scale_aware_cc(dx,PBL1,Psig_bl,Psig_shcu)
+    import c_float
+    real(kind=c_float), intent(in)  :: dx,pbl1
+    real(kind=c_float), intent(out) :: Psig_bl,Psig_shcu
+END SUBROUTINE scale_aware_cc
+  end interface
+
+
   !>Use Ito et al. (2015, BLM) scale-aware (0: no, 1: yes). Note that this also has impacts
   !!on the cloud PDF and mass-flux scheme, using LES-derived similarity function.
   real(kind_phys), parameter :: scaleaware=1.
@@ -976,7 +986,7 @@ CONTAINS
 !>  - Call scale_aware() to calculate similarity functions for scale-adaptive control
 !! (\f$P_{\sigma-PBL}\f$ and \f$P_{\sigma-shcu}\f$).
              IF (scaleaware > 0.) THEN
-                CALL SCALE_AWARE(dx(i),PBLH(i),Psig_bl(i),Psig_shcu(i))
+                CALL scale_aware_cc(dx(i),PBLH(i),Psig_bl(i),Psig_shcu(i))
              ELSE
                 Psig_bl(i)=1.0
                 Psig_shcu(i)=1.0
@@ -1225,7 +1235,7 @@ CONTAINS
 !! the scale-adaptive behaviour for the local and nonlocal 
 !! components, respectively.
        if (scaleaware > 0.) then
-          call SCALE_AWARE(dx(i),PBLH(i),Psig_bl(i),Psig_shcu(i))
+          call SCALE_AWARE_CC(dx(i),PBLH(i),Psig_bl(i),Psig_shcu(i))
        else
           Psig_bl(i)=1.0
           Psig_shcu(i)=1.0

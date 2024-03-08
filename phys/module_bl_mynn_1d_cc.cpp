@@ -19,6 +19,8 @@ extern "C" void DDMF_JPL_cc(int kts, int kte, float dt, std::vector<float> zw, s
 
 extern "C" void topdown_cloudrad_cc(int kts, int kte, const std::vector<float>& dz1, const std::vector<float>& zw, float fltv, float xland, int kpbl, float PBLH, const std::vector<float>& sqc, const std::vector<float>& sqi, const std::vector<float>& sqw, const std::vector<float>& thl, const std::vector<float>& th1, const std::vector<float>& ex1, const std::vector<float>& p1, const std::vector<float>& rho1, const std::vector<float>& thetav, const std::vector<float>& cldfra_bl1D, const std::vector<float>& rthraten, float& maxKHtopdown, std::vector<float>& KHtopdown, std::vector<float>& TKEprodTD);
 
+extern "C" void scale_aware_cc(float dx, float pbl1, float& Psig_bl, float& Psig_shcu); 
+
 //----------------------------------------CONTSTANTS-------------------------------------------
 
 // Constants
@@ -1491,6 +1493,13 @@ void mym_condensation_cc(int kts, int kte, float dx, float dz[], float zw[], flo
     cldfra_bl1D[kte] = 0.0;
 }
 
+
+//===============================================================
+// ===================================================================
+// This is the downdraft mass flux scheme - analogus to edmf_JPL but
+// flipped updraft to downdraft. This scheme is currently only tested
+// for Stratocumulus cloud conditions. For a detailed desctiption of the
+// model, see paper.
 void DDMF_JPL_cc(int kts, int kte, float dt, std::vector<float> zw, std::vector<float> dz, std::vector<float> p,
               std::vector<float> u, std::vector<float> v, std::vector<float> th, std::vector<float> thl, std::vector<float> thv, 
 	      std::vector<float> tk,std::vector<float> qt, std::vector<float> qv, std::vector<float> qc, std::vector<float> 
@@ -1794,5 +1803,22 @@ void topdown_cloudrad_cc(int kts, int kte, const std::vector<float>& dz1, const 
     maxKHtopdown = *std::max_element(KHtopdown.begin(), KHtopdown.end());
 }
 
-
-
+void scale_aware_cc(float dx, float pbl1, float& Psig_bl, float& Psig_shcu) {
+    float dxdh;
+    Psig_bl = 1.0f;
+    Psig_shcu = 1.0f;
+    dxdh = std::max(2.5f * dx, 10.0f) / std::min(pbl1, 3000.0f);
+    
+    // New form to preserve parameterized mixing - only down 5% at dx = 750 m
+    Psig_bl = ((dxdh * dxdh) + 0.106f * std::pow(dxdh, 0.667f)) / ((dxdh * dxdh) + 0.066f * std::pow(dxdh, 0.667f) + 0.071f);
+    
+    // Assume a 500 m cloud depth for shallow-cu clouds
+    dxdh = std::max(2.5f * dx, 10.0f) / std::min(pbl1 + 500.0f, 3500.0f);
+    
+    // Hyeyum Hailey Shin and Song-You Hong 2013, TKE in entrainment zone
+    Psig_shcu = ((dxdh * dxdh) + 0.145f * std::pow(dxdh, 0.667f)) / ((dxdh * dxdh) + 0.172f * std::pow(dxdh, 0.667f) + 0.170f);
+    
+    // Clamping Psig_bl and Psig_shcu to [0, 1]
+    Psig_bl = std::max(0.0f, std::min(Psig_bl, 1.0f));
+    Psig_shcu = std::max(0.0f, std::min(Psig_shcu, 1.0f));
+}
