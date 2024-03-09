@@ -268,6 +268,8 @@ MODULE module_bl_mynn_driver
 
   IMPLICIT NONE
 
+!!===============================================INTERFACE_TO_C++====================================================
+
   interface
     SUBROUTINE  mym_predict_cc (kts,kte,                                &
        &            closure,                                            &
@@ -308,9 +310,7 @@ MODULE module_bl_mynn_driver
        &        bl_mynn_cloudmix,bl_mynn_mixqt,bl_mynn_edmf,      &
        &        bl_mynn_edmf_mom,debug_code,r_d, p608, ep_2,      &
        &        ep_3,tv0,xlv,xlvcp) bind(c)
-
      import c_int,c_float
-
     integer(kind=c_int), intent(in) :: kts,kte
     integer(kind=c_int), intent(in) :: debug_code, FLAG_QC_I
     integer(kind=c_int), intent(in) :: bl_mynn_cloudmix,bl_mynn_mixqt,  &
@@ -329,7 +329,6 @@ MODULE module_bl_mynn_driver
     real(kind=c_float), intent(in) :: flt,flq,flqv,flqc,uoce,voce
     real(kind=c_float), intent(in) :: ust,delt,psfc,wspd,r_d, p608
   END SUBROUTINE mynn_tendencies_cc
-
   end interface
 
 interface
@@ -343,9 +342,7 @@ interface
      &          s_aw, s_awchem,                    &
      &          emis_ant_no, frp, rrfs_sd,         &
      &          enh_mix                            ) bind(c)
-
      import c_int,c_float
-
     integer(kind=c_int), intent(in) :: kts,kte,i
     real(kind=c_float), dimension(kts:kte), intent(in)    :: dfh,dz,tcd,qcd
     real(kind=c_float), dimension(kts:kte), intent(inout) :: rho
@@ -359,28 +356,24 @@ interface
     real(kind=c_float), intent(in) :: emis_ant_no,frp
     integer(kind=c_int), intent(in) :: rrfs_sd, enh_mix
     END SUBROUTINE mynn_mix_chem_cc
-
   end interface
 
   interface
-
   SUBROUTINE moisture_check_cc(kte, delt, dp, exner,   &
                             qv, qc, qi, qs, th,     &
                             dqv, dqc, dqi, dqs, dth ) bind (c)
-
-  ! This subroutine was adopted from the CAM-UW ShCu scheme and
-  ! adapted for use here.
-  !
-  ! If qc < qcmin, qi < qimin, or qv < qvmin happens in any layer,
-  ! force them to be larger than minimum value by (1) condensating
-  ! water vapor into liquid or ice, and (2) by transporting water vapor
-  ! from the very lower layer.
-  !
-  ! We then update the final state variables and tendencies associated
-  ! with this correction. If any condensation happens, update theta too.
-  ! Note that (qv,qc,qi,th) are the final state variables after
-  ! applying corresponding input tendencies and corrective tendencies.
-
+  !! This subroutine was adopted from the CAM-UW ShCu scheme and
+  !! adapted for use here.
+  !!
+  !! If qc < qcmin, qi < qimin, or qv < qvmin happens in any layer,
+  !! force them to be larger than minimum value by (1) condensating
+  !! water vapor into liquid or ice, and (2) by transporting water vapor
+  !! from the very lower layer.
+  !!
+  !! We then update the final state variables and tendencies associated
+  !! with this correction. If any condensation happens, update theta too.
+  !! Note that (qv,qc,qi,th) are the final state variables after
+  !! applying corresponding input tendencies and corrective tendencies.
     import c_int, c_float
     integer(kind=c_int),         intent(in)     :: kte
     real(kind=c_float), intent(in)     :: delt
@@ -388,11 +381,9 @@ interface
     real(kind=c_float), dimension(kte), intent(inout)  :: qv, qc, qi, qs, th
     real(kind=c_float), dimension(kte), intent(inout)  :: dqv, dqc, dqi, dqs, dth
   END SUBROUTINE moisture_check_cc
-
   end interface
 
 interface
-
     SUBROUTINE  mym_condensation_cc (kts,kte,   &
     &            dx, dz, zw, xland,        &
     &            thl, qw, qv, qc, qi, qs,  &
@@ -407,28 +398,23 @@ interface
     &            ep_3,xlv,r_d,xlvcp,p608,  &
     &            tv0, cpv, r_v, cice,cliq, & 
     &            cp,xls,rcp) bind(c)
-
 !-------------------------------------------------------------------
     import c_int, c_float
 
     integer(kind=c_int), intent(in) :: kts,kte,bl_mynn_cloudpdf,spp_pbl
     real(kind=c_float), intent(in)    :: ep_2, ep_3,xlv, r_d, xlvcp, &
                   p608, tv0,cpv,r_v,cice,cliq,cp,xls 
-
     real(kind=c_float), intent(in)      :: HFX1,rmo,xland
     real(kind=c_float), intent(in)      :: dx,pblh1
     real(kind=c_float), dimension(kts:kte), intent(in) :: dz
     real(kind=c_float), dimension(kts:kte+1), intent(in) :: zw
     real(kind=c_float), dimension(kts:kte), intent(in) :: p,exner,thl,qw,   &
          &qv,qc,qi,qs,tsq,qsq,cov,th,rstoch_col
-
     real(kind=c_float), dimension(kts:kte), intent(inout) :: vt,vq,sgm
-
     real(kind=c_float), dimension(kts:kte) :: alp,a,bet,b,ql,q1,RH
     real(kind=c_float), dimension(kts:kte), intent(out) :: qc_bl1D,qi_bl1D, &
          &cldfra_bl1D
     real(kind=c_float), dimension(kts:kte), intent(in) :: Sh,el
-
  END SUBROUTINE mym_condensation_cc
  end interface 
 
@@ -438,10 +424,10 @@ interface
                &sqc,sqi,sqw,thl,th1,ex1,p1,rho1,thetav,       &
                &cldfra_bl1D,rthraten,                         &
                &maxKHtopdown,KHtopdown,TKEprodTD) bind(c)
-
     import c_int, c_float
-
-    integer(kind=c_int),       intent(in)                :: kte,kts
+    real(kind=c_float)                    :: maxKHtopdown
+    real(kind=c_float),dimension(kts:kte) :: KHtopdown,TKEprodTD
+    integer(kind=c_int),intent(in)        :: kte,kts
     real(kind=c_float), dimension(kts:kte), intent(in)   :: dz1,sqc,sqi,sqw,&
           thl,th1,ex1,p1,rho1,thetav,cldfra_bl1D
     real(kind=c_float), dimension(kts:kte), intent(in)   :: rthraten
@@ -449,13 +435,10 @@ interface
     real(kind=c_float), intent(in)                       :: pblh,fltv
     real(kind=c_float), intent(in)                       :: xland
     integer(kind=c_int), intent(in)                      :: kpbl
-
   END SUBROUTINE topdown_cloudrad_cc
-
  end interface
 
   interface
-
   SUBROUTINE DDMF_JPL_cc(kts,kte,dt,zw,dz,p,         &
               &u,v,th,thl,thv,tk,qt,qv,qc,           &
               &rho,exner,ust,wthl,wqt,pblh,kpbl,     &
@@ -466,9 +449,7 @@ interface
               &sd_awqke,qc_bl1d,cldfra_bl1d,         &
               &rthraten,svp1,grav,onethird,          &
               & p1000mb,rcp,xlvcp                   ) bind(c)
-
         import c_int, c_float
-
         integer(kind=c_int), intent(in) :: kts,kte,kpbl
         real(kind=c_float), dimension(kts:kte), intent(in) ::            &
             u,v,th,thl,tk,qt,qv,qc,thv,p,rho,exner,dz
@@ -482,20 +463,39 @@ interface
         real(kind=c_float), dimension(kts:kte+1), intent(in) :: zw
         real(kind=c_float), intent(in)  :: dt,ust,pblh,wthl,wqt
         real(kind=c_float), intent(in)  :: svp1,grav,onethird,p1000mb,rcp,xlvcp
-
-  END SUBROUTINE DDMF_JPL_cc
-
+      END SUBROUTINE DDMF_JPL_cc
   end interface
 
   interface
-
-SUBROUTINE scale_aware_cc(dx,PBL1,Psig_bl,Psig_shcu)
-    import c_float
-    real(kind=c_float), intent(in)  :: dx,pbl1
-    real(kind=c_float), intent(out) :: Psig_bl,Psig_shcu
-END SUBROUTINE scale_aware_cc
+    SUBROUTINE scale_aware_cc(dx,PBL1,Psig_bl,Psig_shcu) bind(c)
+        import c_float
+        real(kind=c_float), intent(in)  :: dx,pbl1
+        real(kind=c_float), intent(out) :: Psig_bl,Psig_shcu
+    END SUBROUTINE scale_aware_cc
   end interface
 
+  interface
+    SUBROUTINE GET_PBLH_cc(KTS,KTE,zi,thetav1D,qke1D,zw1D, &
+      dz1D,landsea,kzi) bind(c)
+      import c_float, c_int
+      integer(kind=c_int),intent(in) :: KTS,KTE
+      real(kind=c_float), intent(in) :: landsea
+      real(kind=c_float), dimension(kts:kte), intent(in) :: thetav1D, qke1D, dz1D
+      real(kind=c_float), dimension(kts:kte+1), intent(in) :: zw1D
+    END SUBROUTINE GET_PBLH_cc
+  end interface
+
+ interface
+   SUBROUTINE retrieve_exchange_coeffs_cc(kts,kte,&
+       &dfm,dfh,dz,K_m,K_h) bind(c)
+        import c_float, c_int
+        integer(kind=c_int) , intent(in) :: kts,kte
+        real(kind=c_float), dimension(KtS:KtE), intent(in) :: dz,dfm,dfh
+    END SUBROUTINE retrieve_exchange_coeffs_cc
+ end interface
+
+
+!!===============================================INTERFACES_END====================================================
 
   !>Use Ito et al. (2015, BLM) scale-aware (0: no, 1: yes). Note that this also has impacts
   !!on the cloud PDF and mass-flux scheme, using LES-derived similarity function.
@@ -980,7 +980,7 @@ CONTAINS
              zw(kte+1)=zw(kte)+dz(i,kte)
 
 !>  - Call get_pblh() to calculate hybrid (\f$\theta_{v}-TKE\f$) PBL height.
-             CALL GET_PBLH(KTS,KTE,PBLH(i),thetav,&
+             CALL GET_PBLH_cc(KTS,KTE,PBLH(i),thetav,&
                &  Qke1,zw,dz1,xland(i),KPBL(i))
              
 !>  - Call scale_aware() to calculate similarity functions for scale-adaptive control
@@ -1227,7 +1227,7 @@ CONTAINS
 
 !>  - Call get_pblh() to calculate the hybrid \f$\theta_{v}-TKE\f$
 !! PBL height diagnostic.
-       CALL GET_PBLH(KTS,KTE,PBLH(i),thetav,&
+       CALL GET_PBLH_cc(KTS,KTE,PBLH(i),thetav,&
        & Qke1,zw,dz1,xland(i),KPBL(i))
 
 !>  - Call scale_aware() to calculate the similarity functions,

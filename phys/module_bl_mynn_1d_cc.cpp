@@ -15,12 +15,18 @@ extern "C" void moisture_check_cc(int kte, float delt, float* dp, float* exner,f
 
 extern "C" void mym_condensation_cc(int kts, int kte, float dx, float dz[], float zw[], float xland,float thl[], float qw[], float qv[], float qc[], float qi[], float qs[],float p[], float exner[], float tsq[], float qsq[], float cov[], float Sh[], float el[], int bl_mynn_cloudpdf,float qc_bl1D[], float qi_bl1D[], float cldfra_bl1D[], float PBLH1, float HFX1,float Vt[], float Vq[], float th[], float sgm[], float rmo[],int spp_pbl, float rstoch_col[], float ep_2, float ep_3, float xlv, float r_d, float xlvcp, float p608, float tv0, float cpv,float r_v, float cice, float cliq, float cp, float xls, float rcp); 
 
-extern "C" void DDMF_JPL_cc(int kts, int kte, float dt, std::vector<float> zw, std::vector<float> dz, std::vector<float> p,std::vector<float> u, std::vector<float> v, std::vector<float> th, std::vector<float> thl, std::vector<float> thv, std::vector<float> tk, std::vector<float> qt, std::vector<float> qv, std::vector<float> qc, std::vector<float> rho, std::vector<float> exner, float ust, float wthl, float wqt, float pblh, int kpbl,std::vector<float>& edmf_a_dd, std::vector<float>& edmf_w_dd, std::vector<float>& edmf_qt_dd,std::vector<float>& edmf_thl_dd, std::vector<float>& edmf_ent_dd, std::vector<float>& edmf_qc_dd,std::vector<float>& sd_aw, std::vector<float>& sd_awthl, std::vector<float>& sd_awqt,std::vector<float>& sd_awqv, std::vector<float>& sd_awqc, std::vector<float>& sd_awu,std::vector<float>& sd_awv, std::vector<float>& sd_awqke,std::vector<float> qc_bl1d, std::vector<float> cldfra_bl1d,std::vector<float> rthraten,float svp1, float grav,float onethird,float p1000mb,float rcp,float xlvcp);
 
 extern "C" void topdown_cloudrad_cc(int kts, int kte, const std::vector<float>& dz1, const std::vector<float>& zw, float fltv, float xland, int kpbl, float PBLH, const std::vector<float>& sqc, const std::vector<float>& sqi, const std::vector<float>& sqw, const std::vector<float>& thl, const std::vector<float>& th1, const std::vector<float>& ex1, const std::vector<float>& p1, const std::vector<float>& rho1, const std::vector<float>& thetav, const std::vector<float>& cldfra_bl1D, const std::vector<float>& rthraten, float& maxKHtopdown, std::vector<float>& KHtopdown, std::vector<float>& TKEprodTD);
 
+extern "C" void DDMF_JPL_cc(int kts, int kte, float dt, std::vector<float> zw, std::vector<float> dz, std::vector<float> p,std::vector<float> u, std::vector<float> v, std::vector<float> th, std::vector<float> thl, std::vector<float> thv, std::vector<float> tk, std::vector<float> qt, std::vector<float> qv, std::vector<float> qc, std::vector<float> rho, std::vector<float> exner, float ust, float wthl, float wqt, float pblh, int kpbl,std::vector<float>& edmf_a_dd, std::vector<float>& edmf_w_dd, std::vector<float>& edmf_qt_dd,std::vector<float>& edmf_thl_dd, std::vector<float>& edmf_ent_dd, std::vector<float>& edmf_qc_dd,std::vector<float>& sd_aw, std::vector<float>& sd_awthl, std::vector<float>& sd_awqt,std::vector<float>& sd_awqv, std::vector<float>& sd_awqc, std::vector<float>& sd_awu,std::vector<float>& sd_awv, std::vector<float>& sd_awqke,std::vector<float> qc_bl1d, std::vector<float> cldfra_bl1d,std::vector<float> rthraten,float svp1, float grav,float onethird,float p1000mb,float rcp,float xlvcp);
+
 extern "C" void scale_aware_cc(float dx, float pbl1, float& Psig_bl, float& Psig_shcu); 
 
+extern "C" void GET_PBLH_cc(int KTS, int KTE, float& zi, float landsea, const std::vector<float>& thetav1D, const std::vector<float>& qke1D, const std::vector<float>& zw1D, const std::vector<float>& dz1D, int& kzi);
+
+extern "C" void retrieve_exchange_coeffs(int kts, int kte, const std::vector<float>& dfm, const std::vector<float>& dfh, const std::vector<float>& dz, std::vector<float>& K_m, std::vector<float>& K_h);
+
+	
 //----------------------------------------CONTSTANTS-------------------------------------------
 
 // Constants
@@ -1822,3 +1828,167 @@ void scale_aware_cc(float dx, float pbl1, float& Psig_bl, float& Psig_shcu) {
     Psig_bl = std::max(0.0f, std::min(Psig_bl, 1.0f));
     Psig_shcu = std::max(0.0f, std::min(Psig_shcu, 1.0f));
 }
+
+// ==================================================================
+//>\ingroup gsd_mynn_edmf
+// This subroutine calculates hybrid diagnotic boundary-layer height (PBLH).
+//
+// NOTES ON THE PBLH FORMULATION: The 1.5-theta-increase method defines
+//PBL heights as the level at.
+//which the potential temperature first exceeds the minimum potential.
+//temperature within the boundary layer by 1.5 K. When applied to.
+//observed temperatures, this method has been shown to produce PBL-
+//height estimates that are unbiased relative to profiler-based.
+//estimates (Nielsen-Gammon et al. 2008 \cite Nielsen_Gammon_2008).
+// However, their study did not
+//include LLJs. Banta and Pichugina (2008) \cite Pichugina_2008  show that a TKE-based.
+//threshold is a good estimate of the PBL height in LLJs. Therefore,
+//a hybrid definition is implemented that uses both methods, weighting
+//the TKE-method more during stable conditions (PBLH < 400 m).
+//A variable tke threshold (TKEeps) is used since no hard-wired
+//value could be found to work best in all conditions.
+//>\section gen_get_pblh  GSD get_pblh General Algorithm
+//> @{
+void GET_PBLH_CC(int KTS, int KTE, float& zi, float landsea, const std::vector<float>& thetav1D, const std::vector<float>& qke1D, const std::vector<float>& zw1D, const std::vector<float>& dz1D, int& kzi) {
+    // Constants
+    const float sbl_lim = 200.0;
+    const float sbl_damp = 400.0;
+
+    // Local variables
+    float PBLH_TKE, qtke, qtkem1, maxqke, TKEeps, minthv, delt_thv;
+    int kthv, ktke;
+
+    // Initialize KPBL (kzi)
+    kzi = 2;
+
+    // Find min thetav in the lowest 200 m AGL
+    kthv = 1;
+    minthv = 9E9;
+    for (int k = KTS + 1; k <= KTE && zw1D[k - KTS] <= 200.; ++k) {
+        if (minthv > thetav1D[k - KTS]) {
+            minthv = thetav1D[k - KTS];
+            kthv = k;
+        }
+    }
+
+    // Find thetav-based PBLH (best for daytime)
+    zi = 0.0;
+    delt_thv = (landsea - 1.5) >= 0 ? 1.0 : 1.25;
+
+    for (int k = kthv + 1; k < KTE; ++k) {
+        if (thetav1D[k - KTS] >= (minthv + delt_thv)) {
+            zi = zw1D[k - KTS] - dz1D[k - 1 - KTS] * std::min((thetav1D[k - KTS] - (minthv + delt_thv)) / std::max(thetav1D[k - KTS] - thetav1D[k - 1 - KTS], 1.e-6f), 1.0f);
+            break;
+        }
+        if (k == KTE - 1) zi = zw1D[KTS + 1 - KTS]; // Exit safeguard
+    }
+
+    // For stable boundary layers, use TKE method to complement the thetav-based definition
+    PBLH_TKE = 0.0;
+    maxqke = std::max(qke1D[KTS - KTS], 0.0f);
+    TKEeps = maxqke / 40.0;
+    TKEeps = std::max(TKEeps, 0.02f);
+
+    for (int k = KTS + 1; k < KTE; ++k) {
+        qtke = std::max(qke1D[k - KTS] / 2.0, 0.0);
+        qtkem1 = std::max(qke1D[k - 1 - KTS] / 2.0, 0.0);
+        if (qtke <= TKEeps) {
+            PBLH_TKE = zw1D[k - KTS] - dz1D[k - 1 - KTS] * std::min((TKEeps - qtke) / std::max(qtkem1 - qtke, 1.0e-6f), 1.0f);
+            PBLH_TKE = std::max(PBLH_TKE, zw1D[KTS + 1 - KTS]);
+            break;
+        }
+        if (k == KTE - 1) PBLH_TKE = zw1D[KTS + 1 - KTS]; // Exit safeguard
+    }
+
+    // Limit PBLH_TKE to not exceed the thetav-based PBL height +/- 350 m
+    PBLH_TKE = std::min(PBLH_TKE, zi + 350.0f);
+    PBLH_TKE = std::max(PBLH_TKE, std::max(zi - 350.0f, 10.0f));
+
+    float wt = 0.5 * std::tanh((zi - sbl_lim) / sbl_damp) + 0.5;
+    if (maxqke > 0.05) {
+        zi = PBLH_TKE * (1.0 - wt) + zi * wt;
+    }
+
+    // Compute KPBL (kzi)
+    for (int k = KTS + 1; k < KTE; ++k) {
+        if (zw1D[k - KTS] >= zi) {
+            kzi = k - 1;
+            break;
+        }
+    }
+}
+
+void retrieve_exchange_coeffs(int kts, int kte, const std::vector<float>& dfm, const std::vector<float>& dfh, const std::vector<float>& dz, std::vector<float>& K_m, std::vector<float>& K_h) {
+    float dzk;
+    K_m[kts] = 0.0;
+    K_h[kts] = 0.0;
+    for (int k = kts + 1; k <= kte; ++k) {
+        dzk = 0.5 * (dz[k] + dz[k - 1]);
+        K_m[k] = dfm[k] * dzk;
+        K_h[k] = dfh[k] * dzk;
+    }
+}
+
+
+
+void mym_level2(int kts, int kte, const std::vector<float>& dz,
+                const std::vector<float>& u, const std::vector<float>& v, 
+                const std::vector<float>& thl, const std::vector<float>& thetav, 
+                const std::vector<float>& qw, const std::vector<float>& ql, 
+                const std::vector<float>& vt, const std::vector<float>& vq, 
+                std::vector<float>& dtl, std::vector<float>& dqw, 
+                std::vector<float>& dtv, std::vector<float>& gm, 
+                std::vector<float>& gh, std::vector<float>& sm, 
+                std::vector<float>& sh, float tv0, float gtr) {
+    // Constants need to be defined or included from the original Fortran code
+    // For example:
+    // float g1, g2, b1, c1, c2, c5, a1, a2, tv0, gtr;
+    // bool CKmod; // Assuming CKmod is a boolean flag
+
+    float rfc, f1, f2, rf1, rf2, smc, shc, ri1, ri2, ri3, ri4, duz, dtz, dqz, vtt, vqq, dtq, dzk, afk, abk, ri, rf;
+    float a2fac;
+
+    rfc = g1 / (g1 + g2);
+    // The rest of the calculations for f1, f2, rf1, etc. need the actual values of the constants used
+
+    for (int k = kts + 1; k <= kte; ++k) {
+        dzk = 0.5 * (dz[k] + dz[k - 1]);
+        afk = dz[k] / (dz[k] + dz[k - 1]);
+        abk = 1.0 - afk;
+        duz = std::pow(u[k] - u[k - 1], 2) + std::pow(v[k] - v[k - 1], 2);
+        duz = duz / std::pow(dzk, 2);
+        dtz = (thl[k] - thl[k - 1]) / dzk;
+        dqz = (qw[k] - qw[k - 1]) / dzk;
+
+        vtt = 1.0 + vt[k] * abk + vt[k - 1] * afk; // Beta-theta
+        vqq = tv0 + vq[k] * abk + vq[k - 1] * afk; // Beta-q
+        dtq = vtt * dtz + vqq * dqz;
+
+        dtl[k] = dtz;
+        dqw[k] = dqz;
+        dtv[k] = dtq;
+
+        gm[k] = duz;
+        gh[k] = -dtq * gtr;
+
+        ri = -gh[k] / std::max(duz, 1.0e-10f);
+
+        if (CKmod) {
+            a2fac = 1.0 / (1.0 + std::max(ri, 0.0f));
+        } else {
+            a2fac = 1.0;
+        }
+
+        // Recalculate rfc, f1, f2, rf1, rf2, smc, shc with a2fac considered
+        // The calculations need the actual values of the constants used
+
+        rf = std::min(float(ri1 * (ri + ri2 - std::sqrt(std::pow(ri, 2) - ri3 * ri + ri4))), rfc);
+
+        sh[k] = shc * (rfc - rf) / (1.0 - rf);
+        sm[k] = smc * (rf1 - rf) / (rf2 - rf) * sh[k];
+    }
+}
+
+
+
+
