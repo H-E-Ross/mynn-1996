@@ -298,10 +298,8 @@ MODULE module_bl_mynn_driver
       !!  TKE budget  (Puhales, 2020, WRF 4.2.1)  << EOB
       real(kind=c_float), dimension(kts:kte), intent(out) :: qWT1D, qDISS1D
     END SUBROUTINE mym_predict_cc
-   end interface
-      
-  interface
-  SUBROUTINE mynn_tendencies_cc(kts,kte,delt,dz,rho,              &
+  
+SUBROUTINE mynn_tendencies_cc(kts,kte,delt,dz,rho,              &
        &        u,v,tk,qv,psfc,p,thl,sqv,sqc,sqw,ust,flt,flq,flqv,   &
        &        flqc,wspd,uoce,voce,tcd,qcd,dfm,dfh,Du,Dv,        &
        &        Dth,diss_heat,s_aw,s_awthl,s_awqt,s_awqv,s_awqc,  &
@@ -329,9 +327,7 @@ MODULE module_bl_mynn_driver
     real(kind=c_float), intent(in) :: flt,flq,flqv,flqc,uoce,voce
     real(kind=c_float), intent(in) :: ust,delt,psfc,wspd,r_d, p608
   END SUBROUTINE mynn_tendencies_cc
-  end interface
 
-interface
     SUBROUTINE mynn_mix_chem_cc (kts,kte,i,        &
      &          delt,dz,pblh,                      &
      &          nchem, kdvel, ndvel,               &
@@ -356,9 +352,7 @@ interface
     real(kind=c_float), intent(in) :: emis_ant_no,frp
     integer(kind=c_int), intent(in) :: rrfs_sd, enh_mix
     END SUBROUTINE mynn_mix_chem_cc
-  end interface
 
-  interface
   SUBROUTINE moisture_check_cc(kte, delt, dp, exner,   &
                             qv, qc, qi, qs, th,     &
                             dqv, dqc, dqi, dqs, dth ) bind (c)
@@ -381,9 +375,7 @@ interface
     real(kind=c_float), dimension(kte), intent(inout)  :: qv, qc, qi, qs, th
     real(kind=c_float), dimension(kte), intent(inout)  :: dqv, dqc, dqi, dqs, dth
   END SUBROUTINE moisture_check_cc
-  end interface
 
-interface
     SUBROUTINE  mym_condensation_cc (kts,kte,   &
     &            dx, dz, zw, xland,        &
     &            thl, qw, qv, qc, qi, qs,  &
@@ -416,9 +408,7 @@ interface
          &cldfra_bl1D
     real(kind=c_float), dimension(kts:kte), intent(in) :: Sh,el
  END SUBROUTINE mym_condensation_cc
- end interface 
 
-interface
  SUBROUTINE topdown_cloudrad_cc(kts,kte,                         &
                &dz1,zw,fltv,xland,kpbl,PBLH,                  &
                &sqc,sqi,sqw,thl,th1,ex1,p1,rho1,thetav,       &
@@ -436,9 +426,7 @@ interface
     real(kind=c_float), intent(in)                       :: xland
     integer(kind=c_int), intent(in)                      :: kpbl
   END SUBROUTINE topdown_cloudrad_cc
- end interface
 
-  interface
   SUBROUTINE DDMF_JPL_cc(kts,kte,dt,zw,dz,p,         &
               &u,v,th,thl,thv,tk,qt,qv,qc,           &
               &rho,exner,ust,wthl,wqt,pblh,kpbl,     &
@@ -464,34 +452,30 @@ interface
         real(kind=c_float), intent(in)  :: dt,ust,pblh,wthl,wqt
         real(kind=c_float), intent(in)  :: svp1,grav,onethird,p1000mb,rcp,xlvcp
       END SUBROUTINE DDMF_JPL_cc
-  end interface
 
-  interface
-    SUBROUTINE scale_aware_cc(dx,PBL1,Psig_bl,Psig_shcu) bind(c)
-        import c_float
-        real(kind=c_float), intent(in)  :: dx,pbl1
-        real(kind=c_float), intent(out) :: Psig_bl,Psig_shcu
-    END SUBROUTINE scale_aware_cc
-  end interface
 
-  interface
-    SUBROUTINE GET_PBLH_cc(KTS,KTE,zi,thetav1D,qke1D,zw1D, &
-      dz1D,landsea,kzi) bind(c)
+    SUBROUTINE GET_PBLH_cc(KTS,KTE,zi,thetav1D,qke1D,zw1D,dz1D,landsea,kzi) bind(c)
       import c_float, c_int
-      integer(kind=c_int),intent(in) :: KTS,KTE
+      real(kind=c_float), intent(out) :: zi
+      integer(kind=c_int),intent(in) :: KTS,KTE,kzi
       real(kind=c_float), intent(in) :: landsea
       real(kind=c_float), dimension(kts:kte), intent(in) :: thetav1D, qke1D, dz1D
       real(kind=c_float), dimension(kts:kte+1), intent(in) :: zw1D
     END SUBROUTINE GET_PBLH_cc
-  end interface
 
- interface
    SUBROUTINE retrieve_exchange_coeffs_cc(kts,kte,&
        &dfm,dfh,dz,K_m,K_h) bind(c)
         import c_float, c_int
         integer(kind=c_int) , intent(in) :: kts,kte
         real(kind=c_float), dimension(KtS:KtE), intent(in) :: dz,dfm,dfh
     END SUBROUTINE retrieve_exchange_coeffs_cc
+
+    SUBROUTINE scale_aware_cc(dx,PBL1,Psig_bl,Psig_shcu) bind(c)
+        import c_float
+        real(kind=c_float), intent(in)  :: dx,pbl1
+        real(kind=c_float), intent(out) :: Psig_bl,Psig_shcu
+    END SUBROUTINE scale_aware_cc
+
  end interface
 
 
@@ -802,6 +786,7 @@ CONTAINS
       enddo
     endif
 
+    write(*,*) "Calling mynn2"
 !***  Begin debugging
     IMD=(IMS+IME)/2
     JMD=(JMS+JME)/2
@@ -980,8 +965,7 @@ CONTAINS
              zw(kte+1)=zw(kte)+dz(i,kte)
 
 !>  - Call get_pblh() to calculate hybrid (\f$\theta_{v}-TKE\f$) PBL height.
-             CALL GET_PBLH_cc(KTS,KTE,PBLH(i),thetav,&
-               &  Qke1,zw,dz1,xland(i),KPBL(i))
+             CALL GET_PBLH(KTS,KTE,PBLH(i),thetav,Qke1,zw,dz1,xland(i),KPBL(i))
              
 !>  - Call scale_aware() to calculate similarity functions for scale-adaptive control
 !! (\f$P_{\sigma-PBL}\f$ and \f$P_{\sigma-shcu}\f$).
@@ -1050,6 +1034,7 @@ CONTAINS
        qke=qke_adv
     ENDIF
 
+    write(*,*) "mynn 1"
     DO i=ITS,ITF
        !Initialize some arrays
        if (tke_budget .eq. 1) then
@@ -1185,6 +1170,7 @@ CONTAINS
        det_u      =0.0
        det_v      =0.0
 
+    write(*,*) "mynn 2"
        do k = kts,kte
           if (k==kts) then
              zw(k)=0.
@@ -1225,10 +1211,10 @@ CONTAINS
        endif
        s_awchem1(kts:kte+1,1:nchem)   = 0.0
 
+    write(*,*) "mynn 3"
 !>  - Call get_pblh() to calculate the hybrid \f$\theta_{v}-TKE\f$
 !! PBL height diagnostic.
-       CALL GET_PBLH_cc(KTS,KTE,PBLH(i),thetav,&
-       & Qke1,zw,dz1,xland(i),KPBL(i))
+       CALL GET_PBLH(KTS,KTE,PBLH(i),thetav,Qke1,zw,dz1,xland(i),KPBL(i))
 
 !>  - Call scale_aware() to calculate the similarity functions,
 !! \f$P_{\sigma-PBL}\f$ and \f$P_{\sigma-shcu}\f$, to control 
@@ -1287,6 +1273,7 @@ CONTAINS
 !! of the subgrid cloud fraction and mixing ratio as well as the functions
 !! used to calculate the buoyancy flux. Different cloud PDFs can be
 !! selected by use of the namelist parameter \p bl_mynn_cloudpdf.
+    write(*,*) "mynn 4"
 
        call mym_condensation_cc (kts,kte,                   &
             &dx(i),dz1,zw,xland(i),                      &
@@ -1301,6 +1288,7 @@ CONTAINS
 
 !>  - Add TKE source driven by cloud top cooling
 !!  Calculate the buoyancy production of TKE from cloud-top cooling when
+    write(*,*) "mynn 5"
 !! \p bl_mynn_topdown =1.
        if (bl_mynn_topdown.eq.1) then
           call topdown_cloudrad_cc(kts,kte,dz1,zw,fltv,     &
@@ -1314,6 +1302,7 @@ CONTAINS
           TKEprodTD(kts:kte) = 0.0
        endif
 
+    write(*,*) "mynn 6"
        if (bl_mynn_edmf > 0) then
           !PRINT*,"Calling DMP Mass-Flux: i= ",i
           call DMP_mf(                                   &
@@ -1357,6 +1346,7 @@ CONTAINS
                &spp_pbl,rstoch_col                       )
        endif
 
+    write(*,*) "mynn 7"
        if (bl_mynn_edmf_dd == 1) then
           call DDMF_JPL_cc(kts,kte,delt,zw,dz1,p1,       &
                &u1,v1,th1,thl,thetav,tk1,                &
@@ -1377,6 +1367,7 @@ CONTAINS
        !do nsub = 1,2
        delt2 = delt !*0.5    !only works if topdown=0
 
+    write(*,*) "mynn 8"
        call mym_turbulence(                              & 
                &kts,kte,xland(i),closure,                &
                &dz1, DX(i), zw,                          &
