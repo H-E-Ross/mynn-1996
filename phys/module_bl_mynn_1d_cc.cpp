@@ -5,7 +5,7 @@
 #include <functional>
 #include <limits>
 
-extern "C" void mynn_tendencies_cc(int kts, int kte, float delt, float* dz, float* rho, float* u, float* v, float* tk, float* qv, float* psfc, float* p, float* thl, float* sqv, float* sqc, float* sqw, float* ust, float flt, float flq, float flqv, float flqc, float wspd, float uoce, float voce, float* tcd, float* qcd, float* dfm, float* dfh, float* Du, float* Dv, float* Dth, float* diss_heat, float* s_aw, float* s_awthl, float* s_awqt, float* s_awqv, float* s_awqc, float* s_awu, float* s_awv, float* sd_aw, float* sd_awthl, float* sd_awqt, float* sd_awqv, float* sd_awqc, float* sd_awu, float* sd_awv, float* sub_thl, float* sub_sqv, float* sub_u, float* sub_v, float* det_thl, float* det_sqv, float* det_sqc, float* det_u, float* det_v, int FLAG_QC, int bl_mynn_cloudmix, int bl_mynn_mixqt, int bl_mynn_edmf_mom, int debug_code, float r_d, float p608, float ep_2,float ep_3,float tv0,float xlv,float xlvcp);
+extern "C" void mynn_tendencies_cc(int kts, int kte, float delt, float* dz, float* rho, float* u, float* v, float* tk, float* qv, float* psfc, float* p, float* thl, float* sqv, float* sqc, float* sqw, float* ust, float flt, float flq, float flqv, float flqc, float wspd, float uoce, float voce, float* tcd, float* qcd, float* dfm, float* dfh, float* du, float* dv, float* dth, float* diss_heat, float* s_aw, float* s_awthl, float* s_awqt, float* s_awqv, float* s_awqc, float* s_awu, float* s_awv, float* sd_aw, float* sd_awthl, float* sd_awqt, float* sd_awqv, float* sd_awqc, float* sd_awu, float* sd_awv, float* sub_thl, float* sub_sqv, float* sub_u, float* sub_v, float* det_thl, float* det_sqv, float* det_sqc, float* det_u, float* det_v, int flag_qc, int bl_mynn_cloudmix, int bl_mynn_mixqt, int bl_mynn_edmf_mom, int debug_code, float r_d, float p608, float ep_2,float ep_3,float tv0,float xlv,float xlvcp);
 
 extern "C" void mym_predict_cc(int kts, int kte, float closure, float delt, float* dz, float* ust, float flt, float flq, float pmz, float phh, float* el, float* dfq, float* rho, float* pdk, float* pdt, float* pdq, float* pdc, float* qke, float* tsq, float* qsq, float* cov, float* s_aw, float* s_awqke, int bl_mynn_edmf_tke, int tke_budget, float xlvcp, float xlscp, float karman);
 
@@ -13,39 +13,40 @@ extern "C" void mynn_mix_chem_cc(int kts, int kte, int i,float delt, std::vector
 
 extern "C" void moisture_check_cc(int kte, float delt, float* dp, float* exner,float* qv, float* qc, float* qi, float* qs, float* th,float* dqv, float* dqc, float* dqi, float* dqs, float* dth,float dqv2, float xlvcp, float xlscp); 
 
-extern "C" void mym_condensation_cc(int kts, int kte, float dx, float dz[], float zw[], float xland,float thl[], float qw[], float qv[], float qc[], float qi[], float qs[],float p[], float exner[], float tsq[], float qsq[], float cov[], float Sh[], float el[], int bl_mynn_cloudpdf,float qc_bl1D[], float qi_bl1D[], float cldfra_bl1D[], float PBLH1, float HFX1,float Vt[], float Vq[], float th[], float sgm[], float rmo[],int spp_pbl, float rstoch_col[], float ep_2, float ep_3, float xlv, float r_d, float xlvcp, float p608, float tv0, float cpv,float r_v, float cice, float cliq, float cp, float xls, float rcp); 
+extern "C" void mym_condensation_cc(int kts, int kte, float dx, float dz[], float zw[], float xland,float thl[], float qw[], float qv[], float qc[], float qi[], float qs[],float p[], float exner[], float tsq[], float qsq[], float cov[], float sh[], float el[], int bl_mynn_cloudpdf,float qc_bl1d[], float qi_bl1d[], float cldfra_bl1d[], float pblh1, float hfx1,float vt[], float vq[], float th[], float sgm[], float rmo[],int spp_pbl, float rstoch_col[], float ep_2, float ep_3, float xlv, float r_d, float xlvcp, float p608, float tv0, float cpv,float r_v, float cice, float cliq, float cp, float xls, float rcp); 
 
 
-extern "C" void topdown_cloudrad_cc(int kts, int kte, const std::vector<float>& dz1, const std::vector<float>& zw, float fltv, float xland, int kpbl, float PBLH, const std::vector<float>& sqc, const std::vector<float>& sqi, const std::vector<float>& sqw, const std::vector<float>& thl, const std::vector<float>& th1, const std::vector<float>& ex1, const std::vector<float>& p1, const std::vector<float>& rho1, const std::vector<float>& thetav, const std::vector<float>& cldfra_bl1D, const std::vector<float>& rthraten, float& maxKHtopdown, std::vector<float>& KHtopdown, std::vector<float>& TKEprodTD);
+extern "C" void topdown_cloudrad_cc(int kts, int kte, const std::vector<float>& dz1, const std::vector<float>& zw, float fltv, float xland, int kpbl, float pblh, const std::vector<float>& sqc, const std::vector<float>& sqi, const std::vector<float>& sqw, const std::vector<float>& thl, const std::vector<float>& th1, const std::vector<float>& ex1, const std::vector<float>& p1, const std::vector<float>& rho1, const std::vector<float>& thetav, const std::vector<float>& cldfra_bl1d, const std::vector<float>& rthraten, float& maxkhtopdown, std::vector<float>& khtopdown, std::vector<float>& tkeprodtd);
 
-extern "C" void DDMF_JPL_cc(int kts, int kte, float dt, std::vector<float> zw, std::vector<float> dz, std::vector<float> p,std::vector<float> u, std::vector<float> v, std::vector<float> th, std::vector<float> thl, std::vector<float> thv, std::vector<float> tk, std::vector<float> qt, std::vector<float> qv, std::vector<float> qc, std::vector<float> rho, std::vector<float> exner, float ust, float wthl, float wqt, float pblh, int kpbl,std::vector<float>& edmf_a_dd, std::vector<float>& edmf_w_dd, std::vector<float>& edmf_qt_dd,std::vector<float>& edmf_thl_dd, std::vector<float>& edmf_ent_dd, std::vector<float>& edmf_qc_dd,std::vector<float>& sd_aw, std::vector<float>& sd_awthl, std::vector<float>& sd_awqt,std::vector<float>& sd_awqv, std::vector<float>& sd_awqc, std::vector<float>& sd_awu,std::vector<float>& sd_awv, std::vector<float>& sd_awqke,std::vector<float> qc_bl1d, std::vector<float> cldfra_bl1d,std::vector<float> rthraten,float svp1, float grav,float onethird,float p1000mb,float rcp,float xlvcp);
+extern "C" void ddmf_jpl_cc(int kts, int kte, float dt, std::vector<float> zw, std::vector<float> dz, std::vector<float> p,std::vector<float> u, std::vector<float> v, std::vector<float> th, std::vector<float> thl, std::vector<float> thv, std::vector<float> tk, std::vector<float> qt, std::vector<float> qv, std::vector<float> qc, std::vector<float> rho, std::vector<float> exner, float ust, float wthl, float wqt, float pblh, int kpbl,std::vector<float>& edmf_a_dd, std::vector<float>& edmf_w_dd, std::vector<float>& edmf_qt_dd,std::vector<float>& edmf_thl_dd, std::vector<float>& edmf_ent_dd, std::vector<float>& edmf_qc_dd,std::vector<float>& sd_aw, std::vector<float>& sd_awthl, std::vector<float>& sd_awqt,std::vector<float>& sd_awqv, std::vector<float>& sd_awqc, std::vector<float>& sd_awu,std::vector<float>& sd_awv, std::vector<float>& sd_awqke,std::vector<float> qc_bl1d, std::vector<float> cldfra_bl1d,std::vector<float> rthraten,float svp1, float grav,float onethird,float p1000mb,float rcp,float xlvcp);
 
-extern "C" void scale_aware_cc(float dx, float pbl1, float& Psig_bl, float& Psig_shcu); 
+extern "C" void scale_aware_cc(float dx, float pbl1, float& psig_bl, float& psig_shcu); 
 
-extern "C" void GET_PBLH_cc(int KTS, int KTE, float& zi, const std::vector<float>& thetav1D, const std::vector<float>& qke1D, const std::vector<float>& zw1D, const std::vector<float>& dz1D, float landsea, int kzi);
+extern "C" void get_pblh_cc(int kts, int kte, float& zi, const std::vector<float>& thetav1d, const std::vector<float>& qke1d, const std::vector<float>& zw1d, const std::vector<float>& dz1d, float landsea, int kzi);
 
-extern "C" void retrieve_exchange_coeffs(int kts, int kte, const std::vector<float>& dfm, const std::vector<float>& dfh, const std::vector<float>& dz, std::vector<float>& K_m, std::vector<float>& K_h);
+extern "C" void retrieve_exchange_coeffs(int kts, int kte, const std::vector<float>& dfm, const std::vector<float>& dfh, const std::vector<float>& dz, std::vector<float>& k_m, std::vector<float>& k_h);
 
+extern "C" void dmp_mf_cc(int kts, int kte, float dt, float* zw, float* dz, float* p, float* rho, int momentum_opt, int tke_opt, int scalar_opt, float* u, float* v, float* w, float* th, float* thl, float* thv, float* tk, float* qt, float* qv, float* qc, float* qke, float* qnc, float* qni, float* qnwfa, float* qnifa, float* qnbca, float ust, float flt, float fltv, float flq, float flqv, float pblh, float kpbl, float dx, float landsea, float ts, float* edmf_a, float* edmf_w, float* edmf_qt, float* edmf_thl, float* edmf_ent, float* edmf_qc, float* s_aw, float* s_awthl, float* s_awqt, float* s_awqv, float* s_awqc, float* s_awu, float* s_awv, float* s_awqke, float* s_awqnc, float* s_awqni, float* s_awqnwfa, float* s_awqnifa, float* s_awqnbca, int nchem, float** chem1, float** s_awchem, bool mix_chem, float* qc_bl1d, float* cldfra_bl1d, float* qc_bl1d_old, float* cldfra_bl1d_old, float psig_shcu, float maxwidth, int ktop, float maxmf, float ztop, float* rstoch_col, float grav, float gtr, float p608);
 	
-//----------------------------------------CONTSTANTS-------------------------------------------
+//----------------------------------------contstants-------------------------------------------
 
-// Constants
-const float NO_threshold = 10.0;     // For anthropogenic sources
-const float frp_threshold = 10.0;    // Increased the frp threshold to enhance mixing over big fires
+// constants
+const float no_threshold = 10.0;     // for anthropogenic sources
+const float frp_threshold = 10.0;    // increased the frp threshold to enhance mixing over big fires
 const float pblh_threshold = 100.0;
 
-const float t0c = 273.15; // Assuming t0c is 273.15
-const float tice = 240.0; // Assuming tice is 240 based on the comment
+const float t0c = 273.15; // assuming t0c is 273.15
+const float tice = 240.0; // assuming tice is 240 based on the comment
 
-// Assuming float corresponds to float precision
+// assuming float corresponds to float precision
 const float cphm_st = 5.0, cphm_unst = 16.0,
                  cphh_st = 5.0, cphh_unst = 16.0;
 
-// Closure constants
+// closure constants
 constexpr float pr = 0.74,
-                 g1 = 0.235, // NN2009 = 0.235
+                 g1 = 0.235, // nn2009 = 0.235
                  b1 = 24.0,
-                 b2 = 15.0, // CKmod     NN2009
+                 b2 = 15.0, // ckmod     nn2009
                  c2 = 0.729, // 0.729, //0.75,
                  c3 = 0.340, // 0.340, //0.352,
                  c4 = 0.0,
@@ -63,20 +64,20 @@ constexpr float cc2 = 1.0 - c2,
                  e4c = 12.0 * a1 * a2 * cc2,
                  e5c = 6.0 * a1 * a1;
 
-// Constants for min tke in elt integration (qmin), max z/L in els (zmax),
-// and factor for eddy viscosity for TKE (Kq = Sqfac*Km):
-constexpr float qmin = 0.0, zmax = 1.0, Sqfac = 3.0;
+// constants for min tke in elt integration (qmin), max z/l in els (zmax),
+// and factor for eddy viscosity for tke (kq = sqfac*km):
+constexpr float qmin = 0.0, zmax = 1.0, sqfac = 3.0;
 
 constexpr float gpw = 5.0 / 3.0, qcgmin = 1e-8, qkemin = 1e-12;
-constexpr float tliq = 269.0; // all hydrometeors are liquid when T > tliq
+constexpr float tliq = 269.0; // all hydrometeors are liquid when t > tliq
 
-// Constants for cloud PDF (mym_condensation)
+// constants for cloud pdf (mym_condensation)
 constexpr float rr2 = 0.7071068, rrp = 0.3989423;
 
-// Use Canuto/Kitamura mod (remove Ric and negative TKE) (1:yes, 0:no)
-constexpr float CKmod = 1.0;
+// use canuto/kitamura mod (remove ric and negative tke) (1:yes, 0:no)
+constexpr float ckmod = 1.0;
 
-// Option to activate environmental subsidence in mass-flux scheme
+// option to activate environmental subsidence in mass-flux scheme
 constexpr bool env_subs = false;
 
 //---------------------------------------------------------------------------------------------
@@ -85,90 +86,90 @@ float elt = 1.0e-5;
 
 float esat_blend_cc(float t) {
 
-    // Constants for liquid
-    const float J0 = .611583699E03;
-    const float J1 = .444606896E02;
-    const float J2 = .143177157E01;
-    const float J3 = .264224321E-1;
-    const float J4 = .299291081E-3;
-    const float J5 = .203154182E-5;
-    const float J6 = .702620698E-8;
-    const float J7 = .379534310E-11;
-    const float J8 = -.321582393E-13;
+    // constants for liquid
+    const float j0 = .611583699e03;
+    const float j1 = .444606896e02;
+    const float j2 = .143177157e01;
+    const float j3 = .264224321e-1;
+    const float j4 = .299291081e-3;
+    const float j5 = .203154182e-5;
+    const float j6 = .702620698e-8;
+    const float j7 = .379534310e-11;
+    const float j8 = -.321582393e-13;
 
-    // Constants for ice
-    const float K0 = .609868993E03;
-    const float K1 = .499320233E02;
-    const float K2 = .184672631E01;
-    const float K3 = .402737184E-1;
-    const float K4 = .565392987E-3;
-    const float K5 = .521693933E-5;
-    const float K6 = .307839583E-7;
-    const float K7 = .105785160E-9;
-    const float K8 = .161444444E-12;
+    // constants for ice
+    const float k0 = .609868993e03;
+    const float k1 = .499320233e02;
+    const float k2 = .184672631e01;
+    const float k3 = .402737184e-1;
+    const float k4 = .565392987e-3;
+    const float k5 = .521693933e-5;
+    const float k6 = .307839583e-7;
+    const float k7 = .105785160e-9;
+    const float k8 = .161444444e-12;
 
-    float XC = std::max(-80.0f, t - t0c);
+    float xc = std::max(-80.0f, t - t0c);
     float esat_blend_cc;
 
     if (t >= (t0c - 6.0)) {
-        esat_blend_cc = J0 + XC * (J1 + XC * (J2 + XC * (J3 + XC * (J4 + XC * (J5 + XC * (J6 + XC * (J7 + XC * J8)))))));
+        esat_blend_cc = j0 + xc * (j1 + xc * (j2 + xc * (j3 + xc * (j4 + xc * (j5 + xc * (j6 + xc * (j7 + xc * j8)))))));
     } else if (t <= tice) {
-        esat_blend_cc = K0 + XC * (K1 + XC * (K2 + XC * (K3 + XC * (K4 + XC * (K5 + XC * (K6 + XC * (K7 + XC * K8)))))));
+        esat_blend_cc = k0 + xc * (k1 + xc * (k2 + xc * (k3 + xc * (k4 + xc * (k5 + xc * (k6 + xc * (k7 + xc * k8)))))));
     } else {
-        float ESL = J0 + XC * (J1 + XC * (J2 + XC * (J3 + XC * (J4 + XC * (J5 + XC * (J6 + XC * (J7 + XC * J8)))))));
-        float ESI = K0 + XC * (K1 + XC * (K2 + XC * (K3 + XC * (K4 + XC * (K5 + XC * (K6 + XC * (K7 + XC * K8)))))));
+        float esl = j0 + xc * (j1 + xc * (j2 + xc * (j3 + xc * (j4 + xc * (j5 + xc * (j6 + xc * (j7 + xc * j8)))))));
+        float esi = k0 + xc * (k1 + xc * (k2 + xc * (k3 + xc * (k4 + xc * (k5 + xc * (k6 + xc * (k7 + xc * k8)))))));
         float chi = ((t0c - 6.0) - t) / ((t0c - 6.0) - tice);
-        esat_blend_cc = (1.0 - chi) * ESL + chi * ESI;
+        esat_blend_cc = (1.0 - chi) * esl + chi * esi;
     }
 
     return esat_blend_cc;
 }
 
 
-float qsat_blend_cc(float t, float P) {
-    // Constants for liquid
-    const float J0 = .611583699E03;
-    const float J1 = .444606896E02;
-    const float J2 = .143177157E01;
-    const float J3 = .264224321E-1;
-    const float J4 = .299291081E-3;
-    const float J5 = .203154182E-5;
-    const float J6 = .702620698E-8;
-    const float J7 = .379534310E-11;
-    const float J8 = -.321582393E-13;
-    // Constants for ice
-    const float K0 = .609868993E03;
-    const float K1 = .499320233E02;
-    const float K2 = .184672631E01;
-    const float K3 = .402737184E-1;
-    const float K4 = .565392987E-3;
-    const float K5 = .521693933E-5;
-    const float K6 = .307839583E-7;
-    const float K7 = .105785160E-9;
-    const float K8 = .161444444E-12; 
-    // Temperature thresholds
-    const float t0c = 0.0; // Assuming 0 for t0c (temperature in Celsius)
-    const float tice = -273.15; // Assuming -273.15 for tice (absolute zero, could be different)
-    float XC = std::max(-80.0f, t - t0c);
-    float qsat_blend_cc, ESL, ESI, RSLF, RSIF, chi;
+float qsat_blend_cc(float t, float p) {
+    // constants for liquid
+    const float j0 = .611583699e03;
+    const float j1 = .444606896e02;
+    const float j2 = .143177157e01;
+    const float j3 = .264224321e-1;
+    const float j4 = .299291081e-3;
+    const float j5 = .203154182e-5;
+    const float j6 = .702620698e-8;
+    const float j7 = .379534310e-11;
+    const float j8 = -.321582393e-13;
+    // constants for ice
+    const float k0 = .609868993e03;
+    const float k1 = .499320233e02;
+    const float k2 = .184672631e01;
+    const float k3 = .402737184e-1;
+    const float k4 = .565392987e-3;
+    const float k5 = .521693933e-5;
+    const float k6 = .307839583e-7;
+    const float k7 = .105785160e-9;
+    const float k8 = .161444444e-12; 
+    // temperature thresholds
+    const float t0c = 0.0; // assuming 0 for t0c (temperature in celsius)
+    const float tice = -273.15; // assuming -273.15 for tice (absolute zero, could be different)
+    float xc = std::max(-80.0f, t - t0c);
+    float qsat_blend_cc, esl, esi, rslf, rsif, chi;
 
     if (t >= (t0c - 6.0)) {
-        ESL = J0 + XC * (J1 + XC * (J2 + XC * (J3 + XC * (J4 + XC * (J5 + XC * (J6 + XC * (J7 + XC * J8)))))));
-        ESL = std::min(ESL, P * 0.15f);
-        qsat_blend_cc = 0.622 * ESL / std::max(P - ESL, 1e-5f);
+        esl = j0 + xc * (j1 + xc * (j2 + xc * (j3 + xc * (j4 + xc * (j5 + xc * (j6 + xc * (j7 + xc * j8)))))));
+        esl = std::min(esl, p * 0.15f);
+        qsat_blend_cc = 0.622 * esl / std::max(p - esl, 1e-5f);
     } else if (t <= tice) {
-        ESI = K0 + XC * (K1 + XC * (K2 + XC * (K3 + XC * (K4 + XC * (K5 + XC * (K6 + XC * (K7 + XC * K8)))))));
-        ESI = std::min(ESI, P * 0.15f);
-        qsat_blend_cc = 0.622 * ESI / std::max(P - ESI, 1e-5f);
+        esi = k0 + xc * (k1 + xc * (k2 + xc * (k3 + xc * (k4 + xc * (k5 + xc * (k6 + xc * (k7 + xc * k8)))))));
+        esi = std::min(esi, p * 0.15f);
+        qsat_blend_cc = 0.622 * esi / std::max(p - esi, 1e-5f);
     } else {
-        ESL = J0 + XC * (J1 + XC * (J2 + XC * (J3 + XC * (J4 + XC * (J5 + XC * (J6 + XC * (J7 + XC * J8)))))));
-        ESL = std::min(ESL, P * 0.15f);
-        ESI = K0 + XC * (K1 + XC * (K2 + XC * (K3 + XC * (K4 + XC * (K5 + XC * (K6 + XC * (K7 + XC * K8)))))));
-        ESI = std::min(ESI, P * 0.15f);
-        RSLF = 0.622 * ESL / std::max(P - ESL, 1e-5f);
-        RSIF = 0.622 * ESI / std::max(P - ESI, 1e-5f);
+        esl = j0 + xc * (j1 + xc * (j2 + xc * (j3 + xc * (j4 + xc * (j5 + xc * (j6 + xc * (j7 + xc * j8)))))));
+        esl = std::min(esl, p * 0.15f);
+        esi = k0 + xc * (k1 + xc * (k2 + xc * (k3 + xc * (k4 + xc * (k5 + xc * (k6 + xc * (k7 + xc * k8)))))));
+        esi = std::min(esi, p * 0.15f);
+        rslf = 0.622 * esl / std::max(p - esl, 1e-5f);
+        rsif = 0.622 * esi / std::max(p - esi, 1e-5f);
         chi = ((t0c - 6.0) - t) / ((t0c - 6.0) - tice);
-        qsat_blend_cc = (1.0 - chi) * RSLF + chi * RSIF;
+        qsat_blend_cc = (1.0 - chi) * rslf + chi * rsif;
     }
     return qsat_blend_cc;
 }
@@ -190,31 +191,31 @@ float xl_blend_cc(float t,float xlv, float xls, float cpv, float cliq, float cic
     return xl_blend_cc;
 }
 
-void condensation_edmf_cc(float QT, float THL, float P, float zagl, float& THV, float& QC, float p1000mb, float rcp, float xlvcp, float rvovrd) {
+void condensation_edmf_cc(float qt, float thl, float p, float zagl, float& thv, float& qc, float p1000mb, float rcp, float xlvcp, float rvovrd) {
     const int niter = 50;
     const float diff = 1.e-6;
-    float EXN = std::pow((P / p1000mb), rcp);
-    // QC is assumed to be initialized before calling this function
+    float exn = std::pow((p / p1000mb), rcp);
+    // qc is assumed to be initialized before calling this function
     for (int i = 0; i < niter; ++i) {
-        float T = EXN * THL + xlvcp * QC;
-        float QS = qsat_blend_cc(T, P);
-        float QCOLD = QC;
-        QC = 0.5 * QC + 0.5 * std::max((QT - QS), 0.0f);
-        if (std::abs(QC - QCOLD) < diff) break;
+        float t = exn * thl + xlvcp * qc;
+        float qs = qsat_blend_cc(t, p);
+        float qcold = qc;
+        qc = 0.5 * qc + 0.5 * std::max((qt - qs), 0.0f);
+        if (std::abs(qc - qcold) < diff) break;
     }
-    float T = EXN * THL + xlvcp * QC;
-    float QS = qsat_blend_cc(T, P);
-    QC = std::max(QT - QS, 0.0f);
-    // Do not allow saturation below 100 m
-    if (zagl < 100.0) QC = 0.0;
-    THV = (THL + xlvcp * QC) * (1.0 + QT * (rvovrd - 1.0) - rvovrd * QC);
+    float t = exn * thl + xlvcp * qc;
+    float qs = qsat_blend_cc(t, p);
+    qc = std::max(qt - qs, 0.0f);
+    // do not allow saturation below 100 m
+    if (zagl < 100.0) qc = 0.0;
+    thv = (thl + xlvcp * qc) * (1.0 + qt * (rvovrd - 1.0) - rvovrd * qc);
 }
 
-// Function to solve system of linear equations on tridiagonal matrix n times n
-// after Peaceman and Rachford, 1955
+// function to solve system of linear equations on tridiagonal matrix n times n
+// after peaceman and rachford, 1955
 // a, b, c, d - are std::vectors of order n
-// a, b, c - are coefficients on the LHS
-// d - is initially RHS on the output becomes a solution std::vector
+// a, b, c - are coefficients on the lhs
+// d - is initially rhs on the output becomes a solution std::vector
 void tridiag_cc(int n, const std::vector<float>& a, const std::vector<float>& b, std::vector<float>& c, std::vector<float>& d) {
     std::vector<float> q(n);
     c[n-1] = 0.0;
@@ -237,21 +238,21 @@ void tridiag2_cc(int n, float* a, float* b, float* c, float* d, float* x) {
     float* dp = new float[n];
     float m;
 
-    // Initialize c-prime and d-prime
+    // initialize c-prime and d-prime
     cp[0] = c[0] / b[0];
     dp[0] = d[0] / b[0];
 
-    // Solve for std::vectors c-prime and d-prime
+    // solve for std::vectors c-prime and d-prime
     for (int i = 1; i < n; ++i) {
         m = b[i] - cp[i - 1] * a[i];
         cp[i] = c[i] / m;
         dp[i] = (d[i] - dp[i - 1] * a[i]) / m;
     }
 
-    // Initialize x
+    // initialize x
     x[n - 1] = dp[n - 1];
 
-    // Solve for x from the std::vectors c-prime and d-prime
+    // solve for x from the std::vectors c-prime and d-prime
     for (int i = n - 2; i >= 0; --i) {
         x[i] = dp[i] - cp[i] * x[i + 1];
     }
@@ -260,12 +261,12 @@ void tridiag2_cc(int n, float* a, float* b, float* c, float* d, float* x) {
     delete[] dp;
 }
 
-// Function to perform tridiagonal matrix algorithm
+// function to perform tridiagonal matrix algorithm
 void tridiag3_cc(int kte, std::vector<float>& a, std::vector<float>& b, std::vector<float>& c, std::vector<float>& d, std::vector<float>& x) {
-    // Inversion and resolution of a tridiagonal matrix A X = D
-    // a - lower diagonal (Ai,i-1)
-    // b - principal diagonal (Ai,i)
-    // c - upper diagonal (Ai,i+1)
+    // inversion and resolution of a tridiagonal matrix a x = d
+    // a - lower diagonal (ai,i-1)
+    // b - principal diagonal (ai,i)
+    // c - upper diagonal (ai,i+1)
     // d - right-hand side std::vector
     // x - solution std::vector
 
@@ -284,24 +285,24 @@ void tridiag3_cc(int kte, std::vector<float>& a, std::vector<float>& b, std::vec
 
 // ==================================================================
 //>\ingroup gsd_mynn_edmf
-// This subroutine was taken from the BouLac scheme in WRF-ARW
-// and modified for integration into the MYNN PBL scheme.
-// WHILE loops were added to reduce the computational expense.
-// This subroutine computes the length scales up and down
+// this subroutine was taken from the boulac scheme in wrf-arw
+// and modified for integration into the mynn pbl scheme.
+// while loops were added to reduce the computational expense.
+// this subroutine computes the length scales up and down
 // and then computes the min, average of the up/down
 // length scales, and also considers the distance to the
 // surface.
 void boulac_length_cc(int kts, int kte, const std::vector<float>& qtke, const std::vector<float>& dz, const std::vector<float>& theta, std::vector<float>& lb1, std::vector<float>& lb2, const std::vector<float>& zw, float gtr) {
 //      dlu = the distance a parcel can be lifted upwards give a finite
-//            amount of TKE.
+//            amount of tke.
 //      dld = the distance a parcel can be displaced downwards given a
-//            finite amount of TKE.
+//            finite amount of tke.
 //      lb1 = the minimum of the length up and length down
 //      lb2 = the average of the length up and length down
     int iz, izz, found;
     std::vector<float> dlu(kts, kte);
     std::vector<float> dld(kts, kte);
-    const float Lmax = 2000.0;
+    const float lmax = 2000.0;
     float dzt, zup, beta, zup_inf, bbb, tl, zdo, zdo_sup, zzz;
     
     for (iz = kts; iz <= kte; iz++) {
@@ -391,8 +392,8 @@ void boulac_length_cc(int kts, int kte, const std::vector<float>& qtke, const st
         dlu[iz] = std::max(0.1f, std::min(dlu[iz], 1000.0f));
         dld[iz] = std::max(0.1f, std::min(dld[iz], 1000.0f));
         lb2[iz] = std::sqrt(dlu[iz] * dld[iz]);
-        lb1[iz] = lb1[iz] / (1.0 + (lb1[iz] / Lmax));
-        lb2[iz] = lb2[iz] / (1.0 + (lb2[iz] / Lmax));
+        lb1[iz] = lb1[iz] / (1.0 + (lb1[iz] / lmax));
+        lb2[iz] = lb2[iz] / (1.0 + (lb2[iz] / lmax));
         
         if (iz == kte) {
             lb1[kte] = lb1[kte - 1];
@@ -403,52 +404,52 @@ void boulac_length_cc(int kts, int kte, const std::vector<float>& qtke, const st
 
 //
 // ==================================================================
-//     SUBROUTINE  mym_level2:
+//     subroutine  mym_level2:
 //
-//     Input variables:    see subroutine mym_initialize
+//     input variables:    see subroutine mym_initialize
 //
-//     Output variables:
-//       dtl(nx,nz,ny) : Vertical gradient of Theta_l             (K/m)
-//       dqw(nx,nz,ny) : Vertical gradient of Q_w
-//       dtv(nx,nz,ny) : Vertical gradient of Theta_V             (K/m)
-//       gm (nx,nz,ny) : G_M divided by L^2/q^2                (s^(-2))
-//       gh (nx,nz,ny) : G_H divided by L^2/q^2                (s^(-2))
-//       sm (nx,nz,ny) : Stability function for momentum, at Level 2
-//       sh (nx,nz,ny) : Stability function for heat, at Level 2
+//     output variables:
+//       dtl(nx,nz,ny) : vertical gradient of theta_l             (k/m)
+//       dqw(nx,nz,ny) : vertical gradient of q_w
+//       dtv(nx,nz,ny) : vertical gradient of theta_v             (k/m)
+//       gm (nx,nz,ny) : g_m divided by l^2/q^2                (s^(-2))
+//       gh (nx,nz,ny) : g_h divided by l^2/q^2                (s^(-2))
+//       sm (nx,nz,ny) : stability function for momentum, at level 2
+//       sh (nx,nz,ny) : stability function for heat, at level 2
 //
-//       These are defined on the walls of the grid boxes.
+//       these are defined on the walls of the grid boxes.
 //
 
 //>\ingroup gsd_mynn_edmf
-// This subroutine calculates the level 2, non-dimensional wind shear
-// \f$G_M\f$ and vertical temperature gradient \f$G_H\f$ as well as
-// the level 2 stability funcitons \f$S_h\f$ and \f$S_m\f$.
+// this subroutine calculates the level 2, non-dimensional wind shear
+// \f$g_m\f$ and vertical temperature gradient \f$g_h\f$ as well as
+// the level 2 stability funcitons \f$s_h\f$ and \f$s_m\f$.
 //\param kts    horizontal dimension
 //\param kte    vertical dimension
 //\param dz     vertical grid spacings (\f$m\f$)
 //\param u      west-east component of the horizontal wind (\f$m s^{-1}\f$)
 //\param v      south-north component of the horizontal wind (\f$m s^{-1}\f$)
 //\param thl    liquid water potential temperature
-//\param qw     total water content \f$Q_w\f$
+//\param qw     total water content \f$q_w\f$
 //\param ql     liquid water content (\f$kg kg^{-1}\f$)
-//\param Vt
-//\param Vq
-//\param dtl     vertical gradient of \f$\theta_l\f$ (\f$K m^{-1}\f$)
-//\param dqw     vertical gradient of \f$Q_w\f$
-//\param dtv     vertical gradient of \f$\theta_V\f$ (\f$K m^{-1}\f$)
-//\param gm      \f$G_M\f$ divided by \f$L^{2}/q^{2}\f$ (\f$s^{-2}\f$)
-//\param gh      \f$G_H\f$ divided by \f$L^{2}/q^{2}\f$ (\f$s^{-2}\f$)
-//\param sm      stability function for momentum, at Level 2
-//\param sh      stability function for heat, at Level 2
-//\section gen_mym_level2 GSD MYNN-EDMF mym_level2 General Algorithm
+//\param vt
+//\param vq
+//\param dtl     vertical gradient of \f$\theta_l\f$ (\f$k m^{-1}\f$)
+//\param dqw     vertical gradient of \f$q_w\f$
+//\param dtv     vertical gradient of \f$\theta_v\f$ (\f$k m^{-1}\f$)
+//\param gm      \f$g_m\f$ divided by \f$l^{2}/q^{2}\f$ (\f$s^{-2}\f$)
+//\param gh      \f$g_h\f$ divided by \f$l^{2}/q^{2}\f$ (\f$s^{-2}\f$)
+//\param sm      stability function for momentum, at level 2
+//\param sh      stability function for heat, at level 2
+//\section gen_mym_level2 gsd mynn-edmf mym_level2 general algorithm
 // @ {
 
 void mym_level2_cc(int kts, int kte, float* dz, float* u, float* v,
                 float* thl, float* thetav, float* qw, float* ql,
-                float* Vt, float* Vq, float* dtl, float* dqw,
+                float* vt, float* vq, float* dtl, float* dqw,
                 float* dtv, float* gm, float* gh, float* sm, float* sh, 
 		float tv0, float gtr, float sqw2) {
-    float rfc, f1, f2, rf1, rf2, smc, shc, ri1, ri2, ri3, ri4, duz, dtz, dqz, Vtt, Vqq, dtq, dzk, afk, abk, ri, rf;
+    float rfc, f1, f2, rf1, rf2, smc, shc, ri1, ri2, ri3, ri4, duz, dtz, dqz, vtt, vqq, dtq, dzk, afk, abk, ri, rf;
     float a2fac;
 
     rfc = g1 / (g1 + g2);
@@ -473,10 +474,10 @@ void mym_level2_cc(int kts, int kte, float* dz, float* u, float* v,
         dtz = (thl[k] - thl[k - 1]) / dzk;
         dqz = (qw[k] - qw[k - 1]) / dzk;
 
-        Vtt = 1.0 + Vt[k] * abk + Vt[k - 1] * afk; // Beta-theta in NN09, Eq. 39
-        Vqq = tv0 + Vq[k] * abk + Vq[k - 1] * afk; // Beta-q
-        dtq = Vtt * dtz + Vqq * dqz;
-        // Alternatively, use theta-v without the SGS clouds
+        vtt = 1.0 + vt[k] * abk + vt[k - 1] * afk; // beta-theta in nn09, eq. 39
+        vqq = tv0 + vq[k] * abk + vq[k - 1] * afk; // beta-q
+        dtq = vtt * dtz + vqq * dqz;
+        // alternatively, use theta-v without the sgs clouds
         // dtq = (thetav[k] - thetav[k - 1]) / dzk;
 
         dtl[k] = dtz;
@@ -486,10 +487,10 @@ void mym_level2_cc(int kts, int kte, float* dz, float* u, float* v,
         gm[k] = duz;
         gh[k] = -dtq * gtr;
 
-        // Gradient Richardson number
+        // gradient richardson number
         ri = -gh[k] / std::max(duz, 1.0e-10f);
-        // a2fac is needed for the Canuto/Kitamura mod
-        if (CKmod == 1) {
+        // a2fac is needed for the canuto/kitamura mod
+        if (ckmod == 1) {
             a2fac = 1.0f / (1.0f + std::max(ri, 0.0f));
         } else {
             a2fac = 1.0f;
@@ -506,7 +507,7 @@ void mym_level2_cc(int kts, int kte, float* dz, float* u, float* v,
         ri3 = 4.0 * rf2 * smc - 2.0 * ri2;
         ri4 = ri2 * ri2;
 
-        // Flux Richardson number
+        // flux richardson number
         rf = std::min(ri1 * (ri + ri2 - std::sqrt(ri * ri - ri3 * ri + ri4)), rfc);
 
         sh[k] = shc * (rfc - rf) / (1.0 - rf);
@@ -517,30 +518,30 @@ void mym_level2_cc(int kts, int kte, float* dz, float* u, float* v,
 // @}
 
 // ==================================================================
-//     SUBROUTINE  mym_length:
+//     subroutine  mym_length:
 //
-//     Input variables:    see subroutine mym_initialize
+//     input variables:    see subroutine mym_initialize
 //
-//     Output variables:   see subroutine mym_initialize
+//     output variables:   see subroutine mym_initialize
 //
-//     Work arrays:
-//       elt(nx,ny)      : Length scale depending on the PBL depth    (m)
-//       vsc(nx,ny)      : Velocity scale q_c                       (m/s)
+//     work arrays:
+//       elt(nx,ny)      : length scale depending on the pbl depth    (m)
+//       vsc(nx,ny)      : velocity scale q_c                       (m/s)
 //                         at first, used for computing elt
 //
-//     NOTE: the mixing lengths are meant to be calculated at the full-
+//     note: the mixing lengths are meant to be calculated at the full-
 //           sigmal levels (or interfaces beween the model layers).
 //
 //>\ingroup gsd_mynn_edmf
-// This subroutine calculates the mixing lengths.
-void mym_length_cc(int kts, int kte, float xland, float* dz, float* zw, float rmo, float flt, float fltv, float flq, float* Vt, float* Vq, float* u1, float* v1, float* qke, float* dtv, float* el, float zi, float* theta, float Psig_bl, float* cldfra_bl1D, int bl_mynn_mixlength, float* edmf_w1, float* edmf_a1) {
+// this subroutine calculates the mixing lengths.
+void mym_length_cc(int kts, int kte, float xland, float* dz, float* zw, float rmo, float flt, float fltv, float flq, float* vt, float* vq, float* u1, float* v1, float* qke, float* dtv, float* el, float zi, float* theta, float psig_bl, float* cldfra_bl1d, int bl_mynn_mixlength, float* edmf_w1, float* edmf_a1) {
     float cns, alp1, alp2, alp3, alp4, alp5, alp6;
     float minzi = 300.0;
     float maxdz = 750.0;
     float mindz = 300.0;
-    float ZSLH = 100.0;
-    float CSL = 2.0;
-    float afk, abk, zwk, zwk1, dzk, qdz, vflx, bv, tau_cloud, wstar, elb, els, elf, el_stab, el_mf, el_stab_mf, elb_mf, PBLH_PLUS_ENT, Uonset, Ugrid, wt_u, el_les;
+    float zslh = 100.0;
+    float csl = 2.0;
+    float afk, abk, zwk, zwk1, dzk, qdz, vflx, bv, tau_cloud, wstar, elb, els, elf, el_stab, el_mf, el_stab_mf, elb_mf, pblh_plus_ent, uonset, ugrid, wt_u, el_les;
     float ctau = 1000.0;
     float karman = 0.4;
     float gtr = 9.81 / theta[0];
@@ -551,9 +552,9 @@ void mym_length_cc(int kts, int kte, float xland, float* dz, float* zw, float rm
     float* qkw = new float[kte-kts+1];
     float qtke[kte+1];
     float thetaw[kte+1];
-    float elBLmin[kte+1];
-    float elBLavg[kte+1];
-    float h1, h2, hs, elBLmin0, elBLavg0, cldavg;
+    float elblmin[kte+1];
+    float elblavg[kte+1];
+    float h1, h2, hs, elblmin0, elblavg0, cldavg;
     int i, j, k;
 
     switch(bl_mynn_mixlength) {
@@ -585,7 +586,7 @@ void mym_length_cc(int kts, int kte, float xland, float* dz, float* zw, float rm
                 zwk = zw[k];
             }
             elt = alp1 * elt / vsc;
-            vflx = (Vt[kts] + 1.0) * flt + (Vq[kts] + tv0) * flq;
+            vflx = (vt[kts] + 1.0) * flt + (vq[kts] + tv0) * flq;
             vsc = std::pow(gtr * elt * std::max(float(vflx), 0.0f), onethird);
             el[kts] = 0.0;
             zwk1 = zw[kts+1];
@@ -600,7 +601,7 @@ void mym_length_cc(int kts, int kte, float xland, float* dz, float* zw, float rm
                     elf = elb;
                 }
                 if (rmo > 0.0) {
-                    els = karman * zwk / (1.0 + cns * std::min(zwk * rmo, ZSLH));
+                    els = karman * zwk / (1.0 + cns * std::min(zwk * rmo, zslh));
                 } else {
                     els = karman * zwk * std::pow(1.0 - alp4 * zwk * rmo, 0.2);
                 }
@@ -609,9 +610,9 @@ void mym_length_cc(int kts, int kte, float xland, float* dz, float* zw, float rm
             }
             break;
         case 1:
-            Ugrid = std::sqrt(u1[kts] * u1[kts] + v1[kts] * v1[kts]);
-            Uonset = 15.0;
-            wt_u = (1.0 - std::min(std::max(float(Ugrid - Uonset), 0.0f) / 30.0f, 0.5f));
+            ugrid = std::sqrt(u1[kts] * u1[kts] + v1[kts] * v1[kts]);
+            uonset = 15.0;
+            wt_u = (1.0 - std::min(std::max(float(ugrid - uonset), 0.0f) / 30.0f, 0.5f));
             cns = 2.7;
             alp1 = 0.23;
             alp2 = 0.3;
@@ -655,24 +656,24 @@ void mym_length_cc(int kts, int kte, float xland, float* dz, float* zw, float rm
                     elb = std::max(float(alp2 * qkw[k]), float(alp6 * edmf_a1[k-1] * edmf_w1[k-1])) / bv * (1.0 + alp3 * std::sqrt(vsc / (bv * elt)));
                     elb = std::min(elb, zwk);
                     elf = 1.0 * qkw[k] / bv;
-                    elBLavg[k] = std::max(float(elBLavg[k]), float(alp6 * edmf_a1[k-1] * edmf_w1[k-1] / bv));
+                    elblavg[k] = std::max(float(elblavg[k]), float(alp6 * edmf_a1[k-1] * edmf_w1[k-1] / bv));
                 } else {
                     elb = 1.0e10;
                     elf = elb;
                 }
                 if (rmo > 0.0) {
-                    els = karman * zwk / (1.0 + cns * std::min(zwk * rmo, ZSLH));
+                    els = karman * zwk / (1.0 + cns * std::min(zwk * rmo, zslh));
                 } else {
                     els = karman * zwk * std::pow(1.0 - alp4 * zwk * rmo, 0.2);
                 }
                 float wt = 0.5 * std::tanh((zwk - (zi + h1)) / h2) + 0.5;
                 el[k] = std::min(elb / (elb / elt + elb / els + 1.0f), elf);
-                el[k] = el[k] * Psig_bl;
+                el[k] = el[k] * psig_bl;
             }
             break;
         case 2:
-            Uonset = 3.5 + dz[kts] * 0.1;
-            Ugrid = std::sqrt(u1[kts] * u1[kts] + v1[kts] * v1[kts]);
+            uonset = 3.5 + dz[kts] * 0.1;
+            ugrid = std::sqrt(u1[kts] * u1[kts] + v1[kts] * v1[kts]);
             cns = 3.5;
             alp1 = 0.22;
             alp2 = 0.30;
@@ -710,7 +711,7 @@ void mym_length_cc(int kts, int kte, float xland, float* dz, float* zw, float rm
             for (k = kts+1; k <= kte; k++) {
                 zwk = zw[k];
                 dzk = 0.5 * (dz[k] + dz[k-1]);
-                cldavg = 0.5 * (cldfra_bl1D[k-1] + cldfra_bl1D[k]);
+                cldavg = 0.5 * (cldfra_bl1d[k-1] + cldfra_bl1d[k]);
                 if (dtv[k] > 0.0) {
                     bv = std::max(float(std::sqrt(gtr * dtv[k])), 0.001f);
                     elb_mf = std::max(float(alp2 * qkw[k]), float(alp6 * edmf_a1[k-1] * edmf_w1[k-1]) / bv * (1.0f + alp3 * std::sqrt(vsc / (bv * elt))));
@@ -732,14 +733,14 @@ void mym_length_cc(int kts, int kte, float xland, float* dz, float* zw, float rm
                 elf = elf / (1.0 + (elf / 800.0));
                 elb_mf = std::max(float(elb_mf), 0.01f);
                 if (rmo > 0.0) {
-                    els = karman * zwk / (1.0 + cns * std::min(zwk * rmo, ZSLH));
+                    els = karman * zwk / (1.0 + cns * std::min(zwk * rmo, zslh));
                 } else {
                     els = karman * zwk * std::pow(1.0 - alp4 * zwk * rmo, 0.2);
                 }
                 float wt = 0.5 * std::tanh((zwk - (zi + h1)) / h2) + 0.5;
                 el[k] = std::sqrt(els * els / (1.0 + (els * els / elt * elt) + (els * els / elb_mf * elb_mf)));
                 el[k] = el[k] * (1.0 - wt) + elf * wt;
-                el[k] = el[k] * Psig_bl + (1.0 - Psig_bl) * el_les;
+                el[k] = el[k] * psig_bl + (1.0 - psig_bl) * el_les;
             }
             break;
     }
@@ -754,34 +755,34 @@ void moisture_check_cc(int kte, float delt, float* dp, float* exner,
                     float* dqv, float* dqc, float* dqi, float* dqs, float* dth, 
 		    float dqv2, float xlvcp, float xlscp) {
 
-    // Constants (assuming xlvcp and xlscp are defined elsewhere)
+    // constants (assuming xlvcp and xlscp are defined elsewhere)
     const float qvmin = 1e-20, qcmin = 0.0, qimin = 0.0;
 
-    for (int k = kte; k >= 1; --k) { // From the top to the surface
-        float dqc2 = std::max(0.0f, qcmin - qc[k-1]); // Adjusting for 1-based indexing
+    for (int k = kte; k >= 1; --k) { // from the top to the surface
+        float dqc2 = std::max(0.0f, qcmin - qc[k-1]); // adjusting for 1-based indexing
         float dqi2 = std::max(0.0f, qimin - qi[k-1]);
         float dqs2 = std::max(0.0f, qimin - qs[k-1]);
 
-        // Fix tendencies
+        // fix tendencies
         dqc[k-1] += dqc2 / delt;
         dqi[k-1] += dqi2 / delt;
         dqs[k-1] += dqs2 / delt;
         dqv[k-1] -= (dqc2 + dqi2 + dqs2) / delt;
         dth[k-1] += xlvcp / exner[k-1] * (dqc2 / delt) + xlscp / exner[k-1] * ((dqi2 + dqs2) / delt);
 
-        // Update species
+        // update species
         qc[k-1] += dqc2;
         qi[k-1] += dqi2;
         qs[k-1] += dqs2;
         qv[k-1] -= dqc2 + dqi2 + dqs2;
         th[k-1] += xlvcp / exner[k-1] * dqc2 + xlscp / exner[k-1] * (dqi2 + dqs2);
 
-        // Then fix qv
+        // then fix qv
         float dqv2 = std::max(0.0f, qvmin - qv[k-1]);
         dqv[k-1] += dqv2 / delt;
         qv[k-1] += dqv2;
         if (k != 1) {
-            qv[k-2] -= dqv2 * dp[k-1] / dp[k-2]; // Adjusting for 1-based indexing
+            qv[k-2] -= dqv2 * dp[k-1] / dp[k-2]; // adjusting for 1-based indexing
             dqv[k-2] -= dqv2 * dp[k-1] / dp[k-2] / delt;
         }
         qv[k-1] = std::max(float(qv[k-1]), float(qvmin));
@@ -793,18 +794,18 @@ void moisture_check_cc(int kte, float delt, float* dp, float* exner,
         float sum = 0.0;
     float aa, dum;
 
-    // Only execute if dqv2 > 1.e-20, which indicates adjustment was made at the top layer
+    // only execute if dqv2 > 1.e-20, which indicates adjustment was made at the top layer
     if(dqv2 > 1e-20) {
-        for (int k = 1; k <= kte; ++k) { // Loop through all layers
+        for (int k = 1; k <= kte; ++k) { // loop through all layers
             if (qv[k-1] > 2.0 * qvmin) {
                 sum += qv[k-1] * dp[k-1];
             }
         }
 
-        aa = dqv2 * dp[0] / std::max(1.e-20f, sum); // Adjust for 1-based indexing with dp[0]
+        aa = dqv2 * dp[0] / std::max(1.e-20f, sum); // adjust for 1-based indexing with dp[0]
 
         if (aa < 0.5) {
-            for (int k = 1; k <= kte; ++k) { // Loop through all layers again
+            for (int k = 1; k <= kte; ++k) { // loop through all layers again
                 if (qv[k-1] > 2.0 * qvmin) {
                     dum = aa * qv[k-1];
                     qv[k-1] -= dum;
@@ -812,8 +813,8 @@ void moisture_check_cc(int kte, float delt, float* dp, float* exner,
                 }
             }
         } else {
-            // For testing purposes only (not yet found in any output):
-            // std::cout << "Full moisture conservation is impossible" << std::endl;
+            // for testing purposes only (not yet found in any output):
+            // std::cout << "full moisture conservation is impossible" << std::endl;
         }
     }
 
@@ -821,51 +822,51 @@ void moisture_check_cc(int kte, float delt, float* dp, float* exner,
 
 /*
 ! ==================================================================
-!     SUBROUTINE  mym_predict:
+!     subroutine  mym_predict:
 !
-!     Input variables:    see subroutine mym_initialize and turbulence
+!     input variables:    see subroutine mym_initialize and turbulence
 !       qke(nx,nz,ny) : qke at (n)th time level
 !       tsq, ...cov     : ditto
 !
-!     Output variables:
+!     output variables:
 !       qke(nx,nz,ny) : qke at (n+1)th time level
 !       tsq, ...cov     : ditto
 !
-!     Work arrays:
+!     work arrays:
 !       qkw(nx,nz,ny)   : q at the center of the grid boxes        (m/s)
-!       bp (nx,nz,ny)   : = 1/2*F,     see below
-!       rp (nx,nz,ny)   : = P-1/2*F*Q, see below
+!       bp (nx,nz,ny)   : = 1/2*f,     see below
+!       rp (nx,nz,ny)   : = p-1/2*f*q, see below
 !
-!     # The equation for a turbulent quantity Q can be expressed as
-!          dQ/dt + Ah + Av = Dh + Dv + P - F*Q,                      (1)
-!       where A is the advection, D the diffusion, P the production,
-!       F*Q the dissipation and h and v denote horizontal and vertical,
-!       respectively. If Q is q^2, F is 2q/B_1L.
-!       Using the Crank-Nicholson scheme for Av, Dv and F*Q, a finite
+!     # the equation for a turbulent quantity q can be expressed as
+!          dq/dt + ah + av = dh + dv + p - f*q,                      (1)
+!       where a is the advection, d the diffusion, p the production,
+!       f*q the dissipation and h and v denote horizontal and vertical,
+!       respectively. if q is q^2, f is 2q/b_1l.
+!       using the crank-nicholson scheme for av, dv and f*q, a finite
 !       difference equation is written as
-!          Q{n+1} - Q{n} = dt  *( Dh{n}   - Ah{n}   + P{n} )
-!                        + dt/2*( Dv{n}   - Av{n}   - F*Q{n}   )
-!                        + dt/2*( Dv{n+1} - Av{n+1} - F*Q{n+1} ),    (2)
+!          q{n+1} - q{n} = dt  *( dh{n}   - ah{n}   + p{n} )
+!                        + dt/2*( dv{n}   - av{n}   - f*q{n}   )
+!                        + dt/2*( dv{n+1} - av{n+1} - f*q{n+1} ),    (2)
 !       where n denotes the time level.
-!       When the advection and diffusion terms are discretized as
-!          dt/2*( Dv - Av ) = a(k)Q(k+1) - b(k)Q(k) + c(k)Q(k-1),    (3)
-!       Eq.(2) can be rewritten as
-!          - a(k)Q(k+1) + [ 1 + b(k) + dt/2*F ]Q(k) - c(k)Q(k-1)
-!                 = Q{n} + dt  *( Dh{n}   - Ah{n}   + P{n} )
-!                        + dt/2*( Dv{n}   - Av{n}   - F*Q{n}   ),    (4)
-!       where Q on the left-hand side is at (n+1)th time level.
+!       when the advection and diffusion terms are discretized as
+!          dt/2*( dv - av ) = a(k)q(k+1) - b(k)q(k) + c(k)q(k-1),    (3)
+!       eq.(2) can be rewritten as
+!          - a(k)q(k+1) + [ 1 + b(k) + dt/2*f ]q(k) - c(k)q(k-1)
+!                 = q{n} + dt  *( dh{n}   - ah{n}   + p{n} )
+!                        + dt/2*( dv{n}   - av{n}   - f*q{n}   ),    (4)
+!       where q on the left-hand side is at (n+1)th time level.
 !
-!       In this subroutine, a(k), b(k) and c(k) are obtained from
+!       in this subroutine, a(k), b(k) and c(k) are obtained from
 !       subprogram coefvu and are passed to subprogram tinteg via
-!       common. 1/2*F and P-1/2*F*Q are stored in bp and rp,
-!       respectively. Subprogram tinteg solves Eq.(4).
+!       common. 1/2*f and p-1/2*f*q are stored in bp and rp,
+!       respectively. subprogram tinteg solves eq.(4).
 !
-!       Modify this subroutine according to your numerical integration
+!       modify this subroutine according to your numerical integration
 !       scheme (program).
 !
 !-------------------------------------------------------------------
 !>\ingroup gsd_mynn_edmf
-!! This subroutine predicts the turbulent quantities at the next step.
+!! this subroutine predicts the turbulent quantities at the next step.
 */
 void mym_predict_cc(int kts, int kte, float closure, float delt, float* dz, float* ust, float flt, float flq, float pmz, float phh, float* el, float* dfq, float* rho, float* pdk, float* pdt, float* pdq, float* pdc, float* qke, float* tsq, float* qsq, float* cov, float* s_aw, float* s_awqke, int bl_mynn_edmf_tke, int tke_budget, float xlvcp, float xlscp, float karman) {
     float vkz, pdk1, phm, pdt1, pdq1, pdc1, b1l, b2l, onoff;
@@ -886,32 +887,32 @@ void mym_predict_cc(int kts, int kte, float closure, float delt, float* dz, floa
     float* tke_up = new float[kte-kts+1];
     float* dzinv = new float[kte-kts+1];
     
-    // REGULATE THE MOMENTUM MIXING FROM THE MASS-FLUX SCHEME (on or off)
+    // regulate the momentum mixing from the mass-flux scheme (on or off)
     if (bl_mynn_edmf_tke == 0) {
         onoff = 0.0;
     } else {
         onoff = 1.0;
     }
     
-    // Calculate vkz
+    // calculate vkz
     vkz = karman * 0.5 * dz[kts];
     
-    // Calculate df3q and dtz
+    // calculate df3q and dtz
     for (int k = kts; k <= kte; k++) {
         qkw[k] = sqrt(std::max(qke[k], 0.0f));
-        df3q[k] = Sqfac * dfq[k];
+        df3q[k] = sqfac * dfq[k];
         dtz[k] = delt / dz[k];
     }
     
-    // Prepare "constants" for diffusion equation
+    // prepare "constants" for diffusion equation
     rhoz[kts] = rho[kts];
     rhoinv[kts] = 1.0 / rho[kts];
     kqdz[kts] = rhoz[kts] * df3q[kts];
     kmdz[kts] = rhoz[kts] * dfq[kts];
     for (int k = kts+1; k <= kte; k++) {
         rhoz[k] = (rho[k] * dz[k-1] + rho[k-1] * dz[k]) / (dz[k-1] + dz[k]);
-        rhoz[k] = std::max(rhoz[k], 1E-4f);
-        rhoinv[k] = 1.0 / std::max(rho[k], 1E-4f);
+        rhoz[k] = std::max(rhoz[k], 1e-4f);
+        rhoinv[k] = 1.0 / std::max(rho[k], 1e-4f);
         kqdz[k] = rhoz[k] * df3q[k];
         kmdz[k] = rhoz[k] * dfq[k];
     }
@@ -919,20 +920,20 @@ void mym_predict_cc(int kts, int kte, float closure, float delt, float* dz, floa
     kqdz[kte+1] = rhoz[kte+1] * df3q[kte];
     kmdz[kte+1] = rhoz[kte+1] * dfq[kte];
     
-    // Calculate pdk1, phm, pdt1, pdq1, pdc1
+    // calculate pdk1, phm, pdt1, pdq1, pdc1
     pdk1 = 2.0f * pow(*ust, 3.0f) * pmz / vkz;
     phm = 2.0f / *ust * phh / vkz;
     pdt1 = phm * pow(flt, 2);
     pdq1 = phm * pow(flq, 2);
     pdc1 = phm * flt * flq;
     
-    // Calculate pdk, pdt, pdq, pdc
+    // calculate pdk, pdt, pdq, pdc
     pdk[kts] = pdk1 - pdk[kts+1];
     pdt[kts] = pdt[kts+1];
     pdq[kts] = pdq[kts+1];
     pdc[kts] = pdc[kts+1];
     
-    // Prediction of twice the turbulent kinetic energy
+    // prediction of twice the turbulent kinetic energy
     for (int k = kts; k <= kte-1; k++) {
         b1l = b1 * 0.5 * (el[k+1] + el[k]);
         bp[k] = 2.0 * qkw[k] / b1l;
@@ -954,34 +955,34 @@ void mym_predict_cc(int kts, int kte, float closure, float delt, float* dz, floa
         qke[k] = std::min(qke[k], 150.0f);
     }
     
-    // TKE budget
+    // tke budget
     if (tke_budget == 1) {
-        float* qWT1D = new float[kte-kts+1];
-        float* qDISS1D = new float[kte-kts+1];
+        float* qwt1d = new float[kte-kts+1];
+        float* qdiss1d = new float[kte-kts+1];
         float* tke_up = new float[kte-kts+1];
         float* dzinv = new float[kte-kts+1];
         
-        // TKE Vertical transport
+        // tke vertical transport
 	for (int k=kts; k <=kte; k++) 
 	{
 		tke_up[k] = 0.5f * qke[k];
                 dzinv[k] = 1.0f / dz[k];
 	}
-        qWT1D[kts] = dzinv[kts] * ((kqdz[kts+1] * (tke_up[kts+1] - tke_up[kts])) - (kqdz[kts] * tke_up[kts])) + 0.5 * rhoinv[kts] * (s_aw[kts+1] * tke_up[kts+1] + ((s_aw[kts+1] - s_aw[kts]) * tke_up[kts]) + (s_awqke[kts] - s_awqke[kts+1])) * onoff;
+        qwt1d[kts] = dzinv[kts] * ((kqdz[kts+1] * (tke_up[kts+1] - tke_up[kts])) - (kqdz[kts] * tke_up[kts])) + 0.5 * rhoinv[kts] * (s_aw[kts+1] * tke_up[kts+1] + ((s_aw[kts+1] - s_aw[kts]) * tke_up[kts]) + (s_awqke[kts] - s_awqke[kts+1])) * onoff;
         for (int k = kts+1; k <= kte-1; k++) {
-            qWT1D[k] = dzinv[k] * ((kqdz[k+1] * (tke_up[k+1] - tke_up[k])) - (kqdz[k] * (tke_up[k] - tke_up[k-1]))) + 0.5 * rhoinv[k] * (s_aw[k+1] * tke_up[k+1] + ((s_aw[k+1] - s_aw[k]) * tke_up[k]) - (s_aw[k] * tke_up[k-1]) + (s_awqke[k] - s_awqke[k+1])) * onoff;
+            qwt1d[k] = dzinv[k] * ((kqdz[k+1] * (tke_up[k+1] - tke_up[k])) - (kqdz[k] * (tke_up[k] - tke_up[k-1]))) + 0.5 * rhoinv[k] * (s_aw[k+1] * tke_up[k+1] + ((s_aw[k+1] - s_aw[k]) * tke_up[k]) - (s_aw[k] * tke_up[k-1]) + (s_awqke[k] - s_awqke[k+1])) * onoff;
         }
-        qWT1D[kte] = dzinv[kte] * (-(kqdz[kte] * (tke_up[kte] - tke_up[kte-1]))) + 0.5 * rhoinv[kte] * (-(s_aw[kte] * tke_up[kte]) - (s_aw[kte] * tke_up[kte-1]) + s_awqke[kte]) * onoff;
+        qwt1d[kte] = dzinv[kte] * (-(kqdz[kte] * (tke_up[kte] - tke_up[kte-1]))) + 0.5 * rhoinv[kte] * (-(s_aw[kte] * tke_up[kte]) - (s_aw[kte] * tke_up[kte-1]) + s_awqke[kte]) * onoff;
         
-        // TKE dissipation rate
+        // tke dissipation rate
 	for (int k=kts; k <=kte; k++) 
 	{
-		qDISS1D[k] = bp[k] * tke_up[k];
+		qdiss1d[k] = bp[k] * tke_up[k];
 	}
     }
     
     if (closure > 2.5) {
-        // Prediction of the moisture variance
+        // prediction of the moisture variance
         for (int k = kts; k <= kte-1; k++) {
             b2l = b2 * 0.5 * (el[k+1] + el[k]);
             bp[k] = 2.0 * qkw[k] / b2l;
@@ -1002,7 +1003,7 @@ void mym_predict_cc(int kts, int kte, float closure, float delt, float* dz, floa
             qsq[k] = std::max(x[k], 1e-17f);
         }
     } else {
-        // Level 2.5 - use level 2 diagnostic
+        // level 2.5 - use level 2 diagnostic
         for (int k = kts; k <= kte-1; k++) {
             if (qkw[k] <= 0.0) {
                 b2l = 0.0;
@@ -1015,7 +1016,7 @@ void mym_predict_cc(int kts, int kte, float closure, float delt, float* dz, floa
     }
     
     if (closure >= 3.0) {
-        // Prediction of the temperature variance
+        // prediction of the temperature variance
         for (int k = kts; k <= kte-1; k++) {
             b2l = b2 * 0.5 * (el[k+1] + el[k]);
             bp[k] = 2.0 * qkw[k] / b2l;
@@ -1036,7 +1037,7 @@ void mym_predict_cc(int kts, int kte, float closure, float delt, float* dz, floa
             tsq[k] = x[k];
         }
         
-        // Prediction of the temperature-moisture covariance
+        // prediction of the temperature-moisture covariance
         for (int k = kts; k <= kte-1; k++) {
             b2l = b2 * 0.5 * (el[k+1] + el[k]);
             bp[k] = 2.0 * qkw[k] / b2l;
@@ -1057,7 +1058,7 @@ void mym_predict_cc(int kts, int kte, float closure, float delt, float* dz, floa
             cov[k] = x[k];
         }
     } else {
-        // Not level 3 - default to level 2 diagnostic
+        // not level 3 - default to level 2 diagnostic
         for (int k = kts; k <= kte-1; k++) {
             if (qkw[k] <= 0.0) {
                 b2l = 0.0;
@@ -1099,14 +1100,14 @@ void mynn_mix_chem_cc(int kts, int kte, int i,
                    std::vector<float>& s_aw, std::vector<std::vector<float>>& s_awchem,
                    float emis_ant_no, float frp, int rrfs_sd, int enh_mix) {
 
-    // Local vars
+    // local vars
     std::vector<float> dtz(kte - kts + 1);
     std::vector<float> a(kte - kts + 1), b(kte - kts + 1), c(kte - kts + 1), d(kte - kts + 1), x(kte - kts + 1);
     float dztop = 0.5 * (dz[kte - 1] + dz[kte - 2]);
     for (int k = kts; k <= kte; ++k) {
         dtz[k - kts] = delt / dz[k - 1];
     }
-    // Prepare "constants" for diffusion equation.
+    // prepare "constants" for diffusion equation.
     std::vector<float> rhoz(kte - kts + 2), khdz(kte - kts + 2), rhoinv(kte - kts + 1);
     rhoz[0] = rho[kts - 1];
     rhoinv[0] = 1.0 / rho[kts - 1];
@@ -1120,20 +1121,20 @@ void mynn_mix_chem_cc(int kts, int kte, int i,
     }
     rhoz[kte - kts + 1] = rhoz[kte - kts];
     khdz[kte - kts + 1] = rhoz[kte - kts + 1] * dfh[kte - 1];
-    // Stability criteria for mf
+    // stability criteria for mf
     for (int k = kts + 1; k <= kte - 1; ++k) {
         khdz[k - kts] = std::max(float(khdz[k - kts]), float(0.5 * s_aw[k - kts]));
         khdz[k - kts] = std::max(float(khdz[k - kts]), float(-0.5 * (s_aw[k - kts] - s_aw[k - kts + 1])));
     }
-    // Enhanced mixing over fires
+    // enhanced mixing over fires
     if (rrfs_sd==1 && enh_mix==1) {
         for (int k = kts + 1; k <= kte - 1; ++k) {
             float khdz_old = khdz[k - kts];
             float khdz_back = pblh * 0.15 / dz[k - 1];
-            // Modify based on anthropogenic emissions of NO and FRP
+            // modify based on anthropogenic emissions of no and frp
             if (pblh < pblh_threshold) {
-                if (emis_ant_no > NO_threshold) {
-                    khdz[k - kts] = std::max(1.1f * float(khdz[k - kts]), float(std::sqrt((emis_ant_no / NO_threshold)) / dz[k - 1] * rhoz[k - kts]));
+                if (emis_ant_no > no_threshold) {
+                    khdz[k - kts] = std::max(1.1f * float(khdz[k - kts]), float(std::sqrt((emis_ant_no / no_threshold)) / dz[k - 1] * rhoz[k - kts]));
                 }
                 if (frp > frp_threshold) {
                     int kmaxfire = std::ceil(std::log(frp));
@@ -1142,7 +1143,7 @@ void mynn_mix_chem_cc(int kts, int kte, int i,
             }
         }
     }
-    // Mixing of chemical species
+    // mixing of chemical species
     for (int ic = 0; ic < nchem; ++ic) {
         int k = kts;
         a[0] = -dtz[0] * khdz[0] * rhoinv[0];
@@ -1155,7 +1156,7 @@ void mynn_mix_chem_cc(int kts, int kte, int i,
             c[k - kts] = -dtz[k - kts] * khdz[k - kts + 1] * rhoinv[k - kts] - 0.5 * dtz[k - kts] * rhoinv[k - kts] * s_aw[k - kts + 1];
             d[k - kts] = chem1[k - 1][ic] + dtz[k - kts] * rhoinv[k - kts] * (s_awchem[k - kts][ic] - s_awchem[k - kts + 1][ic]);
         }
-        // Prescribed value at top
+        // prescribed value at top
         a[kte - kts] = 0.0;
         b[kte - kts] = 1.0;
         c[kte - kts] = 0.0;
@@ -1170,9 +1171,9 @@ void mynn_mix_chem_cc(int kts, int kte, int i,
 
 // ==================================================================
 //>\ingroup gsd_mynn_edmf
-// This subroutine solves for tendencies of U, V, \f$\theta\f$, qv,
+// this subroutine solves for tendencies of u, v, \f$\theta\f$, qv,
 // qc, and qi
-void mynn_tendencies_cc(int kts, int kte, float delt, float* dz, float* rho, float* u, float* v, float* tk, float* qv, float* psfc, float* p, float* thl, float* sqv, float* sqc, float* sqw, float* ust, float flt, float flq, float flqv, float flqc, float wspd, float uoce, float voce, float* tcd, float* qcd, float* dfm, float* dfh, float* Du, float* Dv, float* Dth, float* diss_heat, float* s_aw, float* s_awthl, float* s_awqt, float* s_awqv, float* s_awqc, float* s_awu, float* s_awv, float* sd_aw, float* sd_awthl, float* sd_awqt, float* sd_awqv, float* sd_awqc, float* sd_awu, float* sd_awv, float* sub_thl, float* sub_sqv, float* sub_u, float* sub_v, float* det_thl, float* det_sqv, float* det_sqc, float* det_u, float* det_v, int FLAG_QC, int bl_mynn_cloudmix, int bl_mynn_mixqt, int bl_mynn_edmf_mom, int debug_code, float r_d, float p608, float ep_2,float ep_3,float tv0,float xlv,float xlvcp) {
+void mynn_tendencies_cc(int kts, int kte, float delt, float* dz, float* rho, float* u, float* v, float* tk, float* qv, float* psfc, float* p, float* thl, float* sqv, float* sqc, float* sqw, float* ust, float flt, float flq, float flqv, float flqc, float wspd, float uoce, float voce, float* tcd, float* qcd, float* dfm, float* dfh, float* du, float* dv, float* dth, float* diss_heat, float* s_aw, float* s_awthl, float* s_awqt, float* s_awqv, float* s_awqc, float* s_awu, float* s_awv, float* sd_aw, float* sd_awthl, float* sd_awqt, float* sd_awqv, float* sd_awqc, float* sd_awu, float* sd_awv, float* sub_thl, float* sub_sqv, float* sub_u, float* sub_v, float* det_thl, float* det_sqv, float* det_sqc, float* det_u, float* det_v, int flag_qc, int bl_mynn_cloudmix, int bl_mynn_mixqt, int bl_mynn_edmf_mom, int debug_code, float r_d, float p608, float ep_2,float ep_3,float tv0,float xlv,float xlvcp) {
     float nonloc = 1.0;
     float dztop = 0.5 * (dz[kte] + dz[kte-1]);
     float onoff = (bl_mynn_edmf_mom == 0) ? 0.0 : 1.0;
@@ -1231,7 +1232,6 @@ void mynn_tendencies_cc(int kts, int kte, float delt, float* dz, float* rho, flo
     float ustdrag = std::min(ust_v * ust_v, 0.99f) / wspd;
     float ustdiff = std::min(ust_v * ust_v, 0.01f) / wspd;
     
-    float dth[kte+1];
     for (int k = kts; k <= kte; k++) {
         dth[k] = 0.0;
     }
@@ -1255,7 +1255,7 @@ void mynn_tendencies_cc(int kts, int kte, float delt, float* dz, float* rho, flo
     d[kte] = u[kte];
     tridiag2_cc(kte, a, b, c, d, x);
     for (int k = kts; k <= kte; k++) {
-        Du[k] = (x[k] - u[k]) / delt;
+        du[k] = (x[k] - u[k]) / delt;
     }
     
     k = kts;
@@ -1277,7 +1277,7 @@ void mynn_tendencies_cc(int kts, int kte, float delt, float* dz, float* rho, flo
     d[kte] = v[kte];
     tridiag2_cc(kte, a, b, c, d, x);
     for (int k = kts; k <= kte; k++) {
-        Dv[k] = (x[k] - v[k]) / delt;
+        dv[k] = (x[k] - v[k]) / delt;
     }
     
     k = kts;
@@ -1299,7 +1299,7 @@ void mynn_tendencies_cc(int kts, int kte, float delt, float* dz, float* rho, flo
     d[kte] = thl[kte];
     tridiag2_cc(kte, a, b, c, d, x);
     for (int k = kts; k <= kte; k++) {
-        Dth[k] = (x[k] - thl[k]) / delt;
+        dth[k] = (x[k] - thl[k]) / delt;
     }
     
     if (bl_mynn_mixqt > 0) {
@@ -1328,7 +1328,7 @@ void mynn_tendencies_cc(int kts, int kte, float delt, float* dz, float* rho, flo
     }
     
     if (bl_mynn_mixqt == 0) {
-        if (bl_mynn_cloudmix > 0 && FLAG_QC==1) {
+        if (bl_mynn_cloudmix > 0 && flag_qc==1) {
             k = kts;
             a[k] = -dtz[k] * khdz[k] * rhoinv[k];
             b[k] = 1.0 + dtz[k] * (khdz[k+1] + khdz[k]) * rhoinv[k] - 0.5 * dtz[k] * rhoinv[k] * s_aw[k+1] - 0.5 * dtz[k] * rhoinv[k] * sd_aw[k+1];
@@ -1406,14 +1406,14 @@ void mynn_tendencies_cc(int kts, int kte, float delt, float* dz, float* rho, flo
 
 void mym_condensation_cc(int kts, int kte, float dx, float dz[], float zw[], float xland,float thl[], 
 		float qw[], float qv[], float qc[], float qi[], float qs[],float p[], float exner[], 
-		float tsq[], float qsq[], float cov[],float Sh[], float el[], int bl_mynn_cloudpdf,
-                float qc_bl1D[], float qi_bl1D[], float cldfra_bl1D[],float PBLH1, float HFX1,
-                float Vt[], float Vq[], float th[], float sgm[], float rmo[],int spp_pbl, float rstoch_col[], 
+		float tsq[], float qsq[], float cov[],float sh[], float el[], int bl_mynn_cloudpdf,
+                float qc_bl1d[], float qi_bl1d[], float cldfra_bl1d[],float pblh1, float hfx1,
+                float vt[], float vq[], float th[], float sgm[], float rmo[],int spp_pbl, float rstoch_col[], 
 		float ep_2, float ep_3, float xlv, float r_d, float xlvcp, float p608, float tv0, float cpv, 
 		float r_v, float cice, float cliq, float cp, float xls, float rcp) {
     int k;
     float t3sq, r3sq, c3sq;
-    float qsl, esat, qsat, dqsl, cld0, q1k, qlk, eq1, qll, q2p, pt, rac, qt, t, xl, rsl, cpm, Fng, qww, alpha, beta, bb, ls, wt, wt2, qpct, cld_factor, fac_damp, liq_frac, ql_ice, ql_water, qmq, qsat_tk, q1_rh, rh_hack, dzm1, zsl, maxqc;
+    float qsl, esat, qsat, dqsl, cld0, q1k, qlk, eq1, qll, q2p, pt, rac, qt, t, xl, rsl, cpm, fng, qww, alpha, beta, bb, ls, wt, wt2, qpct, cld_factor, fac_damp, liq_frac, ql_ice, ql_water, qmq, qsat_tk, q1_rh, rh_hack, dzm1, zsl, maxqc;
     const float qpct_sfc = 0.025;
     const float qpct_pbl = 0.030;
     const float qpct_trp = 0.040;
@@ -1421,12 +1421,12 @@ void mym_condensation_cc(int kts, int kte, float dx, float dz[], float zw[], flo
     const float rhmax = 1.02;
     float erf;
     float dth, dtl, dqw, dzk, els;
-    float zagl, damp, PBLH2;
+    float zagl, damp, pblh2;
     float cfmax;
     float theta1, theta2, ht1, ht2;
     float qw_pert;
     int k_tropo;
-//real(float), dimension(kts:kte) :: alp,a,bet,b,ql,q1,RH
+//real(float), dimension(kts:kte) :: alp,a,bet,b,ql,q1,rh
     float* alp = new float[kte-kts]; 
     float* a = new float[kte-kts]; 
     float* bet = new float[kte-kts]; 
@@ -1435,7 +1435,7 @@ void mym_condensation_cc(int kts, int kte, float dx, float dz[], float zw[], flo
     float* q1 = new float[kte-kts]; 
     float* rh = new float[kte-kts]; 
 
-    // Obtain an estimate for the tropopause height (k)
+    // obtain an estimate for the tropopause height (k)
     for (k = kte - 3; k >= kts; k--) {
         theta1 = th[k];
         theta2 = th[k + 2];
@@ -1449,7 +1449,7 @@ void mym_condensation_cc(int kts, int kte, float dx, float dz[], float zw[], flo
     zagl = 0.0;
 
     switch (bl_mynn_cloudpdf) {
-        case 0: // ORIGINAL MYNN PARTIAL-CONDENSATION SCHEME
+        case 0: // original mynn partial-condensation scheme
             for (k = kts; k < kte; k++) {
                 t = th[k] * exner[k];
                 esat = esat_blend_cc(t);
@@ -1465,24 +1465,24 @@ void mym_condensation_cc(int kts, int kte, float dx, float dz[], float zw[], flo
                 qmq = qw[k] - qsl;
                 sgm[k] = std::sqrt(std::max(r3sq, 1.0e-10f));
                 q1[k] = qmq / sgm[k];
-                cldfra_bl1D[k] = 0.5 * (1.0 + std::erf(q1[k] * rr2));
+                cldfra_bl1d[k] = 0.5 * (1.0 + std::erf(q1[k] * rr2));
                 q1k = q1[k];
                 eq1 = rrp * std::exp(-0.5 * q1k * q1k);
-                qll = std::max(cldfra_bl1D[k] * q1k + eq1, 0.0f);
+                qll = std::max(cldfra_bl1d[k] * q1k + eq1, 0.0f);
                 ql[k] = alp[k] * sgm[k] * qll;
                 liq_frac = std::min(1.0f, std::max(0.0f, (t - 240.0f) / 29.0f));
-                qc_bl1D[k] = liq_frac * ql[k];
-                qi_bl1D[k] = (1.0 - liq_frac) * ql[k];
+                qc_bl1d[k] = liq_frac * ql[k];
+                qi_bl1d[k] = (1.0 - liq_frac) * ql[k];
                 q2p = xlvcp / exner[k];
                 pt = thl[k] + q2p * ql[k];
-                qt = 1.0 + p608 * qw[k] - (1.0 + p608) * (qc_bl1D[k] + qi_bl1D[k]) * cldfra_bl1D[k];
-                rac = alp[k] * (cldfra_bl1D[k] - qll * eq1) * (q2p * qt - (1.0 + p608) * pt);
-                Vt[k] = qt - 1.0 - rac * bet[k];
-                Vq[k] = p608 * pt - tv0 + rac;
+                qt = 1.0 + p608 * qw[k] - (1.0 + p608) * (qc_bl1d[k] + qi_bl1d[k]) * cldfra_bl1d[k];
+                rac = alp[k] * (cldfra_bl1d[k] - qll * eq1) * (q2p * qt - (1.0 + p608) * pt);
+                vt[k] = qt - 1.0 - rac * bet[k];
+                vq[k] = p608 * pt - tv0 + rac;
             }
             break;
         case 1:
-        case -1: // ALTERNATIVE FORM (Nakanishi & Niino 2004 BLM, eq. B6, and Kuwano-Yoshida et al. 2010 QJRMS, eq. 7)
+        case -1: // alternative form (nakanishi & niino 2004 blm, eq. b6, and kuwano-yoshida et al. 2010 qjrms, eq. 7)
             for (k = kts; k < kte; k++) {
                 t = th[k] * exner[k];
                 esat = esat_blend_cc(t);
@@ -1497,29 +1497,29 @@ void mym_condensation_cc(int kts, int kte, float dx, float dz[], float zw[], flo
                 }
                 dth = 0.5 * (thl[k + 1] + thl[k]) - 0.5 * (thl[k] + thl[std::max(k - 1, kts)]);
                 dqw = 0.5 * (qw[k + 1] + qw[k]) - 0.5 * (qw[k] + qw[std::max(k - 1, kts)]);
-                sgm[k] = std::sqrt(std::max(float((pow(alp[k], 2) * std::max(pow(el[k], 2), 0.1) * b2 * std::max(Sh[k], 0.03f)) / 4.0f * pow((dqw / dzk - bet[k] * (dth / dzk)), 2)), 1.0e-10f));
+                sgm[k] = std::sqrt(std::max(float((pow(alp[k], 2) * std::max(pow(el[k], 2), 0.1) * b2 * std::max(sh[k], 0.03f)) / 4.0f * pow((dqw / dzk - bet[k] * (dth / dzk)), 2)), 1.0e-10f));
                 qmq = qw[k] - qsl;
                 q1[k] = qmq / sgm[k];
-                cldfra_bl1D[k] = 0.5 * (1.0 + std::erf(q1[k] * rr2));
+                cldfra_bl1d[k] = 0.5 * (1.0 + std::erf(q1[k] * rr2));
                 q1k = q1[k];
                 eq1 = rrp * std::exp(-0.5 * q1k * q1k);
-                qll = std::max(cldfra_bl1D[k] * q1k + eq1, 0.0f);
+                qll = std::max(cldfra_bl1d[k] * q1k + eq1, 0.0f);
                 ql[k] = alp[k] * sgm[k] * qll;
                 liq_frac = std::min(1.0f, std::max(0.0f, (t - 240.0f) / 29.0f));
-                qc_bl1D[k] = liq_frac * ql[k];
-                qi_bl1D[k] = (1.0 - liq_frac) * ql[k];
+                qc_bl1d[k] = liq_frac * ql[k];
+                qi_bl1d[k] = (1.0 - liq_frac) * ql[k];
                 q2p = xlvcp / exner[k];
                 pt = thl[k] + q2p * ql[k];
-                qt = 1.0 + p608 * qw[k] - (1.0 + p608) * (qc_bl1D[k] + qi_bl1D[k]) * cldfra_bl1D[k];
-                rac = alp[k] * (cldfra_bl1D[k] - qll * eq1) * (q2p * qt - (1.0 + p608) * pt);
-                Vt[k] = qt - 1.0 - rac * bet[k];
-                Vq[k] = p608 * pt - tv0 + rac;
+                qt = 1.0 + p608 * qw[k] - (1.0 + p608) * (qc_bl1d[k] + qi_bl1d[k]) * cldfra_bl1d[k];
+                rac = alp[k] * (cldfra_bl1d[k] - qll * eq1) * (q2p * qt - (1.0 + p608) * pt);
+                vt[k] = qt - 1.0 - rac * bet[k];
+                vq[k] = p608 * pt - tv0 + rac;
             }
             break;
         case 2:
-        case -2: // Diagnostic statistical scheme of Chaboureau and Bechtold (2002), JAS
+        case -2: // diagnostic statistical scheme of chaboureau and bechtold (2002), jas
                  // but with use of higher-order moments to estimate sigma
-            PBLH2 = std::max(10.0f, PBLH1);
+            pblh2 = std::max(10.0f, pblh1);
             zagl = 0.0f;
             dzm1 = 0.0f;
             for (k = kts; k < kte; k++) {
@@ -1549,30 +1549,30 @@ void mym_condensation_cc(int kts, int kte, float dx, float dz[], float zw[], flo
                 q1[k] = qmq / sgm[k];
                 q1k = q1[k];
                 eq1 = rrp * std::exp(-0.5f * q1k * q1k);
-                qll = std::max(cldfra_bl1D[k] * q1k + eq1, 0.0f);
+                qll = std::max(cldfra_bl1d[k] * q1k + eq1, 0.0f);
                 ql[k] = alp[k] * sgm[k] * qll;
                 liq_frac = std::min(1.0f, std::max(0.0f, (t - tice) / (tliq - tice)));
-                qc_bl1D[k] = liq_frac * ql[k];
-                qi_bl1D[k] = (1.0f - liq_frac) * ql[k];
-                if (cldfra_bl1D[k] < 0.001f) {
+                qc_bl1d[k] = liq_frac * ql[k];
+                qi_bl1d[k] = (1.0f - liq_frac) * ql[k];
+                if (cldfra_bl1d[k] < 0.001f) {
                     ql_ice = 0.0f;
                     ql_water = 0.0f;
-                    cldfra_bl1D[k] = 0.0f;
+                    cldfra_bl1d[k] = 0.0f;
                 }
-                if ((qi[k] + qs[k]) > 1e-9f && zagl > PBLH2) {
+                if ((qi[k] + qs[k]) > 1e-9f && zagl > pblh2) {
                     rh_hack = std::min(rhmax, rhcrit + wt2 * 0.045f * (9.0f + std::log10(qi[k] + qs[k])));
                     rh[k] = std::max(rh[k], rh_hack);
                     q1_rh = -3.0f + 3.0f * (rh[k] - rhcrit) / (1.0f - rhcrit);
                     q1[k] = std::max(q1_rh, q1[k]);
                 }
-                if (qc[k] > 1e-6f && zagl > PBLH2) {
+                if (qc[k] > 1e-6f && zagl > pblh2) {
                     rh_hack = std::min(rhmax, rhcrit + wt2 * 0.08f * (6.0f + std::log10(qc[k])));
                     rh[k] = std::max(rh[k], rh_hack);
                     q1_rh = -3.0f + 3.0f * (rh[k] - rhcrit) / (1.0f - rhcrit);
                     q1[k] = std::max(q1_rh, q1[k]);
                 }
                 q1k = q1[k];
-                cldfra_bl1D[k] = std::max(0.0f, std::min(1.0f, 0.5f + 0.36f * std::atan(1.8f * (q1[k] + 0.2f))));
+                cldfra_bl1d[k] = std::max(0.0f, std::min(1.0f, 0.5f + 0.36f * std::atan(1.8f * (q1[k] + 0.2f))));
                 maxqc = std::max(qw[k] - qsat_tk, 0.0f);
                 if (q1k < 0.0) {
                     ql_water = sgm[k] * std::exp(1.2f * q1k - 1.0f);
@@ -1584,48 +1584,48 @@ void mym_condensation_cc(int kts, int kte, float dx, float dz[], float zw[], flo
                     ql_water = std::min(float(sgm[k] * (std::exp(-1.0f) + 0.66f * q1k + 0.086f * pow(q1k, 2.0f))), maxqc);
                     ql_ice = sgm[k] * (std::exp(-1.0) + 0.66f * q1k + 0.086f * pow(q1k, 2));
                 }
-                if (cldfra_bl1D[k] < 0.001f) {
+                if (cldfra_bl1d[k] < 0.001f) {
                     ql_ice = 0.0f;
                     ql_water = 0.0f;
-                    cldfra_bl1D[k] = 0.0f;
+                    cldfra_bl1d[k] = 0.0f;
                 }
                 liq_frac = std::min(1.0f, std::max(0.0f, (t - tice) / (tliq - tice)));
-                qc_bl1D[k] = liq_frac * ql_water;
-                qi_bl1D[k] = (1.0f - liq_frac) * ql_ice;
+                qc_bl1d[k] = liq_frac * ql_water;
+                qi_bl1d[k] = (1.0f - liq_frac) * ql_ice;
                 if (k >= k_tropo) {
-                    cldfra_bl1D[k] = 0.0f;
-                    qc_bl1D[k] = 0.0f;
-                    qi_bl1D[k] = 0.0f;
+                    cldfra_bl1d[k] = 0.0f;
+                    qc_bl1d[k] = 0.0f;
+                    qi_bl1d[k] = 0.0f;
                 }
                 q2p = xlvcp / exner[k];
                 pt = thl[k] + q2p * ql[k];
-                qt = 1.0f + p608 * qw[k] - (1.0f + p608) * (qc_bl1D[k] + qi_bl1D[k]) * cldfra_bl1D[k];
-                rac = alp[k] * (cldfra_bl1D[k] - qll * eq1) * (q2p * qt - (1.0f + p608) * pt);
-                Vt[k] = qt - 1.0f - rac * bet[k];
-                Vq[k] = p608 * pt - tv0 + rac;
+                qt = 1.0f + p608 * qw[k] - (1.0f + p608) * (qc_bl1d[k] + qi_bl1d[k]) * cldfra_bl1d[k];
+                rac = alp[k] * (cldfra_bl1d[k] - qll * eq1) * (q2p * qt - (1.0f + p608) * pt);
+                vt[k] = qt - 1.0f - rac * bet[k];
+                vq[k] = p608 * pt - tv0 + rac;
                 fac_damp = std::min(zagl * 0.0025f, 1.0f);
                 cld_factor = 1.0 + fac_damp * std::min(std::pow(std::max(0.0f, (rh[k] - 0.92f)) / 0.145f, 2.0f), 0.37f);
-                cldfra_bl1D[k] = std::min(1.0f, cld_factor * cldfra_bl1D[k]);
+                cldfra_bl1d[k] = std::min(1.0f, cld_factor * cldfra_bl1d[k]);
             }
             break;
     }
 
     ql[kte] = ql[kte - 1];
-    Vt[kte] = Vt[kte - 1];
-    Vq[kte] = Vq[kte - 1];
-    qc_bl1D[kte] = 0.0;
-    qi_bl1D[kte] = 0.0;
-    cldfra_bl1D[kte] = 0.0;
+    vt[kte] = vt[kte - 1];
+    vq[kte] = vq[kte - 1];
+    qc_bl1d[kte] = 0.0;
+    qi_bl1d[kte] = 0.0;
+    cldfra_bl1d[kte] = 0.0;
 }
 
 
 //===============================================================
 // ===================================================================
-// This is the downdraft mass flux scheme - analogus to edmf_JPL but
-// flipped updraft to downdraft. This scheme is currently only tested
-// for Stratocumulus cloud conditions. For a detailed desctiption of the
+// this is the downdraft mass flux scheme - analogus to edmf_jpl but
+// flipped updraft to downdraft. this scheme is currently only tested
+// for stratocumulus cloud conditions. for a detailed desctiption of the
 // model, see paper.
-void DDMF_JPL_cc(int kts, int kte, float dt, std::vector<float> zw, std::vector<float> dz, std::vector<float> p,
+void ddmf_jpl_cc(int kts, int kte, float dt, std::vector<float> zw, std::vector<float> dz, std::vector<float> p,
               std::vector<float> u, std::vector<float> v, std::vector<float> th, std::vector<float> thl, std::vector<float> thv, 
 	      std::vector<float> tk,std::vector<float> qt, std::vector<float> qv, std::vector<float> qc, std::vector<float> 
 	      rho, std::vector<float> exner,float ust, float wthl, float wqt, float pblh, int kpbl,
@@ -1638,42 +1638,42 @@ void DDMF_JPL_cc(int kts, int kte, float dt, std::vector<float> zw, std::vector<
               std::vector<float> rthraten, float svp1, float grav, float onethird, float p1000mb, 
 	      float rcp, float xlvcp, float cp, float rvovrd ) {
     int ndown = 5;
-    std::vector<int> DD_initK(ndown);
-    std::vector<float> randNum(ndown);
-    std::vector<std::vector<float>> DOWNW(kte + 1, std::vector<float>(ndown));
-    std::vector<std::vector<float>> DOWNTHL(kte + 1, std::vector<float>(ndown));
-    std::vector<std::vector<float>> DOWNQT(kte + 1, std::vector<float>(ndown));
-    std::vector<std::vector<float>> DOWNQC(kte + 1, std::vector<float>(ndown));
-    std::vector<std::vector<float>> DOWNA(kte + 1, std::vector<float>(ndown));
-    std::vector<std::vector<float>> DOWNU(kte + 1, std::vector<float>(ndown));
-    std::vector<std::vector<float>> DOWNV(kte + 1, std::vector<float>(ndown));
-    std::vector<std::vector<float>> DOWNTHV(kte + 1, std::vector<float>(ndown));
-    std::vector<std::vector<float>> ENT(kte + 1, std::vector<float>(ndown));
-    std::vector<std::vector<int>> ENTi(kte + 1, std::vector<int>(ndown));
-    int k, I, ki, kminrad, qlTop, p700_ind, qlBase;
-    float wthv, wstar, qstar, thstar, sigmaW, sigmaQT, sigmaTH, z0, pwmin, pwmax, wmin, wmax, wlv, wtv, went, mindownw;
-    float B, QTn, THLn, THVn, QCn, Un, Vn, QKEn, Wn2, Wn, THVk, Pk, EntEXP, EntW, beta_dm, EntExp_M, rho_int;
-    float jump_thetav, jump_qt, jump_thetal, refTHL, refTHV, refQT;
-    float minrad, zminrad, radflux, F0, wst_rad, wst_dd;
+    std::vector<int> dd_initk(ndown);
+    std::vector<float> randnum(ndown);
+    std::vector<std::vector<float>> downw(kte + 1, std::vector<float>(ndown));
+    std::vector<std::vector<float>> downthl(kte + 1, std::vector<float>(ndown));
+    std::vector<std::vector<float>> downqt(kte + 1, std::vector<float>(ndown));
+    std::vector<std::vector<float>> downqc(kte + 1, std::vector<float>(ndown));
+    std::vector<std::vector<float>> downa(kte + 1, std::vector<float>(ndown));
+    std::vector<std::vector<float>> downu(kte + 1, std::vector<float>(ndown));
+    std::vector<std::vector<float>> downv(kte + 1, std::vector<float>(ndown));
+    std::vector<std::vector<float>> downthv(kte + 1, std::vector<float>(ndown));
+    std::vector<std::vector<float>> ent(kte + 1, std::vector<float>(ndown));
+    std::vector<std::vector<int>> enti(kte + 1, std::vector<int>(ndown));
+    int k, i, ki, kminrad, qltop, p700_ind, qlbase;
+    float wthv, wstar, qstar, thstar, sigmaw, sigmaqt, sigmath, z0, pwmin, pwmax, wmin, wmax, wlv, wtv, went, mindownw;
+    float b, qtn, thln, thvn, qcn, un, vn, qken, wn2, wn, thvk, pk, entexp, entw, beta_dm, entexp_m, rho_int;
+    float jump_thetav, jump_qt, jump_thetal, refthl, refthv, refqt;
+    float minrad, zminrad, radflux, f0, wst_rad, wst_dd;
     bool cloudflg;
-    float sigq, xl, rsl, cpm, a, mf_cf, diffqt, Fng, qww, alpha, beta, bb, f, pt, t, q2p, b9, satvp, rhgrid;
-    float Wa = 1.0, Wb = 1.5, Z00 = 100.0, BCOEFF = 0.2;
-    float L0 = 80, ENT0 = 0.2;
-    float dp, dl, Adn;
+    float sigq, xl, rsl, cpm, a, mf_cf, diffqt, fng, qww, alpha, beta, bb, f, pt, t, q2p, b9, satvp, rhgrid;
+    float wa = 1.0, wb = 1.5, z00 = 100.0, bcoeff = 0.2;
+    float l0 = 80, ent0 = 0.2;
+    float dp, dl, adn;
     int debug_mf = 0;
     dl = (1000.0 - 500.0) / ndown;
     pwmin = -3.0;
     pwmax = -1.0;
-    DOWNW.assign(kte + 1, std::vector<float>(ndown, 0.0));
-    DOWNTHL.assign(kte + 1, std::vector<float>(ndown, 0.0));
-    DOWNTHV.assign(kte + 1, std::vector<float>(ndown, 0.0));
-    DOWNQT.assign(kte + 1, std::vector<float>(ndown, 0.0));
-    DOWNQC.assign(kte + 1, std::vector<float>(ndown, 0.0));
-    DOWNA.assign(kte + 1, std::vector<float>(ndown, 0.0));
-    DOWNU.assign(kte + 1, std::vector<float>(ndown, 0.0));
-    DOWNV.assign(kte + 1, std::vector<float>(ndown, 0.0));
-    ENT.assign(kte + 1, std::vector<float>(ndown, 0.0));
-    DD_initK.assign(ndown, 0);
+    downw.assign(kte + 1, std::vector<float>(ndown, 0.0));
+    downthl.assign(kte + 1, std::vector<float>(ndown, 0.0));
+    downthv.assign(kte + 1, std::vector<float>(ndown, 0.0));
+    downqt.assign(kte + 1, std::vector<float>(ndown, 0.0));
+    downqc.assign(kte + 1, std::vector<float>(ndown, 0.0));
+    downa.assign(kte + 1, std::vector<float>(ndown, 0.0));
+    downu.assign(kte + 1, std::vector<float>(ndown, 0.0));
+    downv.assign(kte + 1, std::vector<float>(ndown, 0.0));
+    ent.assign(kte + 1, std::vector<float>(ndown, 0.0));
+    dd_initk.assign(ndown, 0);
     edmf_a_dd.assign(kte + 1, 0.0);
     edmf_w_dd.assign(kte + 1, 0.0);
     edmf_qt_dd.assign(kte + 1, 0.0);
@@ -1689,39 +1689,39 @@ void DDMF_JPL_cc(int kts, int kte, float dt, std::vector<float> zw, std::vector<
     sd_awv.assign(kte + 1, 0.0);
     sd_awqke.assign(kte + 1, 0.0);
     for (int i = 0; i < ndown; i++) {
-        DD_initK[i] = qlTop;
+        dd_initk[i] = qltop;
     }
-    F0 = 0.0;
-    for (int i = 0; i < qlTop; i++) {
+    f0 = 0.0;
+    for (int i = 0; i < qltop; i++) {
         radflux = rthraten[i] * exner[i];
         radflux = radflux * cp / grav * (p[i] - p[i + 1]);
         if (radflux < 0.0) {
-            F0 = abs(radflux) + F0;
+            f0 = abs(radflux) + f0;
         }
     }
-    F0 = std::max(F0, 1.0f);
-    Adn = std::min(0.05 + F0 * 0.001, 0.3);
+    f0 = std::max(f0, 1.0f);
+    adn = std::min(0.05 + f0 * 0.001, 0.3);
     cloudflg = false;
     minrad = 100.0;
     kminrad = kpbl;
     zminrad = pblh;
-    qlTop = 1;
-    qlBase = 1;
+    qltop = 1;
+    qlbase = 1;
     wthv = wthl + svp1 * wqt;
     for (int i = std::max(3, kpbl - 2); i <= kpbl + 3; i++) {
         if (qc[i] > 1.0e-6 && cldfra_bl1d[i] > 0.5) {
             cloudflg = true;
-            qlTop = i;
+            qltop = i;
         }
     }
-    for (int i = qlTop; i >= kts; i--) {
-        if (qc[i] > 1E-6) {
-            qlBase = i;
+    for (int i = qltop; i >= kts; i--) {
+        if (qc[i] > 1e-6) {
+            qlbase = i;
         }
     }
-    qlBase = (qlTop + qlBase) / 2;
+    qlbase = (qltop + qlbase) / 2;
     for (int i = 0; i < ndown; i++) {
-        DD_initK[i] = qlTop;
+        dd_initk[i] = qltop;
     }
     if (cloudflg) {
 
@@ -1735,101 +1735,101 @@ void DDMF_JPL_cc(int kts, int kte, float dt, std::vector<float> zw, std::vector<
     }
 
         //p700_ind = minloc(abs(p - 70000.0), 1.0f);
-        jump_thetav = thv[p700_ind] - thv[1] - (thv[p700_ind] - thv[qlTop + 3]) / (zw[p700_ind] - zw[qlTop + 3]) * (zw[p700_ind] - zw[qlTop]);
+        jump_thetav = thv[p700_ind] - thv[1] - (thv[p700_ind] - thv[qltop + 3]) / (zw[p700_ind] - zw[qltop + 3]) * (zw[p700_ind] - zw[qltop]);
         jump_qt = qc[p700_ind] + qv[p700_ind] - qc[1] - qv[1];
-        jump_thetal = thl[p700_ind] - thl[1] - (thl[p700_ind] - thl[qlTop + 3]) / (zw[p700_ind] - zw[qlTop + 3]) * (zw[p700_ind] - zw[qlTop]);
-        refTHL = thl[qlTop];
-        refTHV = thv[qlTop];
-        refQT = qt[qlTop];
-        wst_rad = pow(grav * zw[qlTop] * F0 / (refTHL * rho[qlTop] * cp), 0.333);
+        jump_thetal = thl[p700_ind] - thl[1] - (thl[p700_ind] - thl[qltop + 3]) / (zw[p700_ind] - zw[qltop + 3]) * (zw[p700_ind] - zw[qltop]);
+        refthl = thl[qltop];
+        refthv = thv[qltop];
+        refqt = qt[qltop];
+        wst_rad = pow(grav * zw[qltop] * f0 / (refthl * rho[qltop] * cp), 0.333);
         wst_rad = std::max(wst_rad, 0.1f);
         wstar = std::max(0.0, pow(grav / thv[1] * wthv * pblh, onethird));
-        went = thv[1] / (grav * jump_thetav * zw[qlTop]) * (0.15 * (pow(wstar, 3) + 5 * pow(ust, 3)) + 0.35 * pow(wst_rad, 3));
+        went = thv[1] / (grav * jump_thetav * zw[qltop]) * (0.15 * (pow(wstar, 3) + 5 * pow(ust, 3)) + 0.35 * pow(wst_rad, 3));
         qstar = abs(went * jump_qt / wst_rad);
-        thstar = F0 / (rho[qlTop] * cp * wst_rad) - went * jump_thetav / wst_rad;
+        thstar = f0 / (rho[qltop] * cp * wst_rad) - went * jump_thetav / wst_rad;
         wst_dd = pow(0.15 * (pow(wstar, 3) + 5 * pow(ust, 3)) + 0.35 * pow(wst_rad, 3), 0.333);
 	std::cout << "qstar=" << qstar << " thstar=" << thstar << " wst_dd=" << wst_dd << std::endl;
-	std::cout << "F0=" << F0 << " wst_rad=" << wst_rad << " jump_thv=" << jump_thetav << std::endl;
+	std::cout << "f0=" << f0 << " wst_rad=" << wst_rad << " jump_thv=" << jump_thetav << std::endl;
 	std::cout << "entrainment velocity=" << went << std::endl;
-        sigmaW = 0.2 * wst_dd;
-        sigmaQT = 40 * qstar;
-        sigmaTH = 1.0 * thstar;
-        wmin = sigmaW * pwmin;
-        wmax = sigmaW * pwmax;
+        sigmaw = 0.2 * wst_dd;
+        sigmaqt = 40 * qstar;
+        sigmath = 1.0 * thstar;
+        wmin = sigmaw * pwmin;
+        wmax = sigmaw * pwmax;
         for (int i = 0; i < ndown; i++) {
-            ki = DD_initK[i];
+            ki = dd_initk[i];
             wlv = wmin + (wmax - wmin) / ndown * (i - 1);
             wtv = wmin + (wmax - wmin) / ndown * i;
-            DOWNW[ki][i] = wlv;
-            DOWNA[ki][i] = Adn / ndown;
-            DOWNU[ki][i] = (u[ki - 1] * dz[ki] + u[ki] * dz[ki - 1]) / (dz[ki] + dz[ki - 1]);
-            DOWNV[ki][i] = (v[ki - 1] * dz[ki] + v[ki] * dz[ki - 1]) / (dz[ki] + dz[ki - 1]);
-            refTHL = (thl[ki - 1] * dz[ki] + thl[ki] * dz[ki - 1]) / (dz[ki] + dz[ki - 1]);
-            refTHV = (thv[ki - 1] * dz[ki] + thv[ki] * dz[ki - 1]) / (dz[ki] + dz[ki - 1]);
-            refQT = (qt[ki - 1] * dz[ki] + qt[ki] * dz[ki - 1]) / (dz[ki] + dz[ki - 1]);
-            DOWNQC[ki][i] = (qc[ki - 1] * dz[ki] + qc[ki] * dz[ki - 1]) / (dz[ki] + dz[ki - 1]);
-            DOWNQT[ki][i] = refQT;
-            DOWNTHV[ki][i] = refTHV + 0.01 * DOWNW[ki][i] * sigmaTH / sigmaW;
-            DOWNTHL[ki][i] = refTHL + 0.01 * DOWNW[ki][i] * sigmaTH / sigmaW;
+            downw[ki][i] = wlv;
+            downa[ki][i] = adn / ndown;
+            downu[ki][i] = (u[ki - 1] * dz[ki] + u[ki] * dz[ki - 1]) / (dz[ki] + dz[ki - 1]);
+            downv[ki][i] = (v[ki - 1] * dz[ki] + v[ki] * dz[ki - 1]) / (dz[ki] + dz[ki - 1]);
+            refthl = (thl[ki - 1] * dz[ki] + thl[ki] * dz[ki - 1]) / (dz[ki] + dz[ki - 1]);
+            refthv = (thv[ki - 1] * dz[ki] + thv[ki] * dz[ki - 1]) / (dz[ki] + dz[ki - 1]);
+            refqt = (qt[ki - 1] * dz[ki] + qt[ki] * dz[ki - 1]) / (dz[ki] + dz[ki - 1]);
+            downqc[ki][i] = (qc[ki - 1] * dz[ki] + qc[ki] * dz[ki - 1]) / (dz[ki] + dz[ki - 1]);
+            downqt[ki][i] = refqt;
+            downthv[ki][i] = refthv + 0.01 * downw[ki][i] * sigmath / sigmaw;
+            downthl[ki][i] = refthl + 0.01 * downw[ki][i] * sigmath / sigmaw;
         
-        for (int k = DD_initK[i] - 1; k >= kts + 1; k--) {
+        for (int k = dd_initk[i] - 1; k >= kts + 1; k--) {
             wmin = 0.3 + dp * 0.0005;
-            ENT[k][i] = 0.33 / (std::min(std::max(-1.0f * DOWNW[k + 1][i], wmin), 0.9f) * dp);
-            EntEXP = ENT[k][i] * dz[k];
-            EntExp_M = ENT[k][i] * 0.333 * dz[k];
-            QTn = DOWNQT[k + 1][i] * (1.0 - EntEXP) + qt[k] * EntEXP;
-            THLn = DOWNTHL[k + 1][i] * (1.0 - EntEXP) + thl[k] * EntEXP;
-            Un = DOWNU[k + 1][i] * (1.0 - EntEXP) + u[k] * EntExp_M;
-            Vn = DOWNV[k + 1][i] * (1.0 - EntEXP) + v[k] * EntExp_M;
-            Pk = (p[k - 1] * dz[k] + p[k] * dz[k - 1]) / (dz[k] + dz[k - 1]);
-            condensation_edmf_cc(QTn, THLn, Pk, zw[k], THVn, QCn,p1000mb,rcp,xlvcp,rvovrd);
-            THVk = (thv[k - 1] * dz[k] + thv[k] * dz[k - 1]) / (dz[k] + dz[k - 1]);
-            B = grav * (THVn / THVk - 1.0);
-            EntW = EntEXP;
-            mindownw = std::min(DOWNW[k + 1][i], -0.2f);
-            Wn = DOWNW[k + 1][i] + (-2.0 * ENT[k][i] * DOWNW[k + 1][i] - BCOEFF * B / mindownw) * std::min(dz[k], 250.0f);
-            if (Wn < DOWNW[k + 1][i] - std::min(1.25 * dz[k] / 200.0, -2.0)) {
-                Wn = DOWNW[k + 1][i] - std::min(1.25 * dz[k] / 200.0, -2.0);
+            ent[k][i] = 0.33 / (std::min(std::max(-1.0f * downw[k + 1][i], wmin), 0.9f) * dp);
+            entexp = ent[k][i] * dz[k];
+            entexp_m = ent[k][i] * 0.333 * dz[k];
+            qtn = downqt[k + 1][i] * (1.0 - entexp) + qt[k] * entexp;
+            thln = downthl[k + 1][i] * (1.0 - entexp) + thl[k] * entexp;
+            un = downu[k + 1][i] * (1.0 - entexp) + u[k] * entexp_m;
+            vn = downv[k + 1][i] * (1.0 - entexp) + v[k] * entexp_m;
+            pk = (p[k - 1] * dz[k] + p[k] * dz[k - 1]) / (dz[k] + dz[k - 1]);
+            condensation_edmf_cc(qtn, thln, pk, zw[k], thvn, qcn,p1000mb,rcp,xlvcp,rvovrd);
+            thvk = (thv[k - 1] * dz[k] + thv[k] * dz[k - 1]) / (dz[k] + dz[k - 1]);
+            b = grav * (thvn / thvk - 1.0);
+            entw = entexp;
+            mindownw = std::min(downw[k + 1][i], -0.2f);
+            wn = downw[k + 1][i] + (-2.0 * ent[k][i] * downw[k + 1][i] - bcoeff * b / mindownw) * std::min(dz[k], 250.0f);
+            if (wn < downw[k + 1][i] - std::min(1.25 * dz[k] / 200.0, -2.0)) {
+                wn = downw[k + 1][i] - std::min(1.25 * dz[k] / 200.0, -2.0);
             }
-            if (Wn > DOWNW[k + 1][i] + std::min(1.25 * dz[k] / 200.0, 2.0)) {
-                Wn = DOWNW[k + 1][i] + std::min(1.25 * dz[k] / 200.0, 2.0);
+            if (wn > downw[k + 1][i] + std::min(1.25 * dz[k] / 200.0, 2.0)) {
+                wn = downw[k + 1][i] + std::min(1.25 * dz[k] / 200.0, 2.0);
             }
-            Wn = std::max(std::min(Wn, 0.0f), -3.0f);
-            if (Wn < 0.0) {
-                DOWNW[k][i] = Wn;
-                DOWNTHV[k][i] = THVn;
-                DOWNTHL[k][i] = THLn;
-                DOWNQT[k][i] = QTn;
-                DOWNQC[k][i] = QCn;
-                DOWNU[k][i] = Un;
-                DOWNV[k][i] = Vn;
-                DOWNA[k][i] = DOWNA[k + 1][i];
+            wn = std::max(std::min(wn, 0.0f), -3.0f);
+            if (wn < 0.0) {
+                downw[k][i] = wn;
+                downthv[k][i] = thvn;
+                downthl[k][i] = thln;
+                downqt[k][i] = qtn;
+                downqc[k][i] = qcn;
+                downu[k][i] = un;
+                downv[k][i] = vn;
+                downa[k][i] = downa[k + 1][i];
             } 
 	    else {
-                if (DD_initK[i] - k < 2) {
-                    DOWNW.assign(kte + 1, std::vector<float>(ndown, 0.0));
-                    DOWNTHV.assign(kte + 1, std::vector<float>(ndown, 0.0));
-                    DOWNTHL.assign(kte + 1, std::vector<float>(ndown, 0.0));
-                    DOWNQT.assign(kte + 1, std::vector<float>(ndown, 0.0));
-                    DOWNQC.assign(kte + 1, std::vector<float>(ndown, 0.0));
-                    DOWNU.assign(kte + 1, std::vector<float>(ndown, 0.0));
-                    DOWNV.assign(kte + 1, std::vector<float>(ndown, 0.0));
+                if (dd_initk[i] - k < 2) {
+                    downw.assign(kte + 1, std::vector<float>(ndown, 0.0));
+                    downthv.assign(kte + 1, std::vector<float>(ndown, 0.0));
+                    downthl.assign(kte + 1, std::vector<float>(ndown, 0.0));
+                    downqt.assign(kte + 1, std::vector<float>(ndown, 0.0));
+                    downqc.assign(kte + 1, std::vector<float>(ndown, 0.0));
+                    downu.assign(kte + 1, std::vector<float>(ndown, 0.0));
+                    downv.assign(kte + 1, std::vector<float>(ndown, 0.0));
                     }
                 break;
                 }
             }
         }
     }
-    DOWNW[0].assign(ndown, 0.0);
-    DOWNA[0].assign(ndown, 0.0);
-    for (int k = qlTop; k <= kts; k++) {
+    downw[0].assign(ndown, 0.0);
+    downa[0].assign(ndown, 0.0);
+    for (int k = qltop; k <= kts; k++) {
         for (int i = 0; i < ndown; i++) {
-            edmf_a_dd[k] += DOWNA[k - 1][i];
-            edmf_w_dd[k] += DOWNA[k - 1][i] * DOWNW[k - 1][i];
-            edmf_qt_dd[k] += DOWNA[k - 1][i] * DOWNQT[k - 1][i];
-            edmf_thl_dd[k] += DOWNA[k - 1][i] * DOWNTHL[k - 1][i];
-            edmf_ent_dd[k] += DOWNA[k - 1][i] * ENT[k - 1][i];
-            edmf_qc_dd[k] += DOWNA[k - 1][i] * DOWNQC[k - 1][i];
+            edmf_a_dd[k] += downa[k - 1][i];
+            edmf_w_dd[k] += downa[k - 1][i] * downw[k - 1][i];
+            edmf_qt_dd[k] += downa[k - 1][i] * downqt[k - 1][i];
+            edmf_thl_dd[k] += downa[k - 1][i] * downthl[k - 1][i];
+            edmf_ent_dd[k] += downa[k - 1][i] * ent[k - 1][i];
+            edmf_qc_dd[k] += downa[k - 1][i] * downqc[k - 1][i];
         }
         if (edmf_a_dd[k] > 0.0) {
             edmf_w_dd[k] /= edmf_a_dd[k];
@@ -1839,28 +1839,28 @@ void DDMF_JPL_cc(int kts, int kte, float dt, std::vector<float> zw, std::vector<
             edmf_qc_dd[k] /= edmf_a_dd[k];
         }
     }
-    for (int k = kts; k <= qlTop; k++) {
+    for (int k = kts; k <= qltop; k++) {
         rho_int = (rho[k] * dz[k + 1] + rho[k + 1] * dz[k]) / (dz[k + 1] + dz[k]);
         for (int i = 0; i < ndown; i++) {
-            sd_aw[k] += rho_int * DOWNA[k][i] * DOWNW[k][i];
-            sd_awthl[k] += rho_int * DOWNA[k][i] * DOWNW[k][i] * DOWNTHL[k][i];
-            sd_awqt[k] += rho_int * DOWNA[k][i] * DOWNW[k][i] * DOWNQT[k][i];
-            sd_awqc[k] += rho_int * DOWNA[k][i] * DOWNW[k][i] * DOWNQC[k][i];
-            sd_awu[k] += rho_int * DOWNA[k][i] * DOWNW[k][i] * DOWNU[k][i];
-            sd_awv[k] += rho_int * DOWNA[k][i] * DOWNW[k][i] * DOWNV[k][i];
+            sd_aw[k] += rho_int * downa[k][i] * downw[k][i];
+            sd_awthl[k] += rho_int * downa[k][i] * downw[k][i] * downthl[k][i];
+            sd_awqt[k] += rho_int * downa[k][i] * downw[k][i] * downqt[k][i];
+            sd_awqc[k] += rho_int * downa[k][i] * downw[k][i] * downqc[k][i];
+            sd_awu[k] += rho_int * downa[k][i] * downw[k][i] * downu[k][i];
+            sd_awv[k] += rho_int * downa[k][i] * downw[k][i] * downv[k][i];
         }
         sd_awqv[k] = sd_awqt[k] - sd_awqc[k];
     }
 }
 
-// Assuming float is equivalent to float or float. Adjust as necessary.
-void topdown_cloudrad_cc(int kts, int kte, const std::vector<float>& dz1, const std::vector<float>& zw, float fltv, float xland, int kpbl, float PBLH, const std::vector<float>& sqc, const std::vector<float>& sqi, const std::vector<float>& sqw, const std::vector<float>& thl, const std::vector<float>& th1, const std::vector<float>& ex1, const std::vector<float>& p1, const std::vector<float>& rho1, const std::vector<float>& thetav, const std::vector<float>& cldfra_bl1D, const std::vector<float>& rthraten, float& maxKHtopdown, std::vector<float>& KHtopdown, std::vector<float>& TKEprodTD) {
-    // Constants
+// assuming float is equivalent to float or float. adjust as necessary.
+void topdown_cloudrad_cc(int kts, int kte, const std::vector<float>& dz1, const std::vector<float>& zw, float fltv, float xland, int kpbl, float pblh, const std::vector<float>& sqc, const std::vector<float>& sqi, const std::vector<float>& sqw, const std::vector<float>& thl, const std::vector<float>& th1, const std::vector<float>& ex1, const std::vector<float>& p1, const std::vector<float>& rho1, const std::vector<float>& thetav, const std::vector<float>& cldfra_bl1d, const std::vector<float>& rthraten, float& maxkhtopdown, std::vector<float>& khtopdown, std::vector<float>& tkeprodtd) {
+    // constants
     const float pfac = 2.0, zfmin = 0.01, phifac = 8.0;
     const float grav = 9.81, cp = 1004.0, xlv = 2.5e6, xlvcp = xlv / cp, r_d = 287.0, ep_2 = 0.622, p608 = 0.608, karman = 0.4;
     const float twothirds = 2.0 / 3.0, onethird = 1.0 / 3.0;
 
-    // Local variables
+    // local variables
     std::vector<float> zfac(kte - kts + 1), wscalek2(kte - kts + 1), zfacent(kte - kts + 1);
     float bfx0, wm2 = 0, wm3, bfxpbl, dthvx, tmp1;
     float temps, templ, zl1, wstar3_2;
@@ -1868,13 +1868,13 @@ void topdown_cloudrad_cc(int kts, int kte, const std::vector<float>& dz1, const 
     int k, kk, kminrad = kpbl;
     bool cloudflg = false;
 
-    KHtopdown.assign(kte - kts + 1, 0.0);
-    TKEprodTD.assign(kte - kts + 1, 0.0);
-    maxKHtopdown = 0.0;
+    khtopdown.assign(kte - kts + 1, 0.0);
+    tkeprodtd.assign(kte - kts + 1, 0.0);
+    maxkhtopdown = 0.0;
 
-    // Check for stratocumulus-topped boundary layers
+    // check for stratocumulus-topped boundary layers
     for (kk = std::max(1, kpbl - 2); kk <= kpbl + 3; ++kk) {
-        if (sqc[kk - kts] > 1.e-6 || sqi[kk - kts] > 1.e-6 || cldfra_bl1D[kk - kts] > 0.5) {
+        if (sqc[kk - kts] > 1.e-6 || sqi[kk - kts] > 1.e-6 || cldfra_bl1d[kk - kts] > 0.5) {
             cloudflg = true;
         }
         if (rthraten[kk - kts] < minrad) {
@@ -1886,7 +1886,7 @@ void topdown_cloudrad_cc(int kts, int kte, const std::vector<float>& dz1, const 
     if (std::max(kminrad, kpbl) < 2) cloudflg = false;
 
     if (cloudflg) {
-        zl1 = dz1[0]; // Assuming kts is 1-based index in Fortran and adjusted to 0-based in C++
+        zl1 = dz1[0]; // assuming kts is 1-based index in fortran and adjusted to 0-based in c++
         k = std::max(kpbl - 1, kminrad - 1);
         templ = thl[k - kts] * ex1[k - kts];
         rvls = 100. * 6.112 * std::exp(17.67 * (templ - 273.16) / (templ - 29.65)) * (ep_2 / p1[k + 1 - kts]);
@@ -1899,18 +1899,18 @@ void topdown_cloudrad_cc(int kts, int kte, const std::vector<float>& dz1, const 
         ent_eff = 0.2 + 0.2 * 8. * tmp1;
         radsum = 0.0;
         for (kk = std::max(1, kpbl - 3); kk <= kpbl + 3; ++kk) {
-            radflux = rthraten[kk - kts] * ex1[kk - kts]; // Converts theta/s to temp/s
-            radflux = radflux * cp / grav * (p1[kk - kts] - p1[kk + 1 - kts]); // Converts temp/s to W/m^2
+            radflux = rthraten[kk - kts] * ex1[kk - kts]; // converts theta/s to temp/s
+            radflux = radflux * cp / grav * (p1[kk - kts] - p1[kk + 1 - kts]); // converts temp/s to w/m^2
             if (radflux < 0.0) radsum = std::abs(radflux) + radsum;
         }
-        if ((xland - 1.5) >= 0) { // WATER
+        if ((xland - 1.5) >= 0) { // water
             radsum = std::min(radsum, 90.0f);
             bfx0 = std::max(radsum / rho1[k - kts] / cp, 0.0f);
-        } else { // LAND
-            radsum = std::min(0.25 * radsum, 30.0); // Practically turn off over land
+        } else { // land
+            radsum = std::min(0.25 * radsum, 30.0); // practically turn off over land
             bfx0 = std::max(radsum / rho1[k - kts] / cp - std::max(fltv, 0.0f), 0.0f);
         }
-        wm3 = grav / thetav[k - kts] * bfx0 * std::min(PBLH, 1500.f); // This is wstar3
+        wm3 = grav / thetav[k - kts] * bfx0 * std::min(pblh, 1500.f); // this is wstar3
         wm2 = wm2 + std::pow(wm3, twothirds);
         bfxpbl = -ent_eff * bfx0;
         dthvx = std::max(thetav[k + 1 - kts] - thetav[k - kts], 0.1f);
@@ -1919,182 +1919,182 @@ void topdown_cloudrad_cc(int kts, int kte, const std::vector<float>& dz1, const 
             zfac[kk - kts] = std::min(std::max((1.f - (zw[kk + 1 - kts] - zl1) / (zminrad - zl1)), zfmin), 1.0f);
             zfacent[kk - kts] = 10. * std::max((zminrad - zw[kk + 1 - kts]) / zminrad, 0.0f) * std::pow((1. - zfac[kk - kts]), 3);
             wscalek2[kk - kts] = std::pow((phifac * karman * wm3 * (zfac[kk - kts])), onethird);
-            KHtopdown[kk - kts] = wscalek2[kk - kts] * karman * (zminrad - zw[kk + 1 - kts]) * std::pow((1. - zfac[kk - kts]), 3); // pfac
-            KHtopdown[kk - kts] = std::max(KHtopdown[kk - kts], 0.0f);
-            TKEprodTD[kk - kts] = 2. * ent_eff * wm3 / std::max(PBLH, 100.f) * zfacent[kk - kts];
-            TKEprodTD[kk - kts] = std::max(TKEprodTD[kk - kts], 0.0f);
+            khtopdown[kk - kts] = wscalek2[kk - kts] * karman * (zminrad - zw[kk + 1 - kts]) * std::pow((1. - zfac[kk - kts]), 3); // pfac
+            khtopdown[kk - kts] = std::max(khtopdown[kk - kts], 0.0f);
+            tkeprodtd[kk - kts] = 2. * ent_eff * wm3 / std::max(pblh, 100.f) * zfacent[kk - kts];
+            tkeprodtd[kk - kts] = std::max(tkeprodtd[kk - kts], 0.0f);
         }
     }
-    maxKHtopdown = *std::max_element(KHtopdown.begin(), KHtopdown.end());
+    maxkhtopdown = *std::max_element(khtopdown.begin(), khtopdown.end());
 }
 
-void scale_aware_cc(float dx, float pbl1, float& Psig_bl, float& Psig_shcu) {
+void scale_aware_cc(float dx, float pbl1, float& psig_bl, float& psig_shcu) {
     float dxdh;
-    Psig_bl = 1.0f;
-    Psig_shcu = 1.0f;
+    psig_bl = 1.0f;
+    psig_shcu = 1.0f;
     dxdh = std::max(2.5f * dx, 10.0f) / std::min(pbl1, 3000.0f);
     
-    // New form to preserve parameterized mixing - only down 5% at dx = 750 m
-    Psig_bl = ((dxdh * dxdh) + 0.106f * std::pow(dxdh, 0.667f)) / ((dxdh * dxdh) + 0.066f * std::pow(dxdh, 0.667f) + 0.071f);
+    // new form to preserve parameterized mixing - only down 5% at dx = 750 m
+    psig_bl = ((dxdh * dxdh) + 0.106f * std::pow(dxdh, 0.667f)) / ((dxdh * dxdh) + 0.066f * std::pow(dxdh, 0.667f) + 0.071f);
     
-    // Assume a 500 m cloud depth for shallow-cu clouds
+    // assume a 500 m cloud depth for shallow-cu clouds
     dxdh = std::max(2.5f * dx, 10.0f) / std::min(pbl1 + 500.0f, 3500.0f);
     
-    // Hyeyum Hailey Shin and Song-You Hong 2013, TKE in entrainment zone
-    Psig_shcu = ((dxdh * dxdh) + 0.145f * std::pow(dxdh, 0.667f)) / ((dxdh * dxdh) + 0.172f * std::pow(dxdh, 0.667f) + 0.170f);
+    // hyeyum hailey shin and song-you hong 2013, tke in entrainment zone
+    psig_shcu = ((dxdh * dxdh) + 0.145f * std::pow(dxdh, 0.667f)) / ((dxdh * dxdh) + 0.172f * std::pow(dxdh, 0.667f) + 0.170f);
     
-    // Clamping Psig_bl and Psig_shcu to [0, 1]
-    Psig_bl = std::max(0.0f, std::min(Psig_bl, 1.0f));
-    Psig_shcu = std::max(0.0f, std::min(Psig_shcu, 1.0f));
+    // clamping psig_bl and psig_shcu to [0, 1]
+    psig_bl = std::max(0.0f, std::min(psig_bl, 1.0f));
+    psig_shcu = std::max(0.0f, std::min(psig_shcu, 1.0f));
 }
 
 // ==================================================================
 //>\ingroup gsd_mynn_edmf
-// This subroutine calculates hybrid diagnotic boundary-layer height (PBLH).
+// this subroutine calculates hybrid diagnotic boundary-layer height (pblh).
 //
-// NOTES ON THE PBLH FORMULATION: The 1.5-theta-increase method defines
-//PBL heights as the level at.
+// notes on the pblh formulation: the 1.5-theta-increase method defines
+//pbl heights as the level at.
 //which the potential temperature first exceeds the minimum potential.
-//temperature within the boundary layer by 1.5 K. When applied to.
-//observed temperatures, this method has been shown to produce PBL-
+//temperature within the boundary layer by 1.5 k. when applied to.
+//observed temperatures, this method has been shown to produce pbl-
 //height estimates that are unbiased relative to profiler-based.
-//estimates (Nielsen-Gammon et al. 2008 \cite Nielsen_Gammon_2008).
-// However, their study did not
-//include LLJs. Banta and Pichugina (2008) \cite Pichugina_2008  show that a TKE-based.
-//threshold is a good estimate of the PBL height in LLJs. Therefore,
+//estimates (nielsen-gammon et al. 2008 \cite nielsen_gammon_2008).
+// however, their study did not
+//include lljs. banta and pichugina (2008) \cite pichugina_2008  show that a tke-based.
+//threshold is a good estimate of the pbl height in lljs. therefore,
 //a hybrid definition is implemented that uses both methods, weighting
-//the TKE-method more during stable conditions (PBLH < 400 m).
-//A variable tke threshold (TKEeps) is used since no hard-wired
+//the tke-method more during stable conditions (pblh < 400 m).
+//a variable tke threshold (tkeeps) is used since no hard-wired
 //value could be found to work best in all conditions.
-//>\section gen_get_pblh  GSD get_pblh General Algorithm
+//>\section gen_get_pblh  gsd get_pblh general algorithm
 //> @{
-void GET_PBLH_cc(int KTS, int KTE, float& zi, float landsea, const std::vector<float>& thetav1D, const std::vector<float>& qke1D, const std::vector<float>& zw1D, const std::vector<float>& dz1D, int& kzi) {
-    // Constants
+void get_pblh_cc(int kts, int kte, float& zi, float landsea, const std::vector<float>& thetav1d, const std::vector<float>& qke1d, const std::vector<float>& zw1d, const std::vector<float>& dz1d, int& kzi) {
+    // constants
     const float sbl_lim = 200.0;
     const float sbl_damp = 400.0;
 
-    // Local variables
-    float PBLH_TKE, qtke, qtkem1, maxqke, TKEeps, minthv, delt_thv;
+    // local variables
+    float pblh_tke, qtke, qtkem1, maxqke, tkeeps, minthv, delt_thv;
     int kthv, ktke;
 
-    // Initialize KPBL (kzi)
+    // initialize kpbl (kzi)
     kzi = 2;
 
-    // Find min thetav in the lowest 200 m AGL
+    // find min thetav in the lowest 200 m agl
     kthv = 1;
-    minthv = 9E9;
-    for (int k = KTS + 1; k <= KTE && zw1D[k - KTS] <= 200.; ++k) {
-        if (minthv > thetav1D[k - KTS]) {
-            minthv = thetav1D[k - KTS];
+    minthv = 9e9;
+    for (int k = kts + 1; k <= kte && zw1d[k - kts] <= 200.; ++k) {
+        if (minthv > thetav1d[k - kts]) {
+            minthv = thetav1d[k - kts];
             kthv = k;
         }
     }
 
-    // Find thetav-based PBLH (best for daytime)
+    // find thetav-based pblh (best for daytime)
     zi = 0.0;
     delt_thv = (landsea - 1.5) >= 0 ? 1.0 : 1.25;
 
-    for (int k = kthv + 1; k < KTE; ++k) {
-        if (thetav1D[k - KTS] >= (minthv + delt_thv)) {
-            zi = zw1D[k - KTS] - dz1D[k - 1 - KTS] * std::min((thetav1D[k - KTS] - (minthv + delt_thv)) / std::max(thetav1D[k - KTS] - thetav1D[k - 1 - KTS], 1.e-6f), 1.0f);
+    for (int k = kthv + 1; k < kte; ++k) {
+        if (thetav1d[k - kts] >= (minthv + delt_thv)) {
+            zi = zw1d[k - kts] - dz1d[k - 1 - kts] * std::min((thetav1d[k - kts] - (minthv + delt_thv)) / std::max(thetav1d[k - kts] - thetav1d[k - 1 - kts], 1.e-6f), 1.0f);
             break;
         }
-        if (k == KTE - 1) zi = zw1D[KTS + 1 - KTS]; // Exit safeguard
+        if (k == kte - 1) zi = zw1d[kts + 1 - kts]; // exit safeguard
     }
 
-    // For stable boundary layers, use TKE method to complement the thetav-based definition
-    PBLH_TKE = 0.0;
-    maxqke = std::max(qke1D[KTS - KTS], 0.0f);
-    TKEeps = maxqke / 40.0;
-    TKEeps = std::max(TKEeps, 0.02f);
+    // for stable boundary layers, use tke method to complement the thetav-based definition
+    pblh_tke = 0.0;
+    maxqke = std::max(qke1d[kts - kts], 0.0f);
+    tkeeps = maxqke / 40.0;
+    tkeeps = std::max(tkeeps, 0.02f);
 
-    for (int k = KTS + 1; k < KTE; ++k) {
-        qtke = std::max(qke1D[k - KTS] / 2.0, 0.0);
-        qtkem1 = std::max(qke1D[k - 1 - KTS] / 2.0, 0.0);
-        if (qtke <= TKEeps) {
-            PBLH_TKE = zw1D[k - KTS] - dz1D[k - 1 - KTS] * std::min((TKEeps - qtke) / std::max(qtkem1 - qtke, 1.0e-6f), 1.0f);
-            PBLH_TKE = std::max(PBLH_TKE, zw1D[KTS + 1 - KTS]);
+    for (int k = kts + 1; k < kte; ++k) {
+        qtke = std::max(qke1d[k - kts] / 2.0, 0.0);
+        qtkem1 = std::max(qke1d[k - 1 - kts] / 2.0, 0.0);
+        if (qtke <= tkeeps) {
+            pblh_tke = zw1d[k - kts] - dz1d[k - 1 - kts] * std::min((tkeeps - qtke) / std::max(qtkem1 - qtke, 1.0e-6f), 1.0f);
+            pblh_tke = std::max(pblh_tke, zw1d[kts + 1 - kts]);
             break;
         }
-        if (k == KTE - 1) PBLH_TKE = zw1D[KTS + 1 - KTS]; // Exit safeguard
+        if (k == kte - 1) pblh_tke = zw1d[kts + 1 - kts]; // exit safeguard
     }
 
-    // Limit PBLH_TKE to not exceed the thetav-based PBL height +/- 350 m
-    PBLH_TKE = std::min(PBLH_TKE, zi + 350.0f);
-    PBLH_TKE = std::max(PBLH_TKE, std::max(zi - 350.0f, 10.0f));
+    // limit pblh_tke to not exceed the thetav-based pbl height +/- 350 m
+    pblh_tke = std::min(pblh_tke, zi + 350.0f);
+    pblh_tke = std::max(pblh_tke, std::max(zi - 350.0f, 10.0f));
 
     float wt = 0.5 * std::tanh((zi - sbl_lim) / sbl_damp) + 0.5;
     if (maxqke > 0.05) {
-        zi = PBLH_TKE * (1.0 - wt) + zi * wt;
+        zi = pblh_tke * (1.0 - wt) + zi * wt;
     }
 
-    // Compute KPBL (kzi)
-    for (int k = KTS + 1; k < KTE; ++k) {
-        if (zw1D[k - KTS] >= zi) {
+    // compute kpbl (kzi)
+    for (int k = kts + 1; k < kte; ++k) {
+        if (zw1d[k - kts] >= zi) {
             kzi = k - 1;
             break;
         }
     }
 }
 
-void retrieve_exchange_coeffs(int kts, int kte, const std::vector<float>& dfm, const std::vector<float>& dfh, const std::vector<float>& dz, std::vector<float>& K_m, std::vector<float>& K_h) {
+void retrieve_exchange_coeffs(int kts, int kte, const std::vector<float>& dfm, const std::vector<float>& dfh, const std::vector<float>& dz, std::vector<float>& k_m, std::vector<float>& k_h) {
     float dzk;
-    K_m[kts] = 0.0;
-    K_h[kts] = 0.0;
+    k_m[kts] = 0.0;
+    k_h[kts] = 0.0;
     for (int k = kts + 1; k <= kte; ++k) {
         dzk = 0.5 * (dz[k] + dz[k - 1]);
-        K_m[k] = dfm[k] * dzk;
-        K_h[k] = dfh[k] * dzk;
+        k_m[k] = dfm[k] * dzk;
+        k_h[k] = dfh[k] * dzk;
     }
 }
 
 
 //
 // ==================================================================
-//     SUBROUTINE  mym_level2:
+//     subroutine  mym_level2:
 //
-//     Input variables:    see subroutine mym_initialize
+//     input variables:    see subroutine mym_initialize
 //
-//     Output variables:
-//       dtl(nx,nz,ny) : Vertical gradient of Theta_l             (K/m)
-//       dqw(nx,nz,ny) : Vertical gradient of Q_w
-//       dtv(nx,nz,ny) : Vertical gradient of Theta_V             (K/m)
-//       gm (nx,nz,ny) : G_M divided by L^2/q^2                (s^(-2))
-//       gh (nx,nz,ny) : G_H divided by L^2/q^2                (s^(-2))
-//       sm (nx,nz,ny) : Stability function for momentum, at Level 2
-//       sh (nx,nz,ny) : Stability function for heat, at Level 2
+//     output variables:
+//       dtl(nx,nz,ny) : vertical gradient of theta_l             (k/m)
+//       dqw(nx,nz,ny) : vertical gradient of q_w
+//       dtv(nx,nz,ny) : vertical gradient of theta_v             (k/m)
+//       gm (nx,nz,ny) : g_m divided by l^2/q^2                (s^(-2))
+//       gh (nx,nz,ny) : g_h divided by l^2/q^2                (s^(-2))
+//       sm (nx,nz,ny) : stability function for momentum, at level 2
+//       sh (nx,nz,ny) : stability function for heat, at level 2
 //
-//      These are defined on the walls of the grid boxes.
+//      these are defined on the walls of the grid boxes.
 //
 
 //>\ingroup gsd_mynn_edmf
-// This subroutine calculates the level 2, non-dimensional wind shear
-// \f$G_M\f$ and vertical temperature gradient \f$G_H\f$ as well as
-// the level 2 stability funcitons \f$S_h\f$ and \f$S_m\f$.
+// this subroutine calculates the level 2, non-dimensional wind shear
+// \f$g_m\f$ and vertical temperature gradient \f$g_h\f$ as well as
+// the level 2 stability funcitons \f$s_h\f$ and \f$s_m\f$.
 //\param kts    horizontal dimension
 //\param kte    vertical dimension
 //\param dz     vertical grid spacings (\f$m\f$)
 //\param u      west-east component of the horizontal wind (\f$m s^{-1}\f$)
 //\param v      south-north component of the horizontal wind (\f$m s^{-1}\f$)
 //\param thl    liquid water potential temperature
-//\param qw     total water content \f$Q_w\f$
+//\param qw     total water content \f$q_w\f$
 //\param ql     liquid water content (\f$kg kg^{-1}\f$)
 //\param vt
 //\param vq
-//\param dtl     vertical gradient of \f$\theta_l\f$ (\f$K m^{-1}\f$)
-//\param dqw     vertical gradient of \f$Q_w\f$
-//\param dtv     vertical gradient of \f$\theta_V\f$ (\f$K m^{-1}\f$)
-//\param gm      \f$G_M\f$ divided by \f$L^{2}/q^{2}\f$ (\f$s^{-2}\f$)
-//\param gh      \f$G_H\f$ divided by \f$L^{2}/q^{2}\f$ (\f$s^{-2}\f$)
-//\param sm      stability function for momentum, at Level 2
-//\param sh      stability function for heat, at Level 2
-//\section gen_mym_level2 GSD MYNN-EDMF mym_level2 General Algorithm
+//\param dtl     vertical gradient of \f$\theta_l\f$ (\f$k m^{-1}\f$)
+//\param dqw     vertical gradient of \f$q_w\f$
+//\param dtv     vertical gradient of \f$\theta_v\f$ (\f$k m^{-1}\f$)
+//\param gm      \f$g_m\f$ divided by \f$l^{2}/q^{2}\f$ (\f$s^{-2}\f$)
+//\param gh      \f$g_h\f$ divided by \f$l^{2}/q^{2}\f$ (\f$s^{-2}\f$)
+//\param sm      stability function for momentum, at level 2
+//\param sh      stability function for heat, at level 2
+//\section gen_mym_level2 gsd mynn-edmf mym_level2 general algorithm
 // @ {
-#include <algorithm> // For std::max and std::min
-#include <cmath>     // For pow, sqrt, etc.
+#include <algorithm> // for std::max and std::min
+#include <cmath>     // for pow, sqrt, etc.
 #include <vector>
 
-// Assuming float is equivalent to float or float. Adjust as necessary.
+// assuming float is equivalent to float or float. adjust as necessary.
 void mym_level2_cc(int kts, int kte,
                 const std::vector<float>& dz,
                 const std::vector<float>& u, const std::vector<float>& v, 
@@ -2106,17 +2106,17 @@ void mym_level2_cc(int kts, int kte,
                 std::vector<float>& dtv, std::vector<float>& gm, 
                 std::vector<float>& gh, std::vector<float>& sm, 
                 std::vector<float>& sh) {
-    // Constants need to be defined or passed as arguments
+    // constants need to be defined or passed as arguments
     float rfc, f1, f2, rf1, rf2, smc, shc;
     float ri1, ri2, ri3, ri4, duz, dtz, dqz, vtt, vqq, dtq, dzk;
     float afk, abk, ri, rf;
     float a2fac;
-    // Assuming these are constants defined elsewhere
+    // assuming these are constants defined elsewhere
     float g1, g2, b1, c1, a2, c2, c5, a1, tv0, gtr;
-    bool CKmod; // Assuming this is a boolean flag defined elsewhere
+    bool ckmod; // assuming this is a boolean flag defined elsewhere
 
     rfc = g1 / (g1 + g2);
-    // The rest of the constants (f1, f2, etc.) need to be calculated or defined
+    // the rest of the constants (f1, f2, etc.) need to be calculated or defined
 
     for (int k = kts + 1; k <= kte; ++k) {
         dzk = 0.5 * (dz[k] + dz[k - 1]);
@@ -2127,8 +2127,8 @@ void mym_level2_cc(int kts, int kte,
         dtz = (thl[k] - thl[k - 1]) / dzk;
         dqz = (qw[k] - qw[k - 1]) / dzk;
 
-        vtt = 1.0 + vt[k] * abk + vt[k - 1] * afk; // Beta-theta
-        vqq = tv0 + vq[k] * abk + vq[k - 1] * afk; // Beta-q
+        vtt = 1.0 + vt[k] * abk + vt[k - 1] * afk; // beta-theta
+        vqq = tv0 + vq[k] * abk + vq[k - 1] * afk; // beta-q
         dtq = vtt * dtz + vqq * dqz;
 
         dtl[k] = dtz;
@@ -2139,13 +2139,13 @@ void mym_level2_cc(int kts, int kte,
         gh[k] = -dtq * gtr;
 
         ri = -gh[k] / std::max(duz, 1.0e-10f);
-        if (CKmod) {
+        if (ckmod) {
             a2fac = 1.0 / (1.0 + std::max(ri, 0.0f));
         } else {
             a2fac = 1.0;
         }
 
-        // Recalculate rfc, f1, f2, rf1, rf2, smc, shc based on a2fac if necessary
+        // recalculate rfc, f1, f2, rf1, rf2, smc, shc based on a2fac if necessary
 
         rf = std::min(ri1 * (ri + ri2 - std::sqrt(std::pow(ri, 2.0f) - ri3 * ri + ri4)), rfc);
 
@@ -2157,34 +2157,34 @@ void mym_level2_cc(int kts, int kte,
 
 
 // ==================================================================
-//     SUBROUTINE  mym_length:
+//     subroutine  mym_length:
 //
-//     Input variables:    see subroutine mym_initialize
+//     input variables:    see subroutine mym_initialize
 //
-//     Output variables:   see subroutine mym_initialize
+//     output variables:   see subroutine mym_initialize
 //
-//     Work arrays:
-//       elt(nx,ny)      : Length scale depending on the PBL depth    (m)
-//       vsc(nx,ny)      : Velocity scale q_c                       (m/s)
+//     work arrays:
+//       elt(nx,ny)      : length scale depending on the pbl depth    (m)
+//       vsc(nx,ny)      : velocity scale q_c                       (m/s)
 //                         at first, used for computing elt
 //
-//     NOTE: the mixing lengths are meant to be calculated at the full-
+//     note: the mixing lengths are meant to be calculated at the full-
 //           sigmal levels (or interfaces beween the model layers).
 //
 //>\ingroup gsd_mynn_edmf
-// This subroutine calculates the mixing lengths.
-void mym_length_cc(int kts, int kte, float xland, float* dz, float* dx, float* zw, float rmo, float flt, float fltv, float flq, float* vt, float* vq, float* u1, float* v1, float* qke, float* dtv, float* el, float zi, float* theta, float* qkw, float Psig_bl, float* cldfra_bl1D, int bl_mynn_mixlength, float* edmf_w1, float* edmf_a1, float karman, float grav, float gtr, float tv0) {
+// this subroutine calculates the mixing lengths.
+void mym_length_cc(int kts, int kte, float xland, float* dz, float* dx, float* zw, float rmo, float flt, float fltv, float flq, float* vt, float* vq, float* u1, float* v1, float* qke, float* dtv, float* el, float zi, float* theta, float* qkw, float psig_bl, float* cldfra_bl1d, int bl_mynn_mixlength, float* edmf_w1, float* edmf_a1, float karman, float grav, float gtr, float tv0) {
     int i, j, k;
     float elt, vsc;
-    float qtke[kte+1], elBLmin[kte+1], elBLavg[kte+1], thetaw[kte+1];
-    float wt, wt2, zi2, h1, h2, hs, elBLmin0, elBLavg0, cldavg;
+    float qtke[kte+1], elblmin[kte+1], elblavg[kte+1], thetaw[kte+1];
+    float wt, wt2, zi2, h1, h2, hs, elblmin0, elblavg0, cldavg;
     float cns, alp1, alp2, alp3, alp4, alp5, alp6;
     float minzi = 300.0;
     float maxdz = 750.0;
     float mindz = 300.0;
-    float ZSLH = 100.0;
-    float CSL = 2.0;
-    float afk, abk, zwk, zwk1, dzk, qdz, vflx, bv, tau_cloud, wstar, elb, els, elf, el_stab, el_mf, el_stab_mf, elb_mf, PBLH_PLUS_ENT, Uonset, Ugrid, wt_u, el_les;
+    float zslh = 100.0;
+    float csl = 2.0;
+    float afk, abk, zwk, zwk1, dzk, qdz, vflx, bv, tau_cloud, wstar, elb, els, elf, el_stab, el_mf, el_stab_mf, elb_mf, pblh_plus_ent, uonset, ugrid, wt_u, el_les;
     float ctau = 1000.0;
 
     switch(bl_mynn_mixlength) {
@@ -2242,9 +2242,9 @@ void mym_length_cc(int kts, int kte, float xland, float* dz, float* dx, float* z
             }
             break;
         case 1:
-            Ugrid = std::sqrt(u1[kts] * u1[kts] + v1[kts] * v1[kts]);
-            Uonset = 15.0;
-            wt_u = (1.0 - std::min(std::max(Ugrid - Uonset, 0.0f) / 30.0f, 0.5f));
+            ugrid = std::sqrt(u1[kts] * u1[kts] + v1[kts] * v1[kts]);
+            uonset = 15.0;
+            wt_u = (1.0 - std::min(std::max(ugrid - uonset, 0.0f) / 30.0f, 0.5f));
             cns = 2.7;
             alp1 = 0.23;
             alp2 = 0.3;
@@ -2290,7 +2290,7 @@ void mym_length_cc(int kts, int kte, float xland, float* dz, float* dx, float* z
                     elb = std::max(alp2 * qkw[k], alp6 * edmf_a1[k-1] * edmf_w1[k-1]) / bv * (1.0 + alp3 * std::sqrt(vsc / (bv * elt)));
                     elb = std::min(elb, zwk);
                     elf = 1.0 * qkw[k] / bv;
-                    elBLavg[k] = std::max(elBLavg[k], alp6 * edmf_a1[k-1] * edmf_w1[k-1] / bv);
+                    elblavg[k] = std::max(elblavg[k], alp6 * edmf_a1[k-1] * edmf_w1[k-1] / bv);
                 } else {
                     elb = 1.0e10;
                     elf = elb;
@@ -2302,12 +2302,12 @@ void mym_length_cc(int kts, int kte, float xland, float* dz, float* dx, float* z
                 }
                 wt = 0.5 * std::tanh((zwk - (zi2 + h1)) / h2) + 0.5;
                 el[k] = std::min(elb / (elb / elt + elb / els + 1.0f), elf);
-                el[k] = el[k] * Psig_bl;
+                el[k] = el[k] * psig_bl;
             }
             break;
         case 2:
-            Uonset = 3.5 + dz[kts] * 0.1;
-            Ugrid = std::sqrt(u1[kts] * u1[kts] + v1[kts] * v1[kts]);
+            uonset = 3.5 + dz[kts] * 0.1;
+            ugrid = std::sqrt(u1[kts] * u1[kts] + v1[kts] * v1[kts]);
             cns = 3.5;
             alp1 = 0.22;
             alp2 = 0.30;
@@ -2347,7 +2347,7 @@ void mym_length_cc(int kts, int kte, float xland, float* dz, float* dx, float* z
             for (k = kts+1; k <= kte; k++) {
                 zwk = zw[k];
                 dzk = 0.5 * (dz[k] + dz[k-1]);
-                cldavg = 0.5 * (cldfra_bl1D[k-1] + cldfra_bl1D[k]);
+                cldavg = 0.5 * (cldfra_bl1d[k-1] + cldfra_bl1d[k]);
                 if (dtv[k] > 0.0) {
                     bv = std::max(std::sqrt(gtr * dtv[k]), 0.001f);
                     elb_mf = std::max(alp2 * qkw[k], alp6 * edmf_a1[k-1] * edmf_w1[k-1]) / bv * (1.0 + alp3 * std::sqrt(vsc / (bv * elt)));
@@ -2377,42 +2377,42 @@ void mym_length_cc(int kts, int kte, float xland, float* dz, float* dx, float* z
                 el[k] = std::sqrt(els * els / (1.0 + (els * els / elt * elt) + (els * els / elb_mf * elb_mf)));
                 el[k] = el[k] * (1.0 - wt) + elf * wt;
                 el_les = std::min(els / (1.0f + (els / 12.0f)), elb_mf);
-                el[k] = el[k] * Psig_bl + (1.0 - Psig_bl) * el_les;
+                el[k] = el[k] * psig_bl + (1.0 - psig_bl) * el_les;
             }
             break;
     }
 }
 
 // ==================================================================
-//     SUBROUTINE  mym_length:
+//     subroutine  mym_length:
 //
-//     Input variables:    see subroutine mym_initialize
+//     input variables:    see subroutine mym_initialize
 //
-//     Output variables:   see subroutine mym_initialize
+//     output variables:   see subroutine mym_initialize
 //
-//     Work arrays:
-//       elt(nx,ny)      : Length scale depending on the PBL depth    (m)
-//       vsc(nx,ny)      : Velocity scale q_c                       (m/s)
+//     work arrays:
+//       elt(nx,ny)      : length scale depending on the pbl depth    (m)
+//       vsc(nx,ny)      : velocity scale q_c                       (m/s)
 //                         at first, used for computing elt
 //
-//     NOTE: the mixing lengths are meant to be calculated at the full-
+//     note: the mixing lengths are meant to be calculated at the full-
 //           sigmal levels (or interfaces beween the model layers).
 //
 //>\ingroup gsd_mynn_edmf
-// This subroutine calculates the mixing lengths.
+// this subroutine calculates the mixing lengths.
 
-void mym_length(int kts, int kte, float xland, float* dz, float* dx, float* zw, float rmo, float flt, float fltv, float flq, float* vt, float* vq, float* u1, float* v1, float* qke, float* dtv, float* el, float zi, float* theta, float* qkw, float Psig_bl, float* cldfra_bl1D, int bl_mynn_mixlength, float* edmf_w1, float* edmf_a1, float grav, float karman, float tv0, float gtr) {
+void mym_length(int kts, int kte, float xland, float* dz, float* dx, float* zw, float rmo, float flt, float fltv, float flq, float* vt, float* vq, float* u1, float* v1, float* qke, float* dtv, float* el, float zi, float* theta, float* qkw, float psig_bl, float* cldfra_bl1d, int bl_mynn_mixlength, float* edmf_w1, float* edmf_a1, float grav, float karman, float tv0, float gtr) {
     int i, j, k;
     float elt, vsc;
-    float qtke[kte+1], elBLmin[kte+1], elBLavg[kte+1], thetaw[kte+1];
-    float wt, wt2, zi2, h1, h2, hs, elBLmin0, elBLavg0, cldavg;
+    float qtke[kte+1], elblmin[kte+1], elblavg[kte+1], thetaw[kte+1];
+    float wt, wt2, zi2, h1, h2, hs, elblmin0, elblavg0, cldavg;
     float cns, alp1, alp2, alp3, alp4, alp5, alp6;
     float minzi = 300.0;
     float maxdz = 750.0;
     float mindz = 300.0;
-    float ZSLH = 100.0;
-    float CSL = 2.0;
-    float afk, abk, zwk, zwk1, dzk, qdz, vflx, bv, tau_cloud, wstar, elb, els, elf, el_stab, el_mf, el_stab_mf, elb_mf, PBLH_PLUS_ENT, Uonset, Ugrid, wt_u, el_les;
+    float zslh = 100.0;
+    float csl = 2.0;
+    float afk, abk, zwk, zwk1, dzk, qdz, vflx, bv, tau_cloud, wstar, elb, els, elf, el_stab, el_mf, el_stab_mf, elb_mf, pblh_plus_ent, uonset, ugrid, wt_u, el_les;
     float ctau = 1000.0;
 
     switch(bl_mynn_mixlength) {
@@ -2470,9 +2470,9 @@ void mym_length(int kts, int kte, float xland, float* dz, float* dx, float* zw, 
             }
             break;
         case 1:
-            Ugrid = std::sqrt(u1[kts] * u1[kts] + v1[kts] * v1[kts]);
-            Uonset = 15.0;
-            wt_u = (1.0 - std::min(std::max(Ugrid - Uonset, 0.0f) / 30.0, 0.5));
+            ugrid = std::sqrt(u1[kts] * u1[kts] + v1[kts] * v1[kts]);
+            uonset = 15.0;
+            wt_u = (1.0 - std::min(std::max(ugrid - uonset, 0.0f) / 30.0, 0.5));
             cns = 2.7;
             alp1 = 0.23;
             alp2 = 0.3;
@@ -2516,7 +2516,7 @@ void mym_length(int kts, int kte, float xland, float* dz, float* dx, float* zw, 
                     elb = std::max(alp2 * qkw[k], alp6 * edmf_a1[k-1] * edmf_w1[k-1]) / bv * (1.0 + alp3 * std::sqrt(vsc / (bv * elt)));
                     elb = std::min(elb, zwk);
                     elf = 1.0 * qkw[k] / bv;
-                    elBLavg[k] = std::max(elBLavg[k], alp6 * edmf_a1[k-1] * edmf_w1[k-1] / bv);
+                    elblavg[k] = std::max(elblavg[k], alp6 * edmf_a1[k-1] * edmf_w1[k-1] / bv);
                 } else {
                     elb = 1.0e10;
                     elf = elb;
@@ -2528,12 +2528,12 @@ void mym_length(int kts, int kte, float xland, float* dz, float* dx, float* zw, 
                 }
                 wt = 0.5 * std::tanh((zwk - (zi2 + h1)) / h2) + 0.5;
                 el[k] = std::min(elb / (elb / elt + elb / els + 1.0f), elf);
-                el[k] = el[k] * Psig_bl;
+                el[k] = el[k] * psig_bl;
             }
             break;
         case 2:
-            Uonset = 3.5 + dz[kts] * 0.1;
-            Ugrid = std::sqrt(u1[kts] * u1[kts] + v1[kts] * v1[kts]);
+            uonset = 3.5 + dz[kts] * 0.1;
+            ugrid = std::sqrt(u1[kts] * u1[kts] + v1[kts] * v1[kts]);
             cns = 3.5;
             alp1 = 0.22;
             alp2 = 0.30;
@@ -2574,7 +2574,7 @@ void mym_length(int kts, int kte, float xland, float* dz, float* dx, float* zw, 
             for (k = kts+1; k <= kte; k++) {
                 zwk = zw[k];
                 dzk = 0.5 * (dz[k] + dz[k-1]);
-                cldavg = 0.5 * (cldfra_bl1D[k-1] + cldfra_bl1D[k]);
+                cldavg = 0.5 * (cldfra_bl1d[k-1] + cldfra_bl1d[k]);
                 if (dtv[k] > 0.0) {
                     bv = std::max(std::sqrt(gtr * dtv[k]), 0.001f);
                     elb_mf = std::max(alp2 * qkw[k], alp6 * edmf_a1[k-1] * edmf_w1[k-1]) / bv * (1.0 + alp3 * std::sqrt(vsc / (bv * elt)));
@@ -2604,7 +2604,7 @@ void mym_length(int kts, int kte, float xland, float* dz, float* dx, float* zw, 
                 el[k] = std::sqrt(els * els / (1.0 + (els * els / elt * elt) + (els * els / elb_mf * elb_mf)));
                 el[k] = el[k] * (1.0 - wt) + elf * wt;
                 el_les = std::min(els / (1.0f + (els / 12.0f)), elb_mf);
-                el[k] = el[k] * Psig_bl + (1.0 - Psig_bl) * el_les;
+                el[k] = el[k] * psig_bl + (1.0 - psig_bl) * el_les;
             }
             break;
     }
@@ -2612,37 +2612,37 @@ void mym_length(int kts, int kte, float xland, float* dz, float* dx, float* zw, 
 
 // ==================================================================
 //>\ingroup gsd_mynn_edmf
-// This subroutine is the Dynamic Multi-Plume (DMP) Mass-Flux Scheme.
+// this subroutine is the dynamic multi-plume (dmp) mass-flux scheme.
 //
 // dmp_mf() calculates the nonlocal turbulent transport from the dynamic
 // multiplume mass-flux scheme as well as the shallow-cumulus component of
-// the subgrid clouds. Note that this mass-flux scheme is called when the
+// the subgrid clouds. note that this mass-flux scheme is called when the
 // namelist paramter \p bl_mynn_edmf is set to 1 (recommended).
 //
-// Much thanks to Kay Suslj of NASA-JPL for contributing the original version
-// of this mass-flux scheme. Considerable changes have been made from it's
-// original form. Some additions include:
+// much thanks to kay suslj of nasa-jpl for contributing the original version
+// of this mass-flux scheme. considerable changes have been made from it's
+// original form. some additions include:
 //  -# scale-aware tapering as dx -> 0
-//  -# transport of TKE (extra namelist option)
-//  -# Chaboureau-Bechtold cloud fraction & coupling to radiation (when icloud_bl > 0)
+//  -# transport of tke (extra namelist option)
+//  -# chaboureau-bechtold cloud fraction & coupling to radiation (when icloud_bl > 0)
 //  -# some extra limits for numerical stability
 //
-// This scheme remains under development, so consider it experimental code.
+// this scheme remains under development, so consider it experimental code.
 //
-/*
-void dmp_mf(int kts, int kte, float dt, float* zw, float* dz, float* p, float* rho, int momentum_opt, int tke_opt, int scalar_opt, float* u, float* v, float* w, float* th, float* thl, float* thv, float* tk, float* qt, float* qv, float* qc, float* qke, float* qnc, float* qni, float* qnwfa, float* qnifa, float* qnbca, float* exner, float* vt, float* vq, float* sgm, float ust, float flt, float fltv, float flq, float flqv, float pblh, float kpbl, float dx, float landsea, float ts, float* edmf_a, float* edmf_w, float* edmf_qt, float* edmf_thl, float* edmf_ent, float* edmf_qc, float* s_aw, float* s_awthl, float* s_awqt, float* s_awqv, float* s_awqc, float* s_awu, float* s_awv, float* s_awqke, float* s_awqnc, float* s_awqni, float* s_awqnwfa, float* s_awqnifa, float* s_awqnbca, float* sub_thl, float* sub_sqv, float* sub_u, float* sub_v, float* det_thl, float* det_sqv, float* det_sqc, float* det_u, float* det_v, int nchem, float** chem1, float** s_awchem, bool mix_chem, float* qc_bl1d, float* cldfra_bl1d, float* qc_bl1D_old, float* cldfra_bl1D_old, bool F_QC, bool F_QI, bool F_QNC, bool F_QNI, bool F_QNWFA, bool F_QNIFA, bool F_QNBCA, float Psig_shcu, float maxwidth, int ktop, float maxmf, float ztop, float spp_pbl, float rstoch_col, float grav) {
+
+void dmp_mf_cc(int kts, int kte, float dt, float* zw, float* dz, float* p, float* rho, int momentum_opt, int tke_opt, int scalar_opt, float* u, float* v, float* w, float* th, float* thl, float* thv, float* tk, float* qt, float* qv, float* qc, float* qke, float* qnc, float* qni, float* qnwfa, float* qnifa, float* qnbca, float ust, float flt, float fltv, float flq, float flqv, float pblh, float kpbl, float dx, float landsea, float ts, float* edmf_a, float* edmf_w, float* edmf_qt, float* edmf_thl, float* edmf_ent, float* edmf_qc, float* s_aw, float* s_awthl, float* s_awqt, float* s_awqv, float* s_awqc, float* s_awu, float* s_awv, float* s_awqke, float* s_awqnc, float* s_awqni, float* s_awqnwfa, float* s_awqnifa, float* s_awqnbca, int nchem, float** chem1, float** s_awchem, bool mix_chem, float* qc_bl1d, float* cldfra_bl1d, float* qc_bl1d_old, float* cldfra_bl1d_old, float psig_shcu, float maxwidth, int ktop, float maxmf, float ztop, float* rstoch_col, float grav, float gtr, float p608) {
     int nup = 8;
     int debug_mf = 0;
     float nup2;
-    float UPW[kte+1][nup], UPTHL[kte+1][nup], UPQT[kte+1][nup], UPQC[kte+1][nup], UPQV[kte+1][nup], UPA[kte+1][nup], UPU[kte+1][nup], UPV[kte+1][nup], UPTHV[kte+1][nup], UPQKE[kte+1][nup], UPQNC[kte+1][nup], UPQNI[kte+1][nup], UPQNWFA[kte+1][nup], UPQNIFA[kte+1][nup], UPQNBCA[kte+1][nup];
-    float ENT[kte][nup];
-    int ENTi[kte][nup];
-    int K, I, k50;
-    float fltv2, wstar, qstar, thstar, sigmaW, sigmaQT, sigmaTH, z0, pwmin, pwmax, wmin, wmax, wlv, Psig_w, maxw, wpbl;
-    float B, QTn, THLn, THVn, QCn, Un, Vn, QKEn, QNCn, QNIn, QNWFAn, QNIFAn, QNBCAn, Wn2, Wn, EntEXP, EntEXM, EntW, BCOEFF, THVkm1, THVk, Pk, rho_int;
-    float Wa = 2./3., Wb = 0.002, Wc = 1.5;
-    float L0 = 100., ENT0 = 0.1;
-    float Atot = 0.10;
+    float upw[kte+1][nup], upthl[kte+1][nup], upqt[kte+1][nup], upqc[kte+1][nup], upqv[kte+1][nup], upa[kte+1][nup], upu[kte+1][nup], upv[kte+1][nup], upthv[kte+1][nup], upqke[kte+1][nup], upqnc[kte+1][nup], upqni[kte+1][nup], upqnwfa[kte+1][nup], upqnifa[kte+1][nup], upqnbca[kte+1][nup];
+    float ent[kte][nup];
+    int enti[kte][nup];
+    int k, i, k50;
+    float fltv2, wstar, qstar, thstar, sigmaw, sigmaqt, sigmath, z0, pwmin, pwmax, wmin, wmax, wlv, psig_w, maxw, wpbl;
+    float b, qtn, thln, thvn, qcn, un, vn, qken, qncn, qnin, qnwfan, qnifan, qnbcan, wn2, wn, entexp, entexm, entw, bcoeff, thvkm1, thvk, pk, rho_int;
+    float wa = 2./3., wb = 0.002, wc = 1.5;
+    float l0 = 100., ent0 = 0.1;
+    float atot = 0.10;
     float lmax = 1000.;
     float lmin = 300.;
     float dlmin = 0.;
@@ -2652,52 +2652,53 @@ void dmp_mf(int kts, int kte, float dt, float* zw, float* dz, float* p, float* r
     float d;
     float cn, c, l, n, an2, hux, wspd_pbl, cloud_base, width_flx;
     float chemn[nchem];
-    float UPCHEM[kte+1][nup][nchem];
+    float upchem[kte+1][nup][nchem];
     float ic;
     float edmf_chem[kte+1][nchem];
+    float envm_u[kte+1],envm_v[kte+1],envm_sqc[kte+1],envm_thl[kte+1],envm_sqv[kte+1];
     bool superadiabatic;
-    float sigq, xl, rsl, cpm, a, qmq, mf_cf, Aup, Q1, diffqt, qsat_tk, Fng, qww, alpha, beta, bb, f, pt, t, q2p, b9, satvp, rhgrid, Ac_mf, Ac_strat, qc_mf;
+    float sigq, xl, rsl, cpm, a, qmq, mf_cf, aup, q1, diffqt, qsat_tk, fng, qww, alpha, beta, bb, f, pt, t, q2p, b9, satvp, rhgrid, ac_mf, ac_strat, qc_mf;
     float cf_thresh = 0.5;
     float exneri[kte], dzi[kte], rhoz[kte];
-    float THp, QTp, QCp, QCs, esat, qsl;
+    float thp, qtp, qcp, qcs, esat, qsl;
     float csigma, acfac, ac_wsp;
     int overshoot;
-    float bvf, Frz, dzp;
+    float bvf, frz, dzp;
     float adjustment, flx1;
     float fluxportion = 0.75;
-    float sublim, qc_ent, qv_ent, qt_ent, thl_ent, detrate, detrateUV, oow, exc_fac, aratio, detturb, qc_grid, qc_sgs, exc_heat, exc_moist, tk_int, tvs;
-    float Cdet = 1./45.;
+    float sublim, qc_ent, qv_ent, qt_ent, thl_ent, detrate, detrateuv, oow, exc_fac, aratio, detturb, qc_grid, qc_sgs, exc_heat, exc_moist, tk_int, tvs, qc_plume;
+    float cdet = 1./45.;
     float dzpmax = 300.;
-    float Csub = 0.25;
+    float csub = 0.25;
     float pgfac = 0.00;
-    float Uk, Ukm1, Vk, Vkm1, dxsa;
+    float uk, ukm1, vk, vkm1, dxsa;
     for (int i = 0; i < nup; i++) {
         for (int j = 0; j < kte+1; j++) {
-            UPW[j][i] = 0.0;
-            UPTHL[j][i] = 0.0;
-            UPQT[j][i] = 0.0;
-            UPQC[j][i] = 0.0;
-            UPQV[j][i] = 0.0;
-            UPA[j][i] = 0.0;
-            UPU[j][i] = 0.0;
-            UPV[j][i] = 0.0;
-            UPTHV[j][i] = 0.0;
-            UPQKE[j][i] = 0.0;
-            UPQNC[j][i] = 0.0;
-            UPQNI[j][i] = 0.0;
-            UPQNWFA[j][i] = 0.0;
-            UPQNIFA[j][i] = 0.0;
-            UPQNBCA[j][i] = 0.0;
+            upw[j][i] = 0.0;
+            upthl[j][i] = 0.0;
+            upqt[j][i] = 0.0;
+            upqc[j][i] = 0.0;
+            upqv[j][i] = 0.0;
+            upa[j][i] = 0.0;
+            upu[j][i] = 0.0;
+            upv[j][i] = 0.0;
+            upthv[j][i] = 0.0;
+            upqke[j][i] = 0.0;
+            upqnc[j][i] = 0.0;
+            upqni[j][i] = 0.0;
+            upqnwfa[j][i] = 0.0;
+            upqnifa[j][i] = 0.0;
+            upqnbca[j][i] = 0.0;
         }
     }
     for (int i = 0; i < kte; i++) {
         for (int j = 0; j < nup; j++) {
-            ENT[i][j] = 0.001;
-            ENTi[i][j] = 0;
+            ent[i][j] = 0.001;
+            enti[i][j] = 0;
         }
     }
-    float maxw = 0.0;
-    float cloud_base = 9000.0;
+    maxw = 0.0;
+    cloud_base = 9000.0;
     for (int k = 0; k < kte-1; k++) {
         if (zw[k] > pblh + 500.) {
             break;
@@ -2706,25 +2707,25 @@ void dmp_mf(int kts, int kte, float dt, float* zw, float* dz, float* p, float* r
         if (w[k] < 0.) {
             wpbl = 2.*w[k];
         }
-        maxw = max(maxw, abs(wpbl));
+        maxw = std::max(maxw, float(abs(wpbl)));
         if (zw[k] <= 50.) {
             k50 = k;
         }
-        float qc_sgs = max(qc[k], qc_bl1d[k]);
-        if (qc_sgs > 1E-5 && cldfra_bl1d[k] >= 0.5 && cloud_base == 9000.0) {
+        float qc_sgs = std::max(qc[k], qc_bl1d[k]);
+        if (qc_sgs > 1e-5 && cldfra_bl1d[k] >= 0.5 && cloud_base == 9000.0) {
             cloud_base = 0.5*(zw[k]+zw[k+1]);
         }
     }
-    maxw = max(0., maxw - 1.0);
-    Psig_w = max(0.0, 1.0 - maxw);
-    Psig_w = min(Psig_w, Psig_shcu);
+    maxw = std::max(0.f, maxw - 1.0f);
+    psig_w = std::max(0.0f, 1.0f - maxw);
+    psig_w = std::min(psig_w, psig_shcu);
     fltv2 = fltv;
-    if (Psig_w == 0.0 && fltv > 0.0) {
+    if (psig_w == 0.0 && fltv > 0.0) {
         fltv2 = -1.*fltv;
     }
     superadiabatic = false;
-    float tvs = ts*(1.0+p608*qv[kts]);
-    for (int k = 0; k < max(1, k50-1); k++) {
+    tvs = ts*(1.0+p608*qv[kts]);
+    for (int k = 0; k < std::max(1, k50-1); k++) {
         if (k == 0) {
             if ((thv[k]-tvs)/(0.5*dz[k]) < hux) {
                 superadiabatic = true;
@@ -2741,32 +2742,31 @@ void dmp_mf(int kts, int kte, float dt, float* zw, float* dz, float* p, float* r
             }
         }
     }
-    float maxwidth = min(dx*dcut, lmax);
-    maxwidth = min(maxwidth, 1.1*PBLH);
+    maxwidth = std::min(dx*dcut, lmax);
+    maxwidth = std::min(maxwidth, 1.1f*pblh);
     if (landsea-1.5 < 0) {
-        maxwidth = min(maxwidth, 0.5*cloud_base);
+        maxwidth = std::min(maxwidth, 0.5f*cloud_base);
     } else {
-        maxwidth = min(maxwidth, 0.9*cloud_base);
+        maxwidth = std::min(maxwidth, 0.9f*cloud_base);
     }
-    float wspd_pbl = sqrt(max(u[kts]*u[kts] + v[kts]*v[kts], 0.01));
-    float width_flx;
+    wspd_pbl = sqrt(std::max(u[kts]*u[kts] + v[kts]*v[kts], 0.01f));
     if (landsea-1.5 < 0) {
-        width_flx = max(min(1000.*(0.6*tanh((fltv - 0.040)/0.04) + .5),1000.), 0.);
+        width_flx = std::max(std::min(1000.*(0.6*tanh((fltv - 0.040)/0.04) + .5),1000.), 0.);
     } else {
-        width_flx = max(min(1000.*(0.6*tanh((fltv - 0.007)/0.02) + .5),1000.), 0.);
+        width_flx = std::max(std::min(1000.*(0.6*tanh((fltv - 0.007)/0.02) + .5),1000.), 0.);
     }
-    maxwidth = min(maxwidth, width_flx);
-    float minwidth = lmin;
+    maxwidth = std::min(maxwidth, width_flx);
+    minwidth = lmin;
     if (maxwidth >= (lmax - 1.0) && fltv > 0.2) {
-        minwidth = lmin + dlmin*min((fltv-0.2)/0.3, 1.);
+        minwidth = lmin + dlmin*std::min((fltv-0.2)/0.3, 1.);
     }
     if (maxwidth <= minwidth) {
         nup2 = 0;
         maxwidth = 0.0;
     }
-    int ktop = 0;
-    float ztop = 0.0;
-    float maxmf = 0.0;
+    ktop = 0;
+    ztop = 0.0;
+    maxmf = 0.0;
     if (fltv2 > 0.002 && maxwidth > minwidth && superadiabatic) {
         float cn = 0.;
         float d = -1.9;
@@ -2775,7 +2775,7 @@ void dmp_mf(int kts, int kte, float dt, float* zw, float* dz, float* p, float* r
             float l = minwidth + dl*float(i);
             cn = cn + l*l*l * (l*l)/(dx*dx) * dl;
         }
-        float C = Atot/cn;
+        float c = atot/cn;
         float acfac;
         if (landsea-1.5 < 0) {
             acfac = 0.5*tanh((fltv2 - 0.02)/0.05) + 0.5;
@@ -2786,22 +2786,22 @@ void dmp_mf(int kts, int kte, float dt, float* zw, float* dz, float* p, float* r
         if (wspd_pbl <= 10.) {
             ac_wsp = 1.0;
         } else {
-            ac_wsp = 1.0 - min((wspd_pbl - 10.0)/15., 1.0);
+            ac_wsp = 1.0 - std::min((wspd_pbl - 10.0)/15., 1.0);
         }
         acfac = acfac * ac_wsp;
-        float An2 = 0.;
+        float an2 = 0.;
         for (int i = 0; i < nup; i++) {
             float l = minwidth + dl*float(i);
-            float N = C*l*l*l * (l*l)/(dx*dx) * dl;
-            UPA[kts][i] = N*l*l/(dx*dx) * dl;
-            UPA[kts][i] = UPA[kts][i]*acfac;
-            An2 = An2 + UPA[kts][i];
+            float n = c*l*l*l * (l*l)/(dx*dx) * dl;
+            upa[kts][i] = n*l*l/(dx*dx) * dl;
+            upa[kts][i] = upa[kts][i]*acfac;
+            an2 = an2 + upa[kts][i];
         }
         float z0 = 50.;
         float pwmin = 0.1;
         float pwmax = 0.4;
-        float wstar = max(1.E-2, pow(gtr*fltv2*pblh, 1./3.));
-        float qstar = max(flq, 1.0E-5)/wstar;
+        float wstar = std::max(1.e-2, pow(gtr*fltv2*pblh, 1./3.));
+        float qstar = std::max(flq, 1.0e-5f)/wstar;
         float thstar = flt/wstar;
         float csigma;
         if (landsea-1.5 >= 0) {
@@ -2820,167 +2820,169 @@ void dmp_mf(int kts, int kte, float dt, float* zw, float* dz, float* p, float* r
             }
         }
         exc_fac = exc_fac * ac_wsp;
-        float sigmaW = csigma*wstar*pow(z0/pblh, 1./3.)*(1 - 0.8*z0/pblh);
-        float sigmaQT = csigma*qstar*pow(z0/pblh, 1./3.);
-        float sigmaTH = csigma*thstar*pow(z0/pblh, 1./3.);
-        float wmin = min(sigmaW*pwmin, 0.1);
-        float wmax = min(sigmaW*pwmax, 0.5);
+        float sigmaw = csigma*wstar*pow(z0/pblh, 1./3.)*(1 - 0.8*z0/pblh);
+        float sigmaqt = csigma*qstar*pow(z0/pblh, 1./3.);
+        float sigmath = csigma*thstar*pow(z0/pblh, 1./3.);
+        float wmin = std::min(sigmaw*pwmin, 0.1f);
+        float wmax = std::min(sigmaw*pwmax, 0.5f);
         for (int i = 0; i < nup; i++) {
             float wlv = wmin+(wmax-wmin)/nup2*float(i);
-            UPW[kts][i] = wmin + float(i+1)/float(nup)*(wmax-wmin);
-            UPU[kts][i] = (U[kts]*dz[kts+1]+U[kts+1]*dz[kts])/(dz[kts]+dz[kts+1]);
-            UPV[kts][i] = (V[kts]*dz[kts+1]+V[kts+1]*dz[kts])/(dz[kts]+dz[kts+1]);
-            UPQC[kts][i] = 0.0;
-            float exc_heat = exc_fac*UPW[kts][i]*sigmaTH/sigmaW;
-            UPTHV[kts][i] = (thv[kts]*dz[kts+1]+thv[kts+1]*dz[kts])/(dz[kts]+dz[kts+1]) + exc_heat;
-            UPTHL[kts][i] = (THL[kts]*dz[kts+1]+THL[kts+1]*dz[kts])/(dz[kts]+dz[kts+1]) + exc_heat;
-            float exc_moist = exc_fac*UPW[kts][i]*sigmaQT/sigmaW;
-            UPQT[kts][i] = (QT[kts]*dz[kts+1]+QT[kts+1]*dz[kts])/(dz[kts]+dz[kts+1]) + exc_moist;
-            UPQKE[kts][i] = (QKE[kts]*dz[kts+1]+QKE[kts+1]*dz[kts])/(dz[kts]+dz[kts+1]);
-            UPQNC[kts][i] = (QNC[kts]*dz[kts+1]+QNC[kts+1]*dz[kts])/(dz[kts]+dz[kts+1]);
-            UPQNI[kts][i] = (QNI[kts]*dz[kts+1]+QNI[kts+1]*dz[kts])/(dz[kts]+dz[kts+1]);
-            UPQNWFA[kts][i] = (QNWFA[kts]*dz[kts+1]+QNWFA[kts+1]*dz[kts])/(dz[kts]+dz[kts+1]);
-            UPQNIFA[kts][i] = (QNIFA[kts]*dz[kts+1]+QNIFA[kts+1]*dz[kts])/(dz[kts]+dz[kts+1]);
-            UPQNBCA[kts][i] = (QNBCA[kts]*dz[kts+1]+QNBCA[kts+1]*dz[kts])/(dz[kts]+dz[kts+1]);
+            upw[kts][i] = wmin + float(i+1)/float(nup)*(wmax-wmin);
+            upu[kts][i] = (u[kts]*dz[kts+1]+u[kts+1]*dz[kts])/(dz[kts]+dz[kts+1]);
+            upv[kts][i] = (v[kts]*dz[kts+1]+v[kts+1]*dz[kts])/(dz[kts]+dz[kts+1]);
+            upqc[kts][i] = 0.0;
+            float exc_heat = exc_fac*upw[kts][i]*sigmath/sigmaw;
+            upthv[kts][i] = (thv[kts]*dz[kts+1]+thv[kts+1]*dz[kts])/(dz[kts]+dz[kts+1]) + exc_heat;
+            upthl[kts][i] = (thl[kts]*dz[kts+1]+thl[kts+1]*dz[kts])/(dz[kts]+dz[kts+1]) + exc_heat;
+            float exc_moist = exc_fac*upw[kts][i]*sigmaqt/sigmaw;
+            upqt[kts][i] = (qt[kts]*dz[kts+1]+qt[kts+1]*dz[kts])/(dz[kts]+dz[kts+1]) + exc_moist;
+            upqke[kts][i] = (qke[kts]*dz[kts+1]+qke[kts+1]*dz[kts])/(dz[kts]+dz[kts+1]);
+            upqnc[kts][i] = (qnc[kts]*dz[kts+1]+qnc[kts+1]*dz[kts])/(dz[kts]+dz[kts+1]);
+            upqni[kts][i] = (qni[kts]*dz[kts+1]+qni[kts+1]*dz[kts])/(dz[kts]+dz[kts+1]);
+            upqnwfa[kts][i] = (qnwfa[kts]*dz[kts+1]+qnwfa[kts+1]*dz[kts])/(dz[kts]+dz[kts+1]);
+            upqnifa[kts][i] = (qnifa[kts]*dz[kts+1]+qnifa[kts+1]*dz[kts])/(dz[kts]+dz[kts+1]);
+            upqnbca[kts][i] = (qnbca[kts]*dz[kts+1]+qnbca[kts+1]*dz[kts])/(dz[kts]+dz[kts+1]);
         }
         if (mix_chem) {
             for (int i = 0; i < nup; i++) {
                 for (int ic = 0; ic < nchem; ic++) {
-                    UPCHEM[kts][i][ic] = (chem1[kts][ic]*dz[kts+1]+chem1[kts+1][ic]*dz[kts])/(dz[kts]+dz[kts+1]);
+                    upchem[kts][i][ic] = (chem1[kts][ic]*dz[kts+1]+chem1[kts+1][ic]*dz[kts])/(dz[kts]+dz[kts+1]);
                 }
             }
         }
-        envm_thl[kts:kte] = THL[kts:kte];
-        envm_sqv[kts:kte] = QV[kts:kte];
-        envm_sqc[kts:kte] = QC[kts:kte];
-        envm_u[kts:kte] = U[kts:kte];
-        envm_v[kts:kte] = V[kts:kte];
+	for (int ii=kts;ii>=kte;ii++){
+            envm_thl[ii-kts] = thl[ii];
+            envm_sqv[ii-kts] = qv[ii];
+            envm_sqc[ii-kts] = qc[ii];
+            envm_u[ii-kts] = u[ii];
+            envm_v[ii-kts] = v[ii];
+	}
         for (int k = kts; k < kte-1; k++) {
             rhoz[k] = (rho[k]*dz[k+1]+rho[k+1]*dz[k])/(dz[k+1]+dz[k]);
         }
         rhoz[kte] = rho[kte];
-        dxsa = 1. - min(max((12000.0-dx)/(12000.0-3000.0), 0.), 1.);
+        dxsa = 1. - std::min(std::max((12000.0-dx)/(12000.0-3000.0), 0.), 1.);
         for (int i = 0; i < nup; i++) {
             float qc_ent = 0.0;
             int overshoot = 0;
             float l = minwidth + dl*float(i);
             for (int k = kts+1; k < kte-1; k++) {
                 float wmin = 0.3 + l*0.0005;
-                ENT[k][i] = 0.33/(min(max(UPW[k-1][i], wmin), 0.9)*l);
-                ENT[k][i] = max(ENT[k][i], 0.0003);
-                if (zw[k] >= min(pblh+1500., 4000.)) {
-                    ENT[k][i] = ENT[k][i] + (zw[k]-min(pblh+1500.,4000.))*5.0E-6;
+                ent[k][i] = 0.33/(std::min(std::max(upw[k-1][i], wmin), 0.9f)*l);
+                ent[k][i] = std::max(ent[k][i], 0.0003f);
+                if (zw[k] >= std::min(pblh+1500.f, 4000.f)) {
+                    ent[k][i] = ent[k][i] + (zw[k]-std::min(pblh+1500.,4000.))*5.0e-6;
                 }
-                ENT[k][i] = ENT[k][i] * (1.0 - rstoch_col[k]);
-                ENT[k][i] = min(ENT[k][i], 0.9/(zw[k+1]-zw[k]));
-                float Uk = (U[k]*dz[k+1]+U[k+1]*dz[k])/(dz[k+1]+dz[k]);
-                float Ukm1 = (U[k-1]*dz[k]+U[k]*dz[k-1])/(dz[k-1]+dz[k]);
-                float Vk = (V[k]*dz[k+1]+V[k+1]*dz[k])/(dz[k+1]+dz[k]);
-                float Vkm1 = (V[k-1]*dz[k]+V[k]*dz[k-1])/(dz[k-1]+dz[k]);
-                float EntExp = ENT[k][i]*(zw[k+1]-zw[k]);
-                float EntExm = EntExp*0.3333;
-                float QTn = UPQT[k-1][i]*(1.-EntExp) + qt[k]*EntExp;
-                float THLn = UPTHL[k-1][i]*(1.-EntExp) + THL[k]*EntExp;
-                float Un = UPU[k-1][i]*(1.-EntExm) + U[k]*EntExm + dxsa*pgfac*(Uk - Ukm1);
-                float Vn = UPV[k-1][i]*(1.-EntExm) + V[k]*EntExm + dxsa*pgfac*(Vk - Vkm1);
-                float qken = UPQKE[k-1][i]*(1.-EntExp) + qke[k]*EntExp;
-                float qncn = UPQNC[k-1][i]*(1.-EntExp) + qnc[k]*EntExp;
-                float qnin = UPQNI[k-1][i]*(1.-EntExp) + qni[k]*EntExp;
-                float qnwfan = UPQNWFA[k-1][i]*(1.-EntExp) + qnwfa[k]*EntExp;
-                float qnifan = UPQNIFA[k-1][i]*(1.-EntExp) + qnifa[k]*EntExp;
-                float qnbcan = UPQNBCA[k-1][i]*(1.-EntExp) + qnbca[k]*EntExp;
-                float qc_ent = QCn;
-                float qt_ent = QTn;
-                float thl_ent = THLn;
+                ent[k][i] = ent[k][i] * (1.0 - rstoch_col[k]);
+                ent[k][i] = std::min(ent[k][i], 0.9f/(zw[k+1]-zw[k]));
+                float uk = (u[k]*dz[k+1]+u[k+1]*dz[k])/(dz[k+1]+dz[k]);
+                float ukm1 = (u[k-1]*dz[k]+u[k]*dz[k-1])/(dz[k-1]+dz[k]);
+                float vk = (v[k]*dz[k+1]+v[k+1]*dz[k])/(dz[k+1]+dz[k]);
+                float vkm1 = (v[k-1]*dz[k]+v[k]*dz[k-1])/(dz[k-1]+dz[k]);
+                float entexp = ent[k][i]*(zw[k+1]-zw[k]);
+                float entexm = entexp*0.3333;
+                float qtn = upqt[k-1][i]*(1.-entexp) + qt[k]*entexp;
+                float thln = upthl[k-1][i]*(1.-entexp) + thl[k]*entexp;
+                float un = upu[k-1][i]*(1.-entexm) + u[k]*entexm + dxsa*pgfac*(uk - ukm1);
+                float vn = upv[k-1][i]*(1.-entexm) + v[k]*entexm + dxsa*pgfac*(vk - vkm1);
+                float qken = upqke[k-1][i]*(1.-entexp) + qke[k]*entexp;
+                float qncn = upqnc[k-1][i]*(1.-entexp) + qnc[k]*entexp;
+                float qnin = upqni[k-1][i]*(1.-entexp) + qni[k]*entexp;
+                float qnwfan = upqnwfa[k-1][i]*(1.-entexp) + qnwfa[k]*entexp;
+                float qnifan = upqnifa[k-1][i]*(1.-entexp) + qnifa[k]*entexp;
+                float qnbcan = upqnbca[k-1][i]*(1.-entexp) + qnbca[k]*entexp;
+                float qc_ent = qcn;
+                float qt_ent = qtn;
+                float thl_ent = thln;
                 if (mix_chem) {
                     for (int ic = 0; ic < nchem; ic++) {
-                        chemn[ic] = UPCHEM[k-1][i][ic]*(1.-EntExp) + chem1[k][ic]*EntExp;
+                        chemn[ic] = upchem[k-1][i][ic]*(1.-entexp) + chem1[k][ic]*entexp;
                     }
                 }
-                float Pk = (p[k]*dz[k+1]+p[k+1]*dz[k])/(dz[k+1]+dz[k]);
-//                condensation_edmf_cc(QTn, THLn, Pk, zw[k+1], THVn, QCn);
-                float THVk = (thv[k]*dz[k+1]+thv[k+1]*dz[k])/(dz[k+1]+dz[k]);
-                float THVkm1 = (thv[k-1]*dz[k]+thv[k]*dz[k-1])/(dz[k-1]+dz[k]);
-                float B = grav*(THVn/THVk - 1.0);
-                if (B > 0.) {
-                    BCOEFF = 0.15;
+                float pk = (p[k]*dz[k+1]+p[k+1]*dz[k])/(dz[k+1]+dz[k]);
+//                condensation_edmf_cc(qtn, thln, pk, zw[k+1], thvn, qcn);
+                float thvk = (thv[k]*dz[k+1]+thv[k+1]*dz[k])/(dz[k+1]+dz[k]);
+                float thvkm1 = (thv[k-1]*dz[k]+thv[k]*dz[k-1])/(dz[k-1]+dz[k]);
+                float b = grav*(thvn/thvk - 1.0);
+                if (b > 0.) {
+                    bcoeff = 0.15;
                 } else {
-                    BCOEFF = 0.2;
+                    bcoeff = 0.2;
                 }
-                if (UPW[k-1][i] < 0.2) {
-                    Wn = UPW[k-1][i] + (-2. * ENT[k][i] * UPW[k-1][i] + BCOEFF*B / max(UPW[k-1][i], 0.2)) * min(zw[k]-zw[k-1], 250.);
+                if (upw[k-1][i] < 0.2) {
+                    wn = upw[k-1][i] + (-2. * ent[k][i] * upw[k-1][i] + bcoeff*b / std::max(upw[k-1][i], 0.2f)) * std::min(zw[k]-zw[k-1], 250.f);
                 } else {
-                    Wn = UPW[k-1][i] + (-2. * ENT[k][i] * UPW[k-1][i] + BCOEFF*B / UPW[k-1][i]) * min(zw[k]-zw[k-1], 250.);
+                    wn = upw[k-1][i] + (-2. * ent[k][i] * upw[k-1][i] + bcoeff*b / upw[k-1][i]) * std::min(zw[k]-zw[k-1], 250.f);
                 }
-                if (Wn > UPW[k-1][i] + min(1.25*(zw[k]-zw[k-1])/200., 2.0)) {
-                    Wn = UPW[k-1][i] + min(1.25*(zw[k]-zw[k-1])/200., 2.0);
+                if (wn > upw[k-1][i] + std::min(1.25*(zw[k]-zw[k-1])/200., 2.0)) {
+                    wn = upw[k-1][i] + std::min(1.25*(zw[k]-zw[k-1])/200., 2.0);
                 }
-                if (Wn < UPW[k-1][i] - min(1.25*(zw[k]-zw[k-1])/200., 2.0)) {
-                    Wn = UPW[k-1][i] - min(1.25*(zw[k]-zw[k-1])/200., 2.0);
+                if (wn < upw[k-1][i] - std::min(1.25*(zw[k]-zw[k-1])/200., 2.0)) {
+                    wn = upw[k-1][i] - std::min(1.25*(zw[k]-zw[k-1])/200., 2.0);
                 }
-                Wn = min(max(Wn, 0.0), 3.0);
-                if (k == kts+1 && Wn == 0.) {
+                wn = std::min(std::max(wn, 0.0f), 3.0f);
+                if (k == kts+1 && wn == 0.) {
                     nup2 = 0;
                     break;
                 }
                 if (debug_mf == 1) {
-                    if (Wn >= 3.0) {
-			std::cout << "**** SUSPICIOUSLY LARGE W:" << std::endl;
-			std::cout << "QCn: " << QCn << " ENT: " << ENT[k][i] << " Nup2: " << nup2 << std::endl;
-			std::cout << "pblh: " << pblh << " Wn: " << Wn << " UPW(k-1): " << UPW[k-1][i] << std::endl;
-			std::cout << "K: " << k << " B: " << B << " dz: " << zw[k]-zw[k-1] << std::endl;
+                    if (wn >= 3.0) {
+			std::cout << "**** suspiciously large w:" << std::endl;
+			std::cout << "qcn: " << qcn << " ent: " << ent[k][i] << " nup2: " << nup2 << std::endl;
+			std::cout << "pblh: " << pblh << " wn: " << wn << " upw(k-1): " << upw[k-1][i] << std::endl;
+			std::cout << "k: " << k << " b: " << b << " dz: " << zw[k]-zw[k-1] << std::endl;
                     }
                 }
-                if (Wn <= 0.0 && overshoot == 0) {
+                if (wn <= 0.0 && overshoot == 0) {
                     overshoot = 1;
-                    if (THVk-THVkm1 > 0.0) {
-                        float bvf = sqrt(gtr*(THVk-THVkm1)/dz[k]);
-                        float Frz = UPW[k-1][i]/(bvf*dz[k]);
-                        dzp = dz[k]*max(min(Frz, 1.0), 0.0);
+                    if (thvk-thvkm1 > 0.0) {
+                        float bvf = sqrt(gtr*(thvk-thvkm1)/dz[k]);
+                        float frz = upw[k-1][i]/(bvf*dz[k]);
+                        dzp = dz[k]*std::max(std::min(frz, 1.0f), 0.0f);
                     }
                 } else {
                     dzp = dz[k];
                 }
-                float aratio = min(UPA[k-1][i]/(1.-UPA[k-1][i]), 0.5);
+                float aratio = std::min(upa[k-1][i]/(1.f-upa[k-1][i]), 0.5f);
                 float detturb = 0.00008;
-                float oow = -0.060/max(1.0, (0.5*(Wn+UPW[k-1][i])));
-                float detrate = min(max(oow*(Wn-UPW[k-1][i])/dz[k], detturb), 0.0002);
-                float detrateUV = min(max(oow*(Wn-UPW[k-1][i])/dz[k], detturb), 0.0001);
-                envm_thl[k] = envm_thl[k] + (0.5*(thl_ent + UPTHL[k-1][i]) - thl[k])*detrate*aratio*min(dzp, dzpmax);
-                float qv_ent = 0.5*(max(qt_ent-qc_ent, 0.0) + max(UPQT[k-1][i]-UPQC[k-1][i], 0.0));
-                envm_sqv[k] = envm_sqv[k] + (qv_ent-QV[k])*detrate*aratio*min(dzp, dzpmax);
-                if (UPQC[k-1][i] > 1E-8) {
+                float oow = -0.060/std::max(1.0f, (0.5f*(wn+upw[k-1][i])));
+                float detrate = std::min(std::max(oow*(wn-upw[k-1][i])/dz[k], detturb), 0.0002f);
+                float detrateuv = std::min(std::max(oow*(wn-upw[k-1][i])/dz[k], detturb), 0.0001f);
+                envm_thl[k-kts] = envm_thl[k-kts] + (0.5*(thl_ent + upthl[k-1][i]) - thl[k])*detrate*aratio*std::min(dzp, dzpmax);
+                float qv_ent = 0.5*(std::max(qt_ent-qc_ent, 0.0f) + std::max(upqt[k-1][i]-upqc[k-1][i], 0.0f));
+                envm_sqv[k-kts] = envm_sqv[k] + (qv_ent-qv[k])*detrate*aratio*std::min(dzp, dzpmax);
+                if (upqc[k-1][i] > 1e-8) {
                     float qc_grid;
-                    if (QC[k] > 1E-6) {
-                        qc_grid = QC[k];
+                    if (qc[k] > 1e-6) {
+                        qc_grid = qc[k];
                     } else {
                         qc_grid = cldfra_bl1d[k]*qc_bl1d[k];
                     }
-                    envm_sqc[k] = envm_sqc[k] + max(UPA[k-1][i]*0.5*(QCn + UPQC[k-1][i]) - qc_grid, 0.0)*detrate*aratio*min(dzp, dzpmax);
+                    envm_sqc[k-kts] = envm_sqc[k-kts] + std::max(upa[k-1][i]*0.5*(qcn + upqc[k-1][i]) - qc_grid, 0.0)*detrate*aratio*std::min(dzp, dzpmax);
                 }
-                envm_u[k] = envm_u[k] + (0.5*(Un + UPU[k-1][i]) - U[k])*detrateUV*aratio*min(dzp, dzpmax);
-                envm_v[k] = envm_v[k] + (0.5*(Vn + UPV[k-1][i]) - V[k])*detrateUV*aratio*min(dzp, dzpmax);
-                if (Wn > 0.) {
-                    UPW[k][i] = Wn;
-                    UPTHV[k][i] = THVn;
-                    UPTHL[k][i] = THLn;
-                    UPQT[k][i] = QTn;
-                    UPQC[k][i] = QCn;
-                    UPU[k][i] = Un;
-                    UPV[k][i] = Vn;
-                    UPQKE[k][i] = QKEn;
-                    UPQNC[k][i] = QNCn;
-                    UPQNI[k][i] = QNIn;
-                    UPQNWFA[k][i] = QNWFAn;
-                    UPQNIFA[k][i] = QNIFAn;
-                    UPQNBCA[k][i] = QNBCAn;
-                    UPA[k][i] = UPA[k-1][i];
+                envm_u[k] = envm_u[k] + (0.5*(un + upu[k-1][i]) - u[k])*detrateuv*aratio*std::min(dzp, dzpmax);
+                envm_v[k] = envm_v[k] + (0.5*(vn + upv[k-1][i]) - v[k])*detrateuv*aratio*std::min(dzp, dzpmax);
+                if (wn > 0.) {
+                    upw[k][i] = wn;
+                    upthv[k][i] = thvn;
+                    upthl[k][i] = thln;
+                    upqt[k][i] = qtn;
+                    upqc[k][i] = qcn;
+                    upu[k][i] = un;
+                    upv[k][i] = vn;
+                    upqke[k][i] = qken;
+                    upqnc[k][i] = qncn;
+                    upqni[k][i] = qnin;
+                    upqnwfa[k][i] = qnwfan;
+                    upqnifa[k][i] = qnifan;
+                    upqnbca[k][i] = qnbcan;
+                    upa[k][i] = upa[k-1][i];
                     if (mix_chem) {
                         for (int ic = 0; ic < nchem; ic++) {
-                            UPCHEM[k][i][ic] = chemn[ic];
+                            upchem[k][i][ic] = chemn[ic];
                         }
                     }
-                    ktop = max(ktop, k);
+                    ktop = std::max(ktop, k);
                 } else {
                     break;
                 }
@@ -2988,28 +2990,28 @@ void dmp_mf(int kts, int kte, float dt, float* zw, float* dz, float* p, float* r
         if (debug_mf == 1) {
 	    bool print_mf=false;
 	    for (int ii=kts;ii>=kte;ii++){
-            if (UPW[ii][i] > 10.0 || UPA[ii][i] < 0.0 || UPA[ii][i] > Atot || nup2 > 10)
+            if (upw[ii][i] > 10.0 || upa[ii][i] < 0.0 || upa[ii][i] > atot || nup2 > 10)
 	    {
                print_mf=true;
 	    }
 	    }
 	    if (print_mf)
 	    {
-		std::cout << "flq: " << flq << " fltv: " << fltv << " Nup2: " << nup2 << std::endl;
+		std::cout << "flq: " << flq << " fltv: " << fltv << " nup2: " << nup2 << std::endl;
 		std::cout << "pblh: " << pblh << " wstar: " << wstar << " ktop: " << ktop << std::endl;
-		std::cout << "sigmaW: " << sigmaW << " sigmaTH: " << sigmaTH << " sigmaQT: " << sigmaQT << std::endl;
+		std::cout << "sigmaw: " << sigmaw << " sigmath: " << sigmath << " sigmaqt: " << sigmaqt << std::endl;
 		std::cout << "u: " << u << std::endl;
 		std::cout << "v: " << v << std::endl;
 		std::cout << "thl: " << thl << std::endl;
-		for(int ii=kts;ii>=kte;ii++) std::cout << "UPA: " << UPA[ii][i] ;
+		for(int ii=kts;ii>=kte;ii++) std::cout << "upa: " << upa[ii][i] ;
 		std::cout<< std::endl;
-		for(int ii=kts;ii>=kte;ii++) std::cout << "UPW: " << UPW[ii][i];
+		for(int ii=kts;ii>=kte;ii++) std::cout << "upw: " << upw[ii][i];
 		std::cout<< std::endl;
-		for(int ii=kts;ii>=kte;ii++) std::cout << "UPTHL: " << UPTHL[ii][i];
+		for(int ii=kts;ii>=kte;ii++) std::cout << "upthl: " << upthl[ii][i];
 		std::cout<< std::endl;
-		for(int ii=kts;ii>=kte;ii++) std::cout << "UPQT: " << UPQT[ii][i];
+		for(int ii=kts;ii>=kte;ii++) std::cout << "upqt: " << upqt[ii][i];
 		std::cout<< std::endl;
-		for(int ii=kts;ii>=kte;ii++) std::cout << "ENT: " << ENT[ii][i];
+		for(int ii=kts;ii>=kte;ii++) std::cout << "ent: " << ent[ii][i];
 		std::cout<< std::endl;
 		}
             }
@@ -3017,7 +3019,7 @@ void dmp_mf(int kts, int kte, float dt, float* zw, float* dz, float* p, float* r
     } else {
         nup2 = 0;
     }
-    ktop = min(ktop, kte-1);
+    ktop = std::min(ktop, kte-1);
     if (ktop == 0) {
         ztop = 0.0;
     } else {
@@ -3026,26 +3028,26 @@ void dmp_mf(int kts, int kte, float dt, float* zw, float* dz, float* p, float* r
   if (nup2 > 0) {
         for (int i = 0; i < nup; i++) {
             for (int k = kts; k <= kte-1; k++) {
-                s_aw[k+1] += rhoz[k]*UPA[k][i]*UPW[k][i]*Psig_w;
-                s_awthl[k+1] += rhoz[k]*UPA[k][i]*UPW[k][i]*UPTHL[k][i]*Psig_w;
-                s_awqt[k+1] += rhoz[k]*UPA[k][i]*UPW[k][i]*UPQT[k][i]*Psig_w;
-                qc_plume = UPQC[k][i];
-                s_awqc[k+1] += rhoz[k]*UPA[k][i]*UPW[k][i]*qc_plume*Psig_w;
+                s_aw[k+1] += rhoz[k]*upa[k][i]*upw[k][i]*psig_w;
+                s_awthl[k+1] += rhoz[k]*upa[k][i]*upw[k][i]*upthl[k][i]*psig_w;
+                s_awqt[k+1] += rhoz[k]*upa[k][i]*upw[k][i]*upqt[k][i]*psig_w;
+                qc_plume = upqc[k][i];
+                s_awqc[k+1] += rhoz[k]*upa[k][i]*upw[k][i]*qc_plume*psig_w;
                 s_awqv[k+1] = s_awqt[k+1] - s_awqc[k+1];
             }
         }
         if (momentum_opt > 0) {
             for (int i = 0; i < nup; i++) {
                 for (int k = kts; k <= kte-1; k++) {
-                    s_awu[k+1] += rhoz[k]*UPA[k][i]*UPW[k][i]*UPU[k][i]*Psig_w;
-                    s_awv[k+1] += rhoz[k]*UPA[k][i]*UPW[k][i]*UPV[k][i]*Psig_w;
+                    s_awu[k+1] += rhoz[k]*upa[k][i]*upw[k][i]*upu[k][i]*psig_w;
+                    s_awv[k+1] += rhoz[k]*upa[k][i]*upw[k][i]*upv[k][i]*psig_w;
                 }
             }
         }
         if (tke_opt > 0) {
             for (int i = 0; i < nup; i++) {
                 for (int k = kts; k <= kte-1; k++) {
-                    s_awqke[k+1] += rhoz[k]*UPA[k][i]*UPW[k][i]*UPQKE[k][i]*Psig_w;
+                    s_awqke[k+1] += rhoz[k]*upa[k][i]*upw[k][i]*upqke[k][i]*psig_w;
                 }
             }
         }
@@ -3053,7 +3055,7 @@ void dmp_mf(int kts, int kte, float dt, float* zw, float* dz, float* p, float* r
             for (int k = kts; k <= kte; k++) {
                 for (int i = 0; i < nup; i++) {
                     for (int ic = 0; ic < nchem; ic++) {
-                        s_awchem[k+1][ic] += rhoz[k]*UPA[k][i]*UPW[k][i]*UPCHEM[k][i][ic]*Psig_w;
+                        s_awchem[k+1][ic] += rhoz[k]*upa[k][i]*upw[k][i]*upchem[k][i][ic]*psig_w;
                     }
                 }
             }
@@ -3061,22 +3063,22 @@ void dmp_mf(int kts, int kte, float dt, float* zw, float* dz, float* p, float* r
         if (scalar_opt > 0) {
             for (int k = kts; k <= kte; k++) {
                 for (int i = 0; i < nup; i++) {
-                    s_awqnc[k+1] += rhoz[k]*UPA[k][i]*UPW[k][i]*UPQNC[k][i]*Psig_w;
-                    s_awqni[k+1] += rhoz[k]*UPA[k][i]*UPW[k][i]*UPQNI[k][i]*Psig_w;
-                    s_awqnwfa[k+1] += rhoz[k]*UPA[k][i]*UPW[k][i]*UPQNWFA[k][i]*Psig_w;
-                    s_awqnifa[k+1] += rhoz[k]*UPA[k][i]*UPW[k][i]*UPQNIFA[k][i]*Psig_w;
-                    s_awqnbca[k+1] += rhoz[k]*UPA[k][i]*UPW[k][i]*UPQNBCA[k][i]*Psig_w;
+                    s_awqnc[k+1] += rhoz[k]*upa[k][i]*upw[k][i]*upqnc[k][i]*psig_w;
+                    s_awqni[k+1] += rhoz[k]*upa[k][i]*upw[k][i]*upqni[k][i]*psig_w;
+                    s_awqnwfa[k+1] += rhoz[k]*upa[k][i]*upw[k][i]*upqnwfa[k][i]*psig_w;
+                    s_awqnifa[k+1] += rhoz[k]*upa[k][i]*upw[k][i]*upqnifa[k][i]*psig_w;
+                    s_awqnbca[k+1] += rhoz[k]*upa[k][i]*upw[k][i]*upqnbca[k][i]*psig_w;
                 }
             }
         }
     }
     if (s_aw[kts+1] != 0.0) {
         dzi[kts] = 0.5*(dz[kts] + dz[kts+1]);
-        flx1 = std::max(s_aw[kts+1]*(TH[kts] - TH[kts+1])/dzi[kts], 1.0e-5);
+        flx1 = std::max(s_aw[kts+1]*(th[kts] - th[kts+1])/dzi[kts], 1.0e-5f);
     } else {
         flx1 = 0.0;
     }
-    float adjustment = 1.0;
+    adjustment = 1.0;
     if (flx1 > fluxportion*flt/dz[kts] && flx1 > 0.0) {
         adjustment = fluxportion*flt/dz[kts]/flx1;
         for (int k = kts+1; k <= kte; k++) {
@@ -3105,16 +3107,18 @@ void dmp_mf(int kts, int kte, float dt, float* zw, float* dz, float* p, float* r
             }
         }
         for (int k = kts; k <= kte-1; k++) {
-            UPA[k] *= adjustment;
+            *upa[k] *= adjustment;
         }
     }
     for (int k = kts; k <= kte-1; k++) {
-        edmf_a[k] += UPA[k];
-        edmf_w[k] += rhoz[k]*UPA[k]*UPW[k];
-        edmf_qt[k] += rhoz[k]*UPA[k]*UPQT[k];
-        edmf_thl[k] += rhoz[k]*UPA[k]*UPTHL[k];
-        edmf_ent[k] += rhoz[k]*UPA[k]*ENT[k];
-        edmf_qc[k] += rhoz[k]*UPA[k]*UPQC[k];
+	for (int i = 1; i<=nup; i++){
+            edmf_a[k] += *upa[k,i];
+            edmf_w[k] += rhoz[k]*(*upa[k,i])*(*upw[k,i]);
+            edmf_qt[k] += rhoz[k]*(*upa[k,i])*(*upqt[k,i]);
+            edmf_thl[k] += rhoz[k]*(*upa[k,i])*(*upthl[k,i]);
+            edmf_ent[k] += rhoz[k]*(*upa[k,i])*(*ent[k,i]);
+            edmf_qc[k] += rhoz[k] *(* upa[k,i]) * (*upqc[k,i]);
+	}
     }
     for (int k = kts; k <= kte-1; k++) {
         if (edmf_a[k] > 0.0) {
@@ -3123,7 +3127,7 @@ void dmp_mf(int kts, int kte, float dt, float* zw, float* dz, float* p, float* r
             edmf_thl[k] /= edmf_a[k];
             edmf_ent[k] /= edmf_a[k];
             edmf_qc[k] /= edmf_a[k];
-            edmf_a[k] *= Psig_w;
+            edmf_a[k] *= psig_w;
             if (edmf_a[k]*edmf_w[k] > maxmf) {
                 maxmf = edmf_a[k]*edmf_w[k];
             }
@@ -3131,8 +3135,10 @@ void dmp_mf(int kts, int kte, float dt, float* zw, float* dz, float* p, float* r
     }
     if (mix_chem) {
         for (int k = kts; k <= kte-1; k++) {
-            for (int ic = 0; ic < nchem; ic++) {
-                edmf_chem[k][ic] += rhoz[k]*UPA[k][i]*UPCHEM[k][i][ic];
+	    for (int i = 1; i<=nup;i++){
+                for (int ic = 0; ic < nchem; ic++) {
+                    edmf_chem[k][ic] += rhoz[k]*upa[k][i]*upchem[k][i][ic];
+		}
             }
         }
         for (int k = kts; k <= kte-1; k++) {
@@ -3144,7 +3150,12 @@ void dmp_mf(int kts, int kte, float dt, float* zw, float* dz, float* p, float* r
         }
     }
     if (ktop > 0) {
-        maxqc = maxval(edmf_qc[0:ktop-1]);
+	float maxqc=0;
+        for (int ii=0;ii > ktop; ii++){
+		if (edmf_qc[ii]>maxqc){
+		    maxqc = edmf_qc[ii];
+		}
+	}
         if (maxqc < 1.0e-8) {
             maxmf = -1.0*maxmf;
         }
@@ -3152,7 +3163,7 @@ void dmp_mf(int kts, int kte, float dt, float* zw, float* dz, float* p, float* r
     if (edmf_w[0] > 4.0) {
         std::cout << "flq: " << flq << " fltv: " << fltv2 << std::endl;
         std::cout << "pblh: " << pblh << " wstar: " << wstar << std::endl;
-        std::cout << "sigmaW: " << sigmaW << " sigmaTH: " << sigmaTH << " sigmaQT: " << sigmaQT << std::endl;
+        std::cout << "sigmaw: " << sigmaw << " sigmath: " << sigmath << " sigmaqt: " << sigmaqt << std::endl;
         std::cout << "edmf_a: ";
         for (int i = 0; i < 14; i++) {
             std::cout << edmf_a[i] << " ";
@@ -3175,7 +3186,7 @@ void dmp_mf(int kts, int kte, float dt, float* zw, float* dz, float* p, float* r
         std::cout << std::endl;
     }
 }
-*/
+
 
 
 

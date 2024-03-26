@@ -476,6 +476,64 @@ SUBROUTINE mynn_tendencies_cc(kts,kte,delt,dz,rho,              &
         real(kind=c_float), intent(out) :: Psig_bl,Psig_shcu
     END SUBROUTINE scale_aware_cc
 
+  SUBROUTINE dmp_mf_cc(                            &
+                 & kts,kte,dt,zw,dz,p,rho,      &
+                 & momentum_opt,                &
+                 & tke_opt,                     &
+                 & scalar_opt,                  &
+                 & u,v,w,th,thl,thv,tk,         &
+                 & qt,qv,qc,qke,                &
+                 & qnc,qni,qnwfa,qnifa,qnbca,   &
+                 & ust,flt,fltv,flq,flqv,       &
+                 & pblh,kpbl,dx,landsea,ts,     &
+            ! outputs - updraft properties
+                 & edmf_a,edmf_w,               &
+                 & edmf_qt,edmf_thl,            &
+                 & edmf_ent,edmf_qc,            &
+            ! outputs - variables needed for solver
+                 & s_aw,s_awthl,s_awqt,         &
+                 & s_awqv,s_awqc,               &
+                 & s_awu,s_awv,s_awqke,         &
+                 & s_awqnc,s_awqni,             &
+                 & s_awqnwfa,s_awqnifa,s_awqnbca, &
+            ! chem/smoke
+                 & nchem,chem1,s_awchem,        &
+                 & mix_chem,                    &
+            ! in/outputs - subgrid scale clouds
+                 & qc_bl1d,cldfra_bl1d,         &
+                 & qc_bl1D_old,cldfra_bl1D_old, &
+            ! output info
+                 & maxwidth,ktop,maxmf,ztop,    &
+            ! inputs for stochastic perturbations
+                 & spp_pbl,rstoch_col,grav,gtr, &
+                 & p608   ) bind(c)
+         import c_float, c_int
+  ! inputs:
+     integer(kind=c_int), intent(in) :: kts,kte,kpbl,momentum_opt,tke_opt,scalar_opt
+! Stochastic
+     integer(kind=c_int),intent(in)  :: spp_pbl,mix_chem,nchem
+     real(kind=c_float), dimension(kts:kte)  :: rstoch_col
+
+     real(kind=c_float),dimension(kts:kte), intent(in) ::                 &
+          &U,V,W,TH,THL,TK,QT,QV,QC,                                   &
+          &dz,THV,P,rho,qke,qnc,qni,qnwfa,qnifa,qnbca
+     real(kind=c_float),dimension(kts:kte+1), intent(in) :: zw    !height at full-sigma
+     real(kind=c_float), intent(in) :: flt,fltv,flq,flqv,              &
+          &landsea,ts,dx,dt,ust,pblh, grav, gtr, p608
+     real(kind=c_float),dimension(kts:kte), intent(out) :: edmf_a,edmf_w, &
+          & edmf_qt,edmf_thl,edmf_ent,edmf_qc
+     integer(kind=c_int), intent(out) :: ktop 
+     real(kind=c_float), intent(out) :: maxmf,ztop,maxwidth
+     real(kind=c_float),dimension(kts:kte), intent(inout) ::            &
+          &qc_bl1d,cldfra_bl1d,qc_bl1d_old,cldfra_bl1d_old
+     real(kind=c_float),dimension(kts:kte+1,nchem), intent(in) :: s_aw, & !sum ai*rho*wis_awphi
+          &s_awthl,s_awqt,s_awqv,s_awqc,s_awqnc,s_awqni,s_awqke,        &
+          &s_awqnwfa,s_awqnifa,s_awqnbca,s_awu,s_awv,s_awchem          
+     real(kind=c_float), dimension(kts:kte,nchem), intent(in) :: chem1
+
+ END SUBROUTINE dmp_mf_cc
+
+
  end interface
 
 
@@ -617,7 +675,7 @@ CONTAINS
 ! SGT: Changed this to use assumed shape arrays (dimension(:,:,:)) with no "optional" arguments
 !      to prevent a crash on Cheyenne. Do not change it back without testing if the code runs
 !      on Cheyenne with the GNU compiler.
-    integer :: enh_mix_in 
+    integer :: enh_mix_in, mix_chem_i
     real(kind_phys), intent(in) :: delt
     real(kind_phys), dimension(ims:ime),   intent(in) :: dx
     real(kind_phys), dimension(ims:ime,kms:kme), intent(in) :: dz,              &
@@ -692,7 +750,7 @@ CONTAINS
     real(kind_phys), dimension(kts:kte) ::                  &
          &thl,tl,qv1,qc1,qi1,qs1,sqw,                       &
          &el, dfm, dfh, dfq, tcd, qcd, pdk, pdt, pdq, pdc,  &
-         &vt, vq, sgm, kzero
+         &sgm, kzero, vq, vt
     real(kind_phys), dimension(kts:kte) ::                  &
          &thetav,sh,sm,u1,v1,w1,p1,                         &
          &ex1,dz1,th1,tk1,rho1,qke1,tsq1,qsq1,cov1,         &
@@ -1305,7 +1363,12 @@ CONTAINS
     write(*,*) "mynn 6"
        if (bl_mynn_edmf > 0) then
           !PRINT*,"Calling DMP Mass-Flux: i= ",i
-          call DMP_mf(                                   &
+          if(mix_chem .eqv. .true.) then
+              mix_chem_i=1
+          else
+              mix_chem_i=0
+          endif
+          call dmp_mf_cc(                                   &
                &kts,kte,delt,zw,dz1,p1,rho1,             &
                &bl_mynn_edmf_mom,                        &
                &bl_mynn_edmf_tke,                        &
@@ -1313,7 +1376,6 @@ CONTAINS
                &u1,v1,w1,th1,thl,thetav,tk1,             &
                &sqw,sqv,sqc,qke1,                        &
                &qnc1,qni1,qnwfa1,qnifa1,qnbca1,          &
-               &ex1,Vt,Vq,sgm,                           &
                &ust(i),flt,fltv,flq,flqv,                &
                &PBLH(i),KPBL(i),DX(i),                   &
                &xland(i),th_sfc,                         &
@@ -1328,22 +1390,14 @@ CONTAINS
                &s_awu1,s_awv1,s_awqke1,                  &
                &s_awqnc1,s_awqni1,                       &
                &s_awqnwfa1,s_awqnifa1,s_awqnbca1,        &
-               &sub_thl,sub_sqv,                         &
-               &sub_u,sub_v,                             &
-               &det_thl,det_sqv,det_sqc,                 &
-               &det_u,det_v,                             &
             ! chem/smoke mixing
                &nchem,chem1,s_awchem1,                   &
-               &mix_chem,                                &
+               &mix_chem_i,                                &
                &qc_bl1D,cldfra_bl1D,                     &
                &qc_bl1D_old,cldfra_bl1D_old,             &
-               &FLAG_QC,FLAG_QI,                         &
-               &FLAG_QNC,FLAG_QNI,                       &
-               &FLAG_QNWFA,FLAG_QNIFA,FLAG_QNBCA,        &
-               &Psig_shcu(i),                            &
                &maxwidth(i),ktop_plume(i),               &
                &maxmf(i),ztop_plume(i),                  &
-               &spp_pbl,rstoch_col                       )
+               &spp_pbl,rstoch_col, grav, gtr, p608      )
        endif
 
     write(*,*) "mynn 7"
