@@ -24,10 +24,13 @@ extern "C" void scale_aware_cc(float dx, float pbl1, float& psig_bl, float& psig
 
 extern "C" void get_pblh_cc(int kts, int kte, float& zi, const std::vector<float>& thetav1d, const std::vector<float>& qke1d, const std::vector<float>& zw1d, const std::vector<float>& dz1d, float landsea, int kzi);
 
-extern "C" void retrieve_exchange_coeffs(int kts, int kte, const std::vector<float>& dfm, const std::vector<float>& dfh, const std::vector<float>& dz, std::vector<float>& k_m, std::vector<float>& k_h);
+extern "C" void retrieve_exchange_coeffs_cc(int kts, int kte, const std::vector<float>& dfm, const std::vector<float>& dfh, const std::vector<float>& dz, std::vector<float>& k_m, std::vector<float>& k_h);
 
 extern "C" void dmp_mf_cc(int kts, int kte, float dt, float* zw, float* dz, float* p, float* rho, int momentum_opt, int tke_opt, int scalar_opt, float* u, float* v, float* w, float* th, float* thl, float* thv, float* tk, float* qt, float* qv, float* qc, float* qke, float* qnc, float* qni, float* qnwfa, float* qnifa, float* qnbca, float ust, float flt, float fltv, float flq, float flqv, float pblh, float kpbl, float dx, float landsea, float ts, float* edmf_a, float* edmf_w, float* edmf_qt, float* edmf_thl, float* edmf_ent, float* edmf_qc, float* s_aw, float* s_awthl, float* s_awqt, float* s_awqv, float* s_awqc, float* s_awu, float* s_awv, float* s_awqke, float* s_awqnc, float* s_awqni, float* s_awqnwfa, float* s_awqnifa, float* s_awqnbca, int nchem, float** chem1, float** s_awchem, bool mix_chem, float* qc_bl1d, float* cldfra_bl1d, float* qc_bl1d_old, float* cldfra_bl1d_old, float psig_shcu, float maxwidth, int ktop, float maxmf, float ztop, float* rstoch_col, float grav, float gtr, float p608);
-	
+
+extern "C" void mym_turbulence_cc(int kts, int kte, float xland, float closure, float* dz, float* dx, float* zw, float* u, float* v, float* thl, float* thetav, float* ql, float* qw, float* qke, float* tsq, float* qsq, float* cov, float* vt, float* vq, float sgm, float rmo, float flt, float fltv, float flq, float zi, float* theta, float* sh, float* sm, float* el, float* dfm, float* dfh, float* dfq, float* tcd, float* qcd, float* pdk, float* pdt, float* pdq, float* pdc, float* qWT1D, float* qSHEAR1D, float* qBUOY1D, float* qDISS1D, int tke_budget, float Psig_bl, float Psig_shcu, float* cldfra_bl1D, int bl_mynn_mixlength, float* edmf_w1, float* edmf_a1, float* TKEprodTD, int spp_pbl, float* rstoch_col, float debug_code, float gtr, float tv0);
+
+extern "C" void mym_initialize_cc(int kts, int kte, float xland, float dz[], float dx, float zw[], float u[], float v[], float thl[], float qw[], float rmo, float Psig_bl, float ust, float zi, float theta[], float thetav[], float sh[], float sm[], float ql[], float pdk[], float pdt[], float pdq[], float pdc[], float dtl[], float dqw[], float dtv[], float gm[], float gh[], float tsq[], float qsq[], float cov[], float el[], float qke[], float cldfra_bl1D[], int bl_mynn_mixlength, float edmf_w1[], float edmf_a1[], int INITIALIZE_QKE, int spp_pbl, float rstoch_col[],float karman,float tv0, float gtr);
 //----------------------------------------contstants-------------------------------------------
 
 // constants
@@ -448,7 +451,7 @@ void mym_level2_cc(int kts, int kte, float* dz, float* u, float* v,
                 float* thl, float* thetav, float* qw, float* ql,
                 float* vt, float* vq, float* dtl, float* dqw,
                 float* dtv, float* gm, float* gh, float* sm, float* sh, 
-		float tv0, float gtr, float sqw2) {
+		float tv0, float gtr) {
     float rfc, f1, f2, rf1, rf2, smc, shc, ri1, ri2, ri3, ri4, duz, dtz, dqz, vtt, vqq, dtq, dzk, afk, abk, ri, rf;
     float a2fac;
 
@@ -534,7 +537,7 @@ void mym_level2_cc(int kts, int kte, float* dz, float* u, float* v,
 //
 //>\ingroup gsd_mynn_edmf
 // this subroutine calculates the mixing lengths.
-void mym_length_cc(int kts, int kte, float xland, float* dz, float* zw, float rmo, float flt, float fltv, float flq, float* vt, float* vq, float* u1, float* v1, float* qke, float* dtv, float* el, float zi, float* theta, float psig_bl, float* cldfra_bl1d, int bl_mynn_mixlength, float* edmf_w1, float* edmf_a1) {
+void mym_length_cc(int kts, int kte, float xland, float* dz, float* zw, float rmo, float flt, float fltv, float flq, float* vt, float* vq, float* u1, float* v1, float* qke, float* dtv, float* el, float zi, float* theta, float* qwt1d, float psig_bl, float* cldfra_bl1d, int bl_mynn_mixlength, float* edmf_w1, float* edmf_a1) {
     float cns, alp1, alp2, alp3, alp4, alp5, alp6;
     float minzi = 300.0;
     float maxdz = 750.0;
@@ -2037,7 +2040,7 @@ void get_pblh_cc(int kts, int kte, float& zi, float landsea, const std::vector<f
     }
 }
 
-void retrieve_exchange_coeffs(int kts, int kte, const std::vector<float>& dfm, const std::vector<float>& dfh, const std::vector<float>& dz, std::vector<float>& k_m, std::vector<float>& k_h) {
+void retrieve_exchange_coeffs_cc(int kts, int kte, const std::vector<float>& dfm, const std::vector<float>& dfh, const std::vector<float>& dz, std::vector<float>& k_m, std::vector<float>& k_h) {
     float dzk;
     k_m[kts] = 0.0;
     k_h[kts] = 0.0;
@@ -2094,6 +2097,7 @@ void retrieve_exchange_coeffs(int kts, int kte, const std::vector<float>& dfm, c
 #include <cmath>     // for pow, sqrt, etc.
 #include <vector>
 
+/*
 // assuming float is equivalent to float or float. adjust as necessary.
 void mym_level2_cc(int kts, int kte,
                 const std::vector<float>& dz,
@@ -2154,7 +2158,7 @@ void mym_level2_cc(int kts, int kte,
     }
 }
 
-
+*/
 
 // ==================================================================
 //     subroutine  mym_length:
@@ -2173,7 +2177,7 @@ void mym_level2_cc(int kts, int kte,
 //
 //>\ingroup gsd_mynn_edmf
 // this subroutine calculates the mixing lengths.
-void mym_length_cc(int kts, int kte, float xland, float* dz, float* dx, float* zw, float rmo, float flt, float fltv, float flq, float* vt, float* vq, float* u1, float* v1, float* qke, float* dtv, float* el, float zi, float* theta, float* qkw, float psig_bl, float* cldfra_bl1d, int bl_mynn_mixlength, float* edmf_w1, float* edmf_a1, float karman, float grav, float gtr, float tv0) {
+/*void mym_length_cc(int kts, int kte, float xland, float* dz, float* dx, float* zw, float rmo, float flt, float fltv, float flq, float* vt, float* vq, float* u1, float* v1, float* qke, float* dtv, float* el, float zi, float* theta, float* qkw, float psig_bl, float* cldfra_bl1d, int bl_mynn_mixlength, float* edmf_w1, float* edmf_a1, float karman, float grav, float gtr, float tv0) {
     int i, j, k;
     float elt, vsc;
     float qtke[kte+1], elblmin[kte+1], elblavg[kte+1], thetaw[kte+1];
@@ -2382,7 +2386,7 @@ void mym_length_cc(int kts, int kte, float xland, float* dz, float* dx, float* z
             break;
     }
 }
-
+*/
 // ==================================================================
 //     subroutine  mym_length:
 //
@@ -3187,6 +3191,420 @@ void dmp_mf_cc(int kts, int kte, float dt, float* zw, float* dz, float* p, float
     }
 }
 
+
+
+//
+// ==================================================================
+//     SUBROUTINE  mym_turbulence:
+//
+//     Input variables:    see subroutine mym_initialize
+//       closure        : closure level (2.5, 2.6, or 3.0)
+//
+//     # ql, vt, vq, qke, tsq, qsq and cov are changed to input variables.
+//
+//     Output variables:   see subroutine mym_initialize
+//       dfm(nx,nz,ny) : Diffusivity coefficient for momentum,
+//                         divided by dz (not dz*h(i,j))            (m/s)
+//       dfh(nx,nz,ny) : Diffusivity coefficient for heat,
+//                         divided by dz (not dz*h(i,j))            (m/s)
+//       dfq(nx,nz,ny) : Diffusivity coefficient for q^2,
+//                         divided by dz (not dz*h(i,j))            (m/s)
+//       tcd(nx,nz,ny)   : Countergradient diffusion term for Theta_l
+//                                                                  (K/s)
+//       qcd(nx,nz,ny)   : Countergradient diffusion term for Q_w
+//                                                             (kg/kg s)
+//       pd?(nx,nz,ny) : Half of the production terms
+//
+//       Only tcd and qcd are defined at the center of the grid boxes
+//
+//     # DO NOT forget that tcd and qcd are added on the right-hand side
+//       of the equations for Theta_l and Q_w, respectively.
+//
+//     Work arrays:        see subroutine mym_initialize and level2
+//
+//     # dtl, dqw, dtv, gm and gh are allowed to share storage units with
+//       dfm, dfh, dfq, tcd and qcd, respectively, for saving memory.
+//
+//\ingroup gsd_mynn_edmf
+// This subroutine calculates the vertical diffusivity coefficients and the
+// production terms for the turbulent quantities.
+//\section gen_mym_turbulence GSD mym_turbulence General Algorithm
+// Two subroutines mym_level2() and mym_length() are called within this
+//subrouine to collect variable to carry out successive calculations:
+// - mym_level2() calculates the level 2 nondimensional wind shear \f$G_M\f$
+// and vertical temperature gradient \f$G_H\f$ as well as the level 2 stability
+// functions \f$S_h\f$ and \f$S_m\f$.
+// - mym_length() calculates the mixing lengths.
+// - The stability criteria from Helfand and Labraga (1989) are applied.
+// - The stability functions for level 2.5 or level 3.0 are calculated.
+// - If level 3.0 is used, counter-gradient terms are calculated.
+// - Production terms of TKE,\f$\theta^{'2}\f$,\f$q^{'2}\f$, and \f$\theta^{'}q^{'}\f$
+// are calculated.
+// - Eddy diffusivity \f$K_h\f$ and eddy viscosity \f$K_m\f$ are calculated.
+// - TKE budget terms are calculated (if the namelist parameter \p tke_budget
+// is set to True)
+void mym_turbulence_cc(int kts, int kte, float xland, float closure, float* dz, float* dx, float* zw, float* u, float* v, float* thl, float* thetav, float* ql, float* qw, float* qke, float* tsq, float* qsq, float* cov, float* vt, float* vq, float sgm, float rmo, float flt, float fltv, float flq, float zi, float* theta, float* sh, float* sm, float* el, float* dfm, float* dfh, float* dfq, float* tcd, float* qcd, float* pdk, float* pdt, float* pdq, float* pdc, float* qWT1D, float* qSHEAR1D, float* qBUOY1D, float* qDISS1D, int tke_budget, float Psig_bl, float Psig_shcu, float* cldfra_bl1D, int bl_mynn_mixlength, float* edmf_w1, float* edmf_a1, float* TKEprodTD, int spp_pbl, float* rstoch_col, float debug_code, float gtr, float tv0) {
+    float q3sq_old, dlsq1, qWTP_old, qWTP_new;
+    float dudz, dvdz, dTdz, upwp, vpwp, Tpwp;
+    float e6c, dzk, afk, abk, vtt, vqq, cw25, clow, cupp, gamt, gamq, smd, gamv, elq, elh;
+    float cldavg;
+    float a2fac, duz, ri;
+    float auh, aum, adh, adm, aeh, aem, Req, Rsl, Rsl2, gmelq, sm20, sh20, sm25max, sh25max, sm25min, sh25min, sm_pbl, sh_pbl, zi2, wt, slht, wtpr;
+    double q2sq, t2sq, r2sq, c2sq, elsq, gmel, ghel, q3sq, t3sq, r3sq, c3sq, dlsq, qdiv, e1, e2, e3, e4, enumc, eden, wden;
+    float Prnum, shb;
+    const float Prlimit = 5.0;
+    float* dtv = new float[kts-kte];  
+    float* gm = new float[kts-kte];  
+    float* gh = new float[kts-kte];  
+    float* dqw = new float[kts-kte];  
+    float* dtl = new float[kts-kte];  
+
+    mym_level2_cc(kts, kte, dz, u, v, thl, thetav, qw, ql, vt, vq, dtl, dqw, dtv, gm, gh, sm, sh, tv0, gtr);
+
+    mym_length_cc(kts, kte, xland, dz, zw, rmo, flt, fltv, flq, vt, vq, u, v, qke, dtv, el, zi, theta, qWT1D, Psig_bl, cldfra_bl1D, bl_mynn_mixlength, edmf_w1, edmf_a1);
+
+    for (int k = kts + 1; k <= kte; k++) {
+        dzk = 0.5 * (dz[k] + dz[k - 1]);
+        afk = dz[k] / (dz[k] + dz[k - 1]);
+        abk = 1.0 - afk;
+        elsq = el[k] * el[k];
+        q3sq = qWT1D[k] * qWT1D[k];
+        q2sq = b1 * elsq * (sm[k] * gm[k] + sh[k] * gh[k]);
+        sh20 = std::max(sh[k], 1e-5f);
+        sm20 = std::max(sm[k], 1e-5f);
+        sh[k] = std::max(sh[k], 1e-5f);
+        duz = (u[k] - u[k - 1]) * (u[k] - u[k - 1]) + (v[k] - v[k - 1]) * (v[k] - v[k - 1]);
+        duz = duz / (dzk * dzk);
+        ri = -gh[k] / std::max(duz, 1.0e-10f);
+        if (ckmod == 1) {
+            a2fac = 1.0 / (1.0 + std::max(ri, 0.0f));
+        } else {
+            a2fac = 1.0;
+        }
+        Prnum = std::min(0.76f + 4.0f * std::max(ri, 0.0f), Prlimit);
+        gmel = gm[k] * elsq;
+        ghel = gh[k] * elsq;
+        if (debug_code) {
+            if (sh[k] < 0.0 || sm[k] < 0.0) {
+                std::cout << "MYNN; mym_turbulence 2.0; sh=" << sh[k] << " k=" << k << std::endl;
+                std::cout << " gm=" << gm[k] << " gh=" << gh[k] << " sm=" << sm[k] << std::endl;
+                std::cout << " q2sq=" << q2sq << " q3sq=" << q3sq << " q3/q2=" << q3sq / q2sq << std::endl;
+                std::cout << " qke=" << qke[k] << " el=" << el[k] << " ri=" << ri << std::endl;
+                std::cout << " PBLH=" << zi << " u=" << u[k] << " v=" << v[k] << std::endl;
+            }
+        }
+        dlsq = elsq;
+        if (q3sq / dlsq < -gh[k]) q3sq = -dlsq * gh[k];
+        if (q3sq < q2sq) {
+            qdiv = sqrt(q3sq / q2sq);
+            sh[k] = sh[k] * qdiv;
+            sm[k] = sm[k] * qdiv;
+            e1 = q3sq - e1c * ghel * a2fac * qdiv * qdiv;
+            e2 = q3sq - e2c * ghel * a2fac * qdiv * qdiv;
+            e3 = e1 + e3c * ghel * a2fac * a2fac * qdiv * qdiv;
+            e4 = e1 - e4c * ghel * a2fac * qdiv * qdiv;
+            eden = e2 * e4 + e3 * e5c * gmel * qdiv * qdiv;
+            eden = std::max(eden, 1.0e-20);
+        } else {
+            e1 = q3sq - e1c * ghel * a2fac;
+            e2 = q3sq - e2c * ghel * a2fac;
+            e3 = e1 + e3c * ghel * a2fac * a2fac;
+            e4 = e1 - e4c * ghel * a2fac;
+            eden = e2 * e4 + e3 * e5c * gmel;
+            eden = std::max(eden, 1.0e-20);
+            qdiv = 1.0;
+            sm[k] = q3sq * a1 * (e3 - 3.0 * c1 * e4) / eden;
+            sh[k] = q3sq * (a2 * a2fac) * (e2 + 3.0 * c1 * e5c * gmel) / eden;
+        }
+        gmelq = std::max(gmel / q3sq, 1e-8);
+        sm25max = 4.0;
+        sh25max = 4.0;
+        sm25min = 0.0;
+        sh25min = 0.0;
+        if (debug_code) {
+            if (sh[k] < sh25min || sm[k] < sm25min || sh[k] > sh25max || sm[k] > sm25max) {
+                std::cout << "In mym_turbulence 2.5: k=" << k << std::endl;
+                std::cout << " sm=" << sm[k] << " sh=" << sh[k] << std::endl;
+                std::cout << " ri=" << ri << " Pr=" << sm[k] / std::max(sh[k], 1e-8f) << std::endl;
+                std::cout << " gm=" << gm[k] << " gh=" << gh[k] << std::endl;
+                std::cout << " q2sq=" << q2sq << " q3sq=" << q3sq << " q3/q2=" << q3sq / q2sq << std::endl;
+                std::cout << " qke=" << qke[k] << " el=" << el[k] << std::endl;
+                std::cout << " PBLH=" << zi << " u=" << u[k] << " v=" << v[k] << std::endl;
+                std::cout << " SMnum=" << q3sq * a1 * (e3 - 3.0 * c1 * e4) << " SMdenom=" << eden << std::endl;
+                std::cout << " SHnum=" << q3sq * (a2 * a2fac) * (e2 + 3.0 * c1 * e5c * gmel) << " SHdenom=" << eden << std::endl;
+            }
+        }
+        if (sh[k] > sh25max) sh[k] = sh25max;
+        if (sh[k] < sh25min) sh[k] = sh25min;
+        shb = std::max(sh[k], 0.002f);
+        sm[k] = std::min(sm[k], Prlimit * shb);
+        if (closure >= 3.0) {
+            t2sq = qdiv * b2 * elsq * sh[k] * dtl[k] * dtl[k];
+            r2sq = qdiv * b2 * elsq * sh[k] * dqw[k] * dqw[k];
+            c2sq = qdiv * b2 * elsq * sh[k] * dtl[k] * dqw[k];
+            t3sq = std::max(tsq[k] * abk + tsq[k - 1] * afk, 0.0f);
+            r3sq = std::max(qsq[k] * abk + qsq[k - 1] * afk, 0.0f);
+            c3sq = cov[k] * abk + cov[k - 1] * afk;
+            c3sq = std::copysign(std::min(std::abs(c3sq), sqrt(t3sq * r3sq)), c3sq);
+            vtt = 1.0 + vt[k] * abk + vt[k - 1] * afk;
+            vqq = tv0 + vq[k] * abk + vq[k - 1] * afk;
+            t2sq = vtt * t2sq + vqq * c2sq;
+            r2sq = vtt * c2sq + vqq * r2sq;
+            c2sq = std::max(vtt * t2sq + vqq * r2sq, 0.0);
+            t3sq = vtt * t3sq + vqq * c3sq;
+            r3sq = vtt * c3sq + vqq * r3sq;
+            c3sq = std::max(vtt * t3sq + vqq * r3sq, 0.0);
+            cw25 = e1 * (e2 + 3.0 * c1 * e5c * gmel * qdiv * qdiv) / (3.0 * eden);
+            dlsq = elsq;
+            if (q3sq / dlsq < -gh[k]) q3sq = -dlsq * gh[k];
+            auh = 27.0 * a1 * ((a2 * a2fac) * (a2 * a2fac)) * b2 * (gtr) * (gtr);
+            aum = 54.0 * (a1 * a1) * (a2 * a2fac) * b2 * c1 * (gtr);
+            adh = 9.0 * a1 * ((a2 * a2fac) * (a2 * a2fac)) * (12.0 * a1 + 3.0 * b2) * (gtr) * (gtr);
+            adm = 18.0 * (a1 * a1) * (a2 * a2fac) * (b2 - 3.0 * (a2 * a2fac)) * (gtr);
+            aeh = (9.0 * a1 * ((a2 * a2fac) * (a2 * a2fac)) * b1 + 9.0 * a1 * ((a2 * a2fac) * (a2 * a2fac)) * (12.0 * a1 + 3.0 * b2)) * (gtr);
+            aem = 3.0 * a1 * (a2 * a2fac) * b1 * (3.0 * (a2 * a2fac) + 3.0 * b2 * c1 + (18.0 * a1 * c1 - b2)) + (18.0) * (a1 * a1) * (a2 * a2fac) * (b2 - 3.0 * (a2 * a2fac));
+            Req = -aeh / aem;
+            Rsl = (auh + aum * Req) / (3.0 * adh + 3.0 * adm * Req);
+            Rsl = 0.12;
+            Rsl2 = 1.0 - 2.0 * Rsl;
+            e2 = q3sq - e2c * ghel * a2fac * qdiv * qdiv;
+            e3 = q3sq + e3c * ghel * a2fac * a2fac * qdiv * qdiv;
+            e4 = q3sq - e4c * ghel * a2fac * qdiv * qdiv;
+            eden = e2 * e4 + e3 * e5c * gmel * qdiv * qdiv;
+            wden = cc3 * gtr * gtr * dlsq * dlsq / elsq * qdiv * qdiv * (e2 * e4c * a2fac - e3c * e5c * gmel * a2fac * a2fac * qdiv * qdiv);
+            if (wden != 0.0) {
+                clow = q3sq * (0.12 - cw25) * eden / wden;
+                cupp = q3sq * (0.76 - cw25) * eden / wden;
+                if (wden > 0.0) {
+                    c3sq = std::min(std::max(c3sq, c2sq + clow), c2sq + cupp);
+                } else {
+                    c3sq = std::max(std::min(c3sq, c2sq + clow), c2sq + cupp);
+                }
+            }
+            e1 = e2 + e5c * gmel * qdiv * qdiv;
+            eden = std::max(eden, 1.0e-20);
+            e6c = 3.0 * (a2 * a2fac) * cc3 * gtr * dlsq / elsq;
+            if (t2sq >= 0.0) {
+                enumc = std::max(qdiv * e6c * (t3sq - t2sq), 0.0);
+            } else {
+                enumc = std::min(qdiv * e6c * (t3sq - t2sq), 0.0);
+            }
+            gamt = -e1 * enumc / eden;
+            if (r2sq >= 0.0) {
+                enumc = std::max(qdiv * e6c * (r3sq - r2sq), 0.0);
+            } else {
+                enumc = std::min(qdiv * e6c * (r3sq - r2sq), 0.0);
+            }
+            gamq = -e1 * enumc / eden;
+            enumc = std::max(qdiv * e6c * (c3sq - c2sq), 0.0);
+            smd = dlsq * enumc * gtr / eden * qdiv * qdiv * (e3c * a2fac * a2fac + e4c * a2fac) * a1 / (a2 * a2fac);
+            gamv = e1 * enumc * gtr / eden;
+            sm[k] = sm[k] + smd;
+            qdiv = 1.0;
+            if (debug_code) {
+                if (sh[k] < -0.3 || sm[k] < -0.3 || qke[k] < -0.1 || std::abs(smd) > 2.0) {
+                    std::cout << "MYNN; mym_turbulence3.0; sh=" << sh[k] << " k=" << k << std::endl;
+                    std::cout << " gm=" << gm[k] << " gh=" << gh[k] << " sm=" << sm[k] << std::endl;
+                    std::cout << " q2sq=" << q2sq << " q3sq=" << q3sq << " q3/q2=" << q3sq / q2sq << std::endl;
+                    std::cout << " qke=" << qke[k] << " el=" << el[k] << " ri=" << ri << std::endl;
+                    std::cout << " PBLH=" << zi << " u=" << u[k] << " v=" << v[k] << std::endl;
+                }
+            }
+        } else {
+            gamt = 0.0;
+            gamq = 0.0;
+            gamv = 0.0;
+        }
+        cldavg = 0.5 * (cldfra_bl1D[k - 1] + cldfra_bl1D[k]);
+        if (edmf_a1[k] > 0.001 || cldavg > 0.02) {
+            sm[k] = std::max(sm[k], 0.03f * std::min(10.0f * edmf_a1[k] * edmf_w1[k], 1.0f));
+            sh[k] = std::max(sh[k], 0.03f * std::min(10.0f * edmf_a1[k] * edmf_w1[k], 1.0f));
+            sm[k] = std::max(sm[k], 0.05f * std::min(cldavg, 1.0f));
+            sh[k] = std::max(sh[k], 0.05f * std::min(cldavg, 1.0f));
+        }
+        elq = el[k] * qWT1D[k];
+        elh = elq * qdiv;
+        pdk[k] = elq * (sm[k] * gm[k] + sh[k] * gh[k] + gamv) + 0.5 * TKEprodTD[k];
+        pdt[k] = elh * (sh[k] * dtl[k] + gamt) * dtl[k];
+        pdq[k] = elh * (sh[k] * dqw[k] + gamq) * dqw[k];
+        pdc[k] = elh * (sh[k] * dtl[k] + gamt) * dqw[k] * 0.5 + elh * (sh[k] * dqw[k] + gamq) * dtl[k] * 0.5;
+        tcd[k] = elq * gamt;
+        qcd[k] = elq * gamq;
+        dfm[k] = elq * sm[k] / dzk;
+        dfh[k] = elq * sh[k] / dzk;
+        dfq[k] = dfm[k];
+        if (tke_budget == 1) {
+            qSHEAR1D[k] = elq * sm[k] * gm[k];
+            qBUOY1D[k] = elq * (sh[k] * gh[k] + gamv) + 0.5 * TKEprodTD[k];
+        }
+    }
+    dfm[kts] = 0.0;
+    dfh[kts] = 0.0;
+    dfq[kts] = 0.0;
+    tcd[kts] = 0.0;
+    qcd[kts] = 0.0;
+    tcd[kte] = 0.0;
+    qcd[kte] = 0.0;
+    for (int k = kts; k <= kte - 1; k++) {
+        dzk = dz[k];
+        tcd[k] = (tcd[k + 1] - tcd[k]) / dzk;
+        qcd[k] = (qcd[k + 1] - qcd[k]) / dzk;
+    }
+    if (spp_pbl == 1) {
+        for (int k = kts; k <= kte; k++) {
+            dfm[k] = dfm[k] + dfm[k] * rstoch_col[k] * 1.5 * std::max(exp(-std::max(zw[k] - 8000.0, 0.0) / 2000.0), 0.001);
+            dfh[k] = dfh[k] + dfh[k] * rstoch_col[k] * 1.5 * std::max(exp(-std::max(zw[k] - 8000.0, 0.0) / 2000.0), 0.001);
+        }
+    }
+}
+
+
+//!=======================================================================
+//     SUBROUTINE  mym_initialize:
+//
+//     Input variables:
+//       iniflag         : <>0; turbulent quantities will be initialized
+//                         = 0; turbulent quantities have been already
+//                              given, i.e., they will not be initialized
+//       nx, nz          : Dimension sizes of the
+//                         x and z directions, respectively
+//       tref            : Reference temperature                      (K)
+//       dz(nz)          : Vertical grid spacings                     (m)
+//                         # dz(nz)=dz(nz-1)
+//       zw(nz+1)        : Heights of the walls of the grid boxes     (m)
+//                         # zw(1)=0.0 and zw(k)=zw(k-1)+dz(k-1)
+//       exner(nx,nz)    : Exner function at zw*h+zg             (J/kg K)
+//                         defined by c_p*( p_basic/1000hPa )^kappa
+//                         This is usually computed by integrating
+//                         d(pi0)/dz = -h*g/tref.
+//       rmo(nx)         : Inverse of the Obukhov length         (m^(-1))
+//       flt, flq(nx)    : Turbulent fluxes of potential temperature and
+//                         total water, respectively:
+//                                    flt=-u_*Theta_*             (K m/s)
+//                                    flq=-u_*qw_*            (kg/kg m/s)
+//       ust(nx)         : Friction velocity                        (m/s)
+//       pmz(nx)         : phi_m-zeta at z1*h+z0, where z1 (=0.5*dz(1))
+//                         is the first grid point above the surafce, z0
+//                         the roughness length and zeta=(z1*h+z0)*rmo
+//       phh(nx)         : phi_h at z1*h+z0
+//       u, v(nx,nz)     : Components of the horizontal wind        (m/s)
+//       thl(nx,nz)      : Liquid water potential temperature
+//                                                                    (K)
+//       qw(nx,nz)       : Total water content Q_w                (kg/kg)
+//
+//     Output variables:
+//       ql(nx,nz)       : Liquid water content                   (kg/kg)
+//       vt, vq(nx,nz)   : Functions for computing the buoyancy flux
+//       qke(nx,nz)      : Twice the turbulent kinetic energy q^2
+//                                                              (m^2/s^2)
+//       tsq(nx,nz)      : Variance of Theta_l                      (K^2)
+//       qsq(nx,nz)      : Variance of Q_w
+//       cov(nx,nz)      : Covariance of Theta_l and Q_w              (K)
+//       el(nx,nz)       : Master length scale L                      (m)
+//                         defined on the walls of the grid boxes
+//
+//     Work arrays:        see subroutine mym_level2
+//       pd?(nx,nz,ny) : Half of the production terms at Level 2
+//                         defined on the walls of the grid boxes
+//       qkw(nx,nz,ny) : q on the walls of the grid boxes         (m/s)
+//
+//     # As to dtl, ...gh, see subroutine mym_turbulence.
+//
+//-------------------------------------------------------------------
+
+//>\ingroup gsd_mynn_edmf
+// This subroutine initializes the mixing length, TKE, \f$\theta^{'2}\f$,
+// \f$q^{'2}\f$, and \f$\theta^{'}q^{'}\f$.
+//\section gen_mym_ini GSD MYNN-EDMF mym_initialize General Algorithm
+//> @{
+void mym_initialize_cc(int kts, int kte, float xland, float dz[], float dx, float zw[], float u[], float v[], float thl[], float qw[], float rmo, float Psig_bl, float ust, float zi, float theta[], float thetav[], float sh[], float sm[], float ql[], float pdk[], float pdt[], float pdq[], float pdc[], float dtl[], float dqw[], float dtv[], float gm[], float gh[], float tsq[], float qsq[], float cov[], float el[], float qke[], float cldfra_bl1D[], int bl_mynn_mixlength, float edmf_w1[], float edmf_a1[], int INITIALIZE_QKE, int spp_pbl, float rstoch_col[],float karman,float tv0, float gtr) {
+    float phm, vkz, elq, elv, b1l, b2l, pmz = 1.0, phh = 1.0, flt = 0.0, fltv = 0.0, flq = 0.0, tmpq;
+    int k, l, lmax;
+    float* qkw = new float[kte-kts]; 
+    float* vt = new float[kte-kts];
+    float* vq = new float[kte-kts];
+    // At first ql, vt and vq are set to zero.
+    for (k = kts; k <= kte; k++) {
+        ql[k-kts] = 0.0;
+        vt[k-kts] = 0.0;
+        vq[k-kts] = 0.0;
+    }
+    
+    // Call mym_level2() to calculate the stability functions at level 2.
+    mym_level2_cc(kts, kte, dz, u, v, thl, thetav, qw, ql, vt, vq, dtl, dqw, dtv, gm, gh, sm, sh, tv0, gtr);
+    
+    // Preliminary setting
+    el[kts] = 0.0;
+    if (INITIALIZE_QKE==1) {
+        qke[kts] = 1.5 * ust * ust * pow(b1 * pmz, 2.0 / 3.0);
+        for (k = kts + 1; k <= kte; k++) {
+            qke[k] = qke[kts] * std::max((ust * 700.0f - zw[k]) / (std::max(ust, 0.01f) * 700.0f), 0.01f);
+        }
+    }
+    
+    phm = phh * b2 / pow(b1 * pmz, 1.0 / 3.0);
+    tsq[kts] = phm * pow(flt / ust, 2);
+    qsq[kts] = phm * pow(flq / ust, 2);
+    cov[kts] = phm * (flt / ust) * (flq / ust);
+    
+    for (k = kts + 1; k <= kte; k++) {
+        vkz = karman * zw[k];
+        el[k] = vkz / (1.0 + vkz / 100.0);
+        tsq[k] = 0.0;
+        qsq[k] = 0.0;
+        cov[k] = 0.0;
+    }
+    
+    // Initialization with an iterative manner
+    lmax = 5;
+    
+    for (l = 1; l <= lmax; l++) {
+        // Call mym_length() to calculate the master length scale.
+        mym_length_cc(kts, kte, xland, dz, zw, rmo, flt, fltv, flq, vt, vq, u, v, qke, dtv, el, zi, theta, qkw, Psig_bl, cldfra_bl1D, bl_mynn_mixlength, edmf_w1, edmf_a1);
+        
+        for (k = kts + 1; k <= kte; k++) {
+            elq = el[k] * qkw[k-k];
+            pdk[k] = elq * (sm[k] * gm[k] + sh[k] * gh[k]);
+            pdt[k] = elq * sh[k] * pow(dtl[k], 2);
+            pdq[k] = elq * sh[k] * pow(dqw[k], 2);
+            pdc[k] = elq * sh[k] * dtl[k] * dqw[k];
+        }
+        
+        vkz = karman * 0.5 * dz[kts];
+        elv = 0.5 * (el[kts + 1] + el[kts]) / vkz;
+        if (INITIALIZE_QKE==1) {
+            qke[kts] = 1.0 * std::max(ust, 0.02f) * std::max(ust, 0.02f) * pow(b1 * pmz * elv, 2.0 / 3.0);
+        }
+        phm = phh * b2 / pow(b1 * pmz / pow(elv, 2), 1.0 / 3.0);
+        tsq[kts] = phm * pow(flt / ust, 2);
+        qsq[kts] = phm * pow(flq / ust, 2);
+        cov[kts] = phm * (flt / ust) * (flq / ust);
+        
+        for (k = kts + 1; k <= kte - 1; k++) {
+            b1l = b1 * 0.25 * (el[k + 1] + el[k]);
+            tmpq = std::min(std::max(b1l * (pdk[k + 1] + pdk[k]), qkemin), 125.0f);
+            if (INITIALIZE_QKE==1) {
+                qke[k] = pow(tmpq, 2.0 / 3.0);
+            }
+            if (qke[k] <= 0.0) {
+                b2l = 0.0;
+            } else {
+                b2l = b2 * (b1l / b1) / sqrt(qke[k]);
+            }
+            tsq[k] = b2l * (pdt[k + 1] + pdt[k]);
+            qsq[k] = b2l * (pdq[k + 1] + pdq[k]);
+            cov[k] = b2l * (pdc[k + 1] + pdc[k]);
+        }
+    }
+    
+    if (INITIALIZE_QKE==1) {
+        qke[kts] = 0.5 * (qke[kts] + qke[kts + 1]);
+        qke[kte] = qke[kte - 1];
+    }
+    tsq[kte] = tsq[kte - 1];
+    qsq[kte] = qsq[kte - 1];
+    cov[kte] = cov[kte - 1];
+}
 
 
 

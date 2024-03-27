@@ -263,7 +263,7 @@ MODULE module_bl_mynn_driver
         onethird  , twothirds , tkmin      , t0c       , &
         tice      , kind_phys
 
-  use module_bl_mynn_1d
+  !!use module_bl_mynn_1d
   use iso_c_binding !, only: c_double, c_int, c_float
 
   IMPLICIT NONE
@@ -439,7 +439,7 @@ SUBROUTINE mynn_tendencies_cc(kts,kte,delt,dz,rho,              &
               & p1000mb,rcp,xlvcp                   ) bind(c)
         import c_int, c_float
         integer(kind=c_int), intent(in) :: kts,kte,kpbl
-        real(kind=c_float), dimension(kts:kte), intent(in) ::            &
+        real(kind=c_float), dimension(kts:kte), intent(in) ::         &
             u,v,th,thl,tk,qt,qv,qc,thv,p,rho,exner,dz
         real(kind=c_float), dimension(kts:kte), intent(in) :: rthraten
         real(kind=c_float), dimension(kts:kte), intent(in) :: edmf_a_dd,&
@@ -454,20 +454,23 @@ SUBROUTINE mynn_tendencies_cc(kts,kte,delt,dz,rho,              &
       END SUBROUTINE DDMF_JPL_cc
 
 
-    SUBROUTINE GET_PBLH_cc(KTS,KTE,zi,thetav1D,qke1D,zw1D,dz1D,landsea,kzi) bind(c)
+    SUBROUTINE get_pblh_cc(kts,kte,zi,thetav1D,qke1D,zw1D,dz1D,landsea, &
+      & kzi) bind(c)
       import c_float, c_int
       real(kind=c_float), intent(out) :: zi
-      integer(kind=c_int),intent(in) :: KTS,KTE,kzi
+      integer(kind=c_int),intent(in) :: kts,kte,kzi
       real(kind=c_float), intent(in) :: landsea
-      real(kind=c_float), dimension(kts:kte), intent(in) :: thetav1D, qke1D, dz1D
+      real(kind=c_float), dimension(kts:kte), intent(in) :: thetav1D, &
+      & qke1D, dz1D
       real(kind=c_float), dimension(kts:kte+1), intent(in) :: zw1D
-    END SUBROUTINE GET_PBLH_cc
+    END SUBROUTINE get_pblh_cc
 
    SUBROUTINE retrieve_exchange_coeffs_cc(kts,kte,&
        &dfm,dfh,dz,K_m,K_h) bind(c)
         import c_float, c_int
         integer(kind=c_int) , intent(in) :: kts,kte
         real(kind=c_float), dimension(KtS:KtE), intent(in) :: dz,dfm,dfh
+        real(kind=c_float), dimension(KtS:KtE), intent(out) :: K_m, K_h
     END SUBROUTINE retrieve_exchange_coeffs_cc
 
     SUBROUTINE scale_aware_cc(dx,PBL1,Psig_bl,Psig_shcu) bind(c)
@@ -533,6 +536,74 @@ SUBROUTINE mynn_tendencies_cc(kts,kte,delt,dz,rho,              &
 
  END SUBROUTINE dmp_mf_cc
 
+  SUBROUTINE  mym_turbulence_cc (                             &
+    &            kts,kte,                                     &
+    &            xland,closure,                               &            
+    &            dz, dx, zw,                                  &
+    &            u, v, thl, thetav, ql, qw,                   &
+    &            qke, tsq, qsq, cov,                          &
+    &            vt, vq,                                      &
+    &            rmo, flt, fltv, flq,                         &
+    &            zi,theta,                                    &
+    &            sh, sm,                                      &
+    &            El,                                          &
+    &            Dfm, Dfh, Dfq, Tcd, Qcd, Pdk, Pdt, Pdq, Pdc, &
+    &            qWT1D,qSHEAR1D,qBUOY1D,qDISS1D,              &
+    &            tke_budget,                                  &
+    &            Psig_bl,Psig_shcu,cldfra_bl1D,               &
+    &            bl_mynn_mixlength,                           &
+    &            edmf_w1,edmf_a1,                             &
+    &            TKEprodTD,                                   &
+    &            spp_pbl,rstoch_col,debug_code,               &
+    &            gtr, tv0) bind(c)
+         import c_float, c_int
+    integer(kind=c_int), intent(in)   :: kts,kte
+    integer(kind=c_int), intent(in)   :: debug_code
+    integer(kind=c_int), intent(in)   :: bl_mynn_mixlength,tke_budget
+    real(kind=c_float), intent(in)    :: closure, gtr, tv0 
+    real(kind=c_float), dimension(kts:kte),   intent(in) :: dz
+    real(kind=c_float), dimension(kts:kte) :: qkw,dtl,dqw,dtv,gm,gh,sm,sh
+    real(kind=c_float), dimension(kts:kte+1), intent(in) :: zw
+    real(kind=c_float), intent(in)       :: rmo,flt,fltv,flq,                 &
+         &Psig_bl,Psig_shcu,xland,dx,zi
+    real(kind=c_float), dimension(kts:kte), intent(in) :: u,v,thl,thetav,qw,  &
+         &ql,vt,vq,qke,tsq,qsq,cov,cldfra_bl1D,edmf_w1,edmf_a1,            &
+         &TKEprodTD, theta
+    real(kind=c_float), dimension(kts:kte), intent(out) :: dfm,dfh,dfq,       &
+         &pdk,pdt,pdq,pdc,tcd,qcd,el
+    real(kind=c_float), dimension(kts:kte), intent(inout) ::                  &
+         qWT1D,qSHEAR1D,qBUOY1D,qDISS1D
+    real(kind=c_float), dimension(kts:kte),intent(in)     :: rstoch_col
+    integer(kind=c_int),         intent(in)                   ::    spp_pbl
+
+  END SUBROUTINE mym_turbulence_cc
+
+ SUBROUTINE  mym_initialize_cc (                                &
+       &            kts,kte,xland,                            &
+       &            dz, dx, zw,                               &
+       &            u, v, thl, qw,                            &
+       &            zi, theta, thetav, sh, sm,                &
+       &            ust, rmo, el,                             &
+       &            qke, tsq, qsq, cov, Psig_bl, cldfra_bl1D, &
+       &            bl_mynn_mixlength,                        &
+       &            edmf_w1,edmf_a1,                          &
+       &            INITIALIZE_QKE,                           &
+       &            spp_pbl,rstoch_col, karman, tv0, gtr) bind(c)
+    import c_float, c_int
+    integer(kind=c_int), intent(in)           :: kts,kte
+    integer(kind=c_int), intent(in)           :: bl_mynn_mixlength
+    integer(kind=c_int), intent(in)           :: INITIALIZE_QKE, spp_pbl
+    real(kind=c_float), intent(in)   :: rmo, Psig_bl, xland
+    real(kind=c_float), intent(in)   :: dx, ust, zi, karman, tv0, gtr
+    real(kind=c_float), dimension(kts:kte),   intent(in) :: dz
+    real(kind=c_float), dimension(kts:kte+1), intent(in) :: zw
+    real(kind=c_float), dimension(kts:kte),   intent(in) :: u,v,thl,&
+         &qw,cldfra_bl1D,edmf_w1,edmf_a1
+    real(kind=c_float), dimension(kts:kte),   intent(out) :: tsq,qsq,cov
+    real(kind=c_float), dimension(kts:kte),   intent(inout) :: el,qke
+    real(kind=c_float), dimension(kts:kte), intent(in) :: theta,thetav,& 
+    &    sh,sm, rstoch_col
+  END SUBROUTINE mym_initialize_cc
 
  end interface
 
@@ -564,6 +635,33 @@ SUBROUTINE mynn_tendencies_cc(kts,kte,delt,dz,rho,              &
   ! Used in WRF-ARW module_physics_init.F
   integer :: mynn_level
 
+    real(kind_phys), parameter :: cphm_st=5.0, cphm_unst=16.0, &
+                                cphh_st=5.0, cphh_unst=16.0
+
+! Closure constants
+  real(kind_phys), parameter ::  &
+       &pr  =  0.74,             &
+       &g1  =  0.235,            &  ! NN2009 = 0.235
+       &b1  = 24.0,              &
+       &b2  = 15.0,              &  ! CKmod     NN2009
+       &c2  =  0.729,            &  ! 0.729, & !0.75, &
+       &c3  =  0.340,            &  ! 0.340, & !0.352, &
+       &c4  =  0.0,              &
+       &c5  =  0.2,              &
+       &a1  = b1*( 1.0-3.0*g1 )/6.0, &
+!       &c1  = g1 -1.0/( 3.0*a1*b1**(1.0/3.0) ), &
+       &c1  = g1 -1.0/( 3.0*a1*2.88449914061481660), &
+       &a2  = a1*( g1-c1 )/( g1*pr ), &
+       &g2  = b2/b1*( 1.0-c3 ) +2.0*a1/b1*( 3.0-2.0*c2 )
+
+  real(kind_phys), parameter ::  &
+       &cc2 =  1.0-c2,           &
+       &cc3 =  1.0-c3,           &
+       &e1c =  3.0*a2*b2*cc3,    &
+       &e2c =  9.0*a1*a2*cc2,    &
+       &e3c =  9.0*a2*a2*cc2*( 1.0-c5 ), &
+       &e4c = 12.0*a1*a2*cc2,    &
+       &e5c =  6.0*a1*a1
 
 CONTAINS
 
@@ -791,6 +889,7 @@ CONTAINS
     real(kind_phys), dimension(kts:kte) :: KHtopdown,TKEprodTD
 
     logical :: INITIALIZE_QKE,problem
+    integer :: INITIALIZE_QKE_I
 
     ! Stochastic fields 
     integer,  intent(in)                         :: spp_pbl
@@ -1023,7 +1122,7 @@ CONTAINS
              zw(kte+1)=zw(kte)+dz(i,kte)
 
 !>  - Call get_pblh() to calculate hybrid (\f$\theta_{v}-TKE\f$) PBL height.
-             CALL GET_PBLH(KTS,KTE,PBLH(i),thetav,Qke1,zw,dz1,xland(i),KPBL(i))
+             CALL get_pblh_cc(KTS,KTE,PBLH(i),thetav,Qke1,zw,dz1,xland(i),KPBL(i))
              
 !>  - Call scale_aware() to calculate similarity functions for scale-adaptive control
 !! (\f$P_{\sigma-PBL}\f$ and \f$P_{\sigma-shcu}\f$).
@@ -1039,7 +1138,12 @@ CONTAINS
 !! \f$q^{'2}\f$, and \f$\theta^{'}q^{'}\f$. These variables are calculated after 
 !! obtaining prerequisite variables by calling the following subroutines from 
 !! within mym_initialize(): mym_level2() and mym_length().
-             CALL mym_initialize (                & 
+             if (INITIALIZE_QKE .eqv. .true.) then
+                 INITIALIZE_QKE_I = 1
+             else
+                 INITIALIZE_QKE_I=0
+             endif
+             CALL mym_initialize_cc (             & 
                   &kts,kte,xland(i),              &
                   &dz1, dx(i), zw,                &
                   &u1, v1, thl, sqv,              &
@@ -1049,8 +1153,9 @@ CONTAINS
                   &Psig_bl(i), cldfra_bl1D,       &
                   &bl_mynn_mixlength,             &
                   &edmf_w1,edmf_a1,               &
-                  &INITIALIZE_QKE,                &
-                  &spp_pbl,rstoch_col             )
+                  &INITIALIZE_QKE_I,              &
+                  &spp_pbl,rstoch_col,            &
+                  &karman, tv0, gtr               )
 
              IF (.not.restart) THEN
                 !UPDATE 3D VARIABLES
@@ -1092,7 +1197,6 @@ CONTAINS
        qke=qke_adv
     ENDIF
 
-    write(*,*) "mynn 1"
     DO i=ITS,ITF
        !Initialize some arrays
        if (tke_budget .eq. 1) then
@@ -1228,7 +1332,6 @@ CONTAINS
        det_u      =0.0
        det_v      =0.0
 
-    write(*,*) "mynn 2"
        do k = kts,kte
           if (k==kts) then
              zw(k)=0.
@@ -1269,10 +1372,9 @@ CONTAINS
        endif
        s_awchem1(kts:kte+1,1:nchem)   = 0.0
 
-    write(*,*) "mynn 3"
 !>  - Call get_pblh() to calculate the hybrid \f$\theta_{v}-TKE\f$
 !! PBL height diagnostic.
-       CALL GET_PBLH(KTS,KTE,PBLH(i),thetav,Qke1,zw,dz1,xland(i),KPBL(i))
+       CALL get_pblh_cc(KTS,KTE,PBLH(i),thetav,Qke1,zw,dz1,xland(i),KPBL(i))
 
 !>  - Call scale_aware() to calculate the similarity functions,
 !! \f$P_{\sigma-PBL}\f$ and \f$P_{\sigma-shcu}\f$, to control 
@@ -1331,7 +1433,6 @@ CONTAINS
 !! of the subgrid cloud fraction and mixing ratio as well as the functions
 !! used to calculate the buoyancy flux. Different cloud PDFs can be
 !! selected by use of the namelist parameter \p bl_mynn_cloudpdf.
-    write(*,*) "mynn 4"
 
        call mym_condensation_cc (kts,kte,                   &
             &dx(i),dz1,zw,xland(i),                      &
@@ -1346,7 +1447,6 @@ CONTAINS
 
 !>  - Add TKE source driven by cloud top cooling
 !!  Calculate the buoyancy production of TKE from cloud-top cooling when
-    write(*,*) "mynn 5"
 !! \p bl_mynn_topdown =1.
        if (bl_mynn_topdown.eq.1) then
           call topdown_cloudrad_cc(kts,kte,dz1,zw,fltv,     &
@@ -1360,7 +1460,6 @@ CONTAINS
           TKEprodTD(kts:kte) = 0.0
        endif
 
-    write(*,*) "mynn 6"
        if (bl_mynn_edmf > 0) then
           !PRINT*,"Calling DMP Mass-Flux: i= ",i
           if(mix_chem .eqv. .true.) then
@@ -1400,7 +1499,6 @@ CONTAINS
                &spp_pbl,rstoch_col, grav, gtr, p608      )
        endif
 
-    write(*,*) "mynn 7"
        if (bl_mynn_edmf_dd == 1) then
           call DDMF_JPL_cc(kts,kte,delt,zw,dz1,p1,       &
                &u1,v1,th1,thl,thetav,tk1,                &
@@ -1421,8 +1519,7 @@ CONTAINS
        !do nsub = 1,2
        delt2 = delt !*0.5    !only works if topdown=0
 
-    write(*,*) "mynn 8"
-       call mym_turbulence(                              & 
+       call mym_turbulence_cc(                              & 
                &kts,kte,xland(i),closure,                &
                &dz1, DX(i), zw,                          &
                &u1, v1, thl, thetav, sqc, sqw,           &
@@ -1440,7 +1537,8 @@ CONTAINS
                &cldfra_bl1D,bl_mynn_mixlength,           &
                &edmf_w1,edmf_a1,                         &
                &TKEprodTD,                               &
-               &spp_pbl,rstoch_col,debug_code            )
+               &spp_pbl,rstoch_col,debug_code_i,           &
+               &gtr, tv0            )
 
 !>  - Call mym_predict() to solve TKE and 
 !! \f$\theta^{'2}, q^{'2}, and \theta^{'}q^{'}\f$
@@ -1520,8 +1618,8 @@ CONTAINS
           enddo
        endif
  
-       call retrieve_exchange_coeffs(kts,kte,            &
-            &dfm, dfh, dz1, K_m1, K_h1                   )
+       call retrieve_exchange_coeffs_cc(kts,kte,            &
+            &dfm, dfh, dz1, k_m1, K_h1                   )
 
        !UPDATE 3D ARRAYS
        exch_m(i,kts:kte)  =k_m1(kts:kte)
