@@ -464,8 +464,8 @@ SUBROUTINE mynn_tendencies_cc(kts,kte,delt,dz,rho,              &
    SUBROUTINE get_pblh_cc(kts,kte,zi,thetav1D, &
       &qke1D,zw1D,dz1D,landsea,kzi) bind(c)
       import c_float, c_int
-      real(kind=c_float), intent(out) :: zi
       integer(kind=c_int),intent(in) :: kts,kte,kzi
+      real(kind=c_float), intent(out) :: zi
       real(kind=c_float), intent(in) :: landsea
       real(kind=c_float),dimension(kts:kte),intent(in)::thetav1D,qke1D,dz1D
       real(kind=c_float),dimension(kts:kte+1), intent(in) :: zw1D

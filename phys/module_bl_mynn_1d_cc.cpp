@@ -22,7 +22,7 @@ extern "C" void ddmf_jpl_cc(int kts, int kte, float dt, std::vector<float> zw, s
 
 extern "C" void scale_aware_cc(float dx, float pbl1, float& psig_bl, float& psig_shcu); 
 
-extern "C" void get_pblh_cc(int kts, int kte, float& zi, const std::vector<float>& thetav1d, const std::vector<float>& qke1d, const std::vector<float>& zw1d, const std::vector<float>& dz1d, float landsea, int kzi);
+extern "C" void get_pblh_cc(int kts, int kte, float zi, const std::vector<float>& thetav1d, const std::vector<float>& qke1d, const std::vector<float>& zw1d, const std::vector<float>& dz1d, float landsea, int kzi);
 
 extern "C" void retrieve_exchange_coeffs_cc(int kts, int kte, const std::vector<float>& dfm, const std::vector<float>& dfh, const std::vector<float>& dz, std::vector<float>& k_m, std::vector<float>& k_h);
 
@@ -1973,7 +1973,7 @@ void scale_aware_cc(float dx, float pbl1, float& psig_bl, float& psig_shcu) {
 //value could be found to work best in all conditions.
 //>\section gen_get_pblh  gsd get_pblh general algorithm
 //> @{
-void get_pblh_cc(int kts, int kte, float& zi, float landsea, const std::vector<float>& thetav1d, const std::vector<float>& qke1d, const std::vector<float>& zw1d, const std::vector<float>& dz1d, int& kzi) {
+void get_pblh_cc(int kts, int kte, float zi, const std::vector<float>& thetav1d, const std::vector<float>& qke1d, const std::vector<float>& zw1d, const std::vector<float>& dz1d, float landsea, int kzi) {
     // constants
     const float sbl_lim = 200.0;
     const float sbl_damp = 400.0;
