@@ -10,13 +10,13 @@ imach="pm" #system name, pm for perlmutter
 
 doclean_all=false #true if compiled different configure options
 
-doclean=true
+doclean=false
 
 runconf=false
 
 docompile=true
 
-debug=false
+debug=true
 
 # WRF directories
 mversion="4.5.1"
@@ -127,11 +127,12 @@ if [ "$runconf" = true ]; then
         echo "editing configure.wrf"
         #need to remove -cc=$(SCC) in DM_CC
         sed -i 's/-cc=\$(SCC)/ /' ${configfile}
- 
+#paralell
 #	sed -i 's/mpif90/ftn/' ${configfile}
 #        sed -i 's/mpicc/cc/' ${configfile}
- 
-	sed -i 's/gfortran/ftn/' ${configfile}
+
+#serial
+	sed -i 's/gfortran/ftn/'${configfile}
         sed -i 's/gcc/cc/' ${configfile}
         
         #also add (uncomment) "-DRSL0_ONLY" to CFLAGS_LOCAL to supress 
