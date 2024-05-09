@@ -19,7 +19,7 @@ bindir="/global/homes/h/hross/codes/WRF1996_Hannah/run/"
 binname="real.exe"
 binname2="wrf.exe"
 #binname="tc.exe"
-rundir="/pscratch/sd/h/hross/simulation/WRF/run2" #user needs to change this
+rundir="/pscratch/sd/h/hross/simulation/WRF/run_Hannah" #user needs to change this
 
 #Modules --------------------------------------------------------------------
 #use the example module-loading script given above; accessible for WRF-SIG members

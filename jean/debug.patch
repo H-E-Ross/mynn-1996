@@ -1,0 +1,67 @@
+diff --git a/arch/postamble b/arch/postamble
+index 936f040..6a3114b 100644
+--- a/arch/postamble
++++ b/arch/postamble
+@@ -223,3 +223,7 @@ setfeenv.o : setfeenv.c
+ 	$(RM) $@
+ 	$(CC) -o $@ -c $(CFLAGS) $*.c
+ 
++.cpp.o:
++	$(RM) $@
++	${CPPCC) -o $@ -c $(FCFLAGS) $*.c
++
+diff --git a/build/build.sh b/build/build.sh
+index d10c5e2..5bcb163 100755
+--- a/build/build.sh
++++ b/build/build.sh
+@@ -8,11 +8,11 @@ set -o pipefail
+ 
+ imach="pm" #system name, pm for perlmutter
+ 
+-doclean_all=false #true if compiled different configure options
++doclean_all=true #true if compiled different configure options
+ 
+-doclean=false
++doclean=true
+ 
+-runconf=false
++runconf=true
+ 
+ docompile=true
+ 
+@@ -134,7 +134,11 @@ if [ "$runconf" = true ]; then
+ #serial
+ 	sed -i 's/gfortran/ftn/'${configfile}
+         sed -i 's/gcc/cc/' ${configfile}
+-        
++	grep "LD              =       " ${configfile}
++        sed -i '/^CC_TOOLS       .*/a CPPCC              =       CC \$(PROMOTION) \$(OMP) \$(FCFLAGS)' ${configfile}
++        sed -i '/LD              =       /c\LD              =       CC' ${configfile}
++	grep "LD              =       " ${configfile}
++
+         #also add (uncomment) "-DRSL0_ONLY" to CFLAGS_LOCAL to supress 
+         #rsl.err.xxxx and rsl.out.xxxx files and write only rsl.err.0000 and rsl.out.000
+         echo "using the DRSL0_ONLY flag; only the root rank will write the err and out files"
+@@ -144,7 +148,7 @@ if [ "$runconf" = true ]; then
+ fi
+ 
+ if [ "$docompile" = true ]; then
+-    export J="-j 4"  #build in parallel
++    export J="-j 16"  #build in parallel
+     echo "J = $J"
+     
+     bldlog=${script_dir}/compile_logs/compile_em_${idate}_${imach}.log
+diff --git a/main/depend.common b/main/depend.common
+index 80e1fc5..5606c5e 100644
+--- a/main/depend.common
++++ b/main/depend.common
+@@ -316,7 +316,8 @@ module_bl_mynn_1d.o: \
+ 	module_bl_mynn_common.o
+ 
+ module_bl_mynn_1d_cc.o: module_bl_mynn_1d_cc.cpp
+-	cc -o module_bl_mynn_1d_cc.o -c module_bl_mynn_1d_cc.cpp
++	$(CPPCC) -o module_bl_mynn_1d_cc.o -c $(FCFLAGS) module_bl_mynn_1d_cc.cpp
++#	cc -o module_bl_mynn_1d_cc.o -c module_bl_mynn_1d_cc.cpp
+ 	
+ #$(CC) -o module_bl_mynn_1d_cc.o -c $(CFLAGS) module_bl_mynn_1d_cc.cpp
+ 	

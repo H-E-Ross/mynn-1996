@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+#set -e
 set -o pipefail 
 #https://stackoverflow.com/questions/1550933/catching-error-codes-in-a-shell-pipe
 
@@ -126,13 +126,15 @@ if [ "$runconf" = true ]; then
     if [ -f "$configfile" ]; then
         echo "editing configure.wrf"
         #need to remove -cc=$(SCC) in DM_CC
-        sed -i 's/-cc=\$(SCC)/ /' ${configfile}
+	sed -i 's/-cc=\$(SCC)/ /' ${configfile}
 #paralell
 #	sed -i 's/mpif90/ftn/' ${configfile}
 #        sed -i 's/mpicc/cc/' ${configfile}
 
 #serial
-	sed -i 's/gfortran/ftn/'${configfile}
+echo 'gfortran sed'
+	sed -i 's/gfortran/ftn/' ${configfile}
+	echo 'gcc sed'
         sed -i 's/gcc/cc/' ${configfile}
         
         #also add (uncomment) "-DRSL0_ONLY" to CFLAGS_LOCAL to supress 
@@ -144,7 +146,7 @@ if [ "$runconf" = true ]; then
 fi
 
 if [ "$docompile" = true ]; then
-    export J="-j 32"  #build in parallel
+    export J="-j 4"  #build in parallel
     echo "J = $J"
     
     bldlog=${script_dir}/compile_logs/compile_em_${idate}_${imach}.log
