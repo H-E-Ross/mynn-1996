@@ -1,2 +1,0 @@
-build wrf calling your routines
-take tridiag c++ and try to run

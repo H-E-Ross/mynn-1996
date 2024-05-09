@@ -144,7 +144,7 @@ if [ "$runconf" = true ]; then
 fi
 
 if [ "$docompile" = true ]; then
-    export J="-j 32"  #build in parallel
+    export J="-j 4"  #build in parallel
     echo "J = $J"
     
     bldlog=${script_dir}/compile_logs/compile_em_${idate}_${imach}.log
