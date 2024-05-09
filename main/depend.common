@@ -316,8 +316,9 @@ module_bl_mynn_1d.o: \
 	module_bl_mynn_common.o
 
 module_bl_mynn_1d_cc.o: module_bl_mynn_1d_cc.cpp
-	cc -o module_bl_mynn_1d_cc.o -c module_bl_mynn_1d_cc.cpp
-	
+	$(CPPCC) -o module_bl_mynn_1d_cc.o -c $(FCFLAGS) module_bl_mynn_1d_cc.cpp
+#      cc -o module_bl_mynn_1d_cc.o -c module_bl_mynn_1d_cc.cpp
+#
 #$(CC) -o module_bl_mynn_1d_cc.o -c $(CFLAGS) module_bl_mynn_1d_cc.cpp
 	
 

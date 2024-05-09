@@ -9,7 +9,7 @@
 #SBATCH --tasks-per-node=64
 
 pwd
-ntile=4  #number of OpenMP threads per MPI task
+ntile=1  #number of OpenMP threads per MPI task
 #need to set the "numtiles" variable in the wrf namelist (namelist.input) to be the same 
 
 #example using the WRFSIG project CFS directories; 
@@ -35,14 +35,14 @@ export OMP_PROC_BIND=spread
 cd $rundir
 
 #get ics
-srun -n 64 -c 4 --cpu_bind=cores ${bindir}/${binname}
+srun -n 1 -c 4 --cpu_bind=cores ${bindir}/${binname}
 
 #rename and save the process 0 out and err files
 #cp rsl.error.0000 rsl.error_ics_$SLURM_JOBID
 #cp rsl.out.0000 rsl.out_ics_$SLURM_JOBID
 
 #run simulation
-srun -n 64 -c 4 --cpu_bind=cores ${bindir}/${binname2}
+srun -n 1 -c 4 --cpu_bind=cores ${bindir}/${binname2}
 
 #rename and save the process 0 out and err files
 #cp rsl.error.0000 rsl.error_0_$SLURM_JOBID

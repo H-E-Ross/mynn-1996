@@ -8,11 +8,11 @@ set -o pipefail
 
 imach="pm" #system name, pm for perlmutter
 
-doclean_all=false #true if compiled different configure options
+doclean_all=true #true if compiled different configure options
 
-doclean=false
+doclean=true
 
-runconf=false
+runconf=true
 
 docompile=true
 
@@ -127,14 +127,20 @@ if [ "$runconf" = true ]; then
         echo "editing configure.wrf"
         #need to remove -cc=$(SCC) in DM_CC
         sed -i 's/-cc=\$(SCC)/ /' ${configfile}
+
 #paralell
 #	sed -i 's/mpif90/ftn/' ${configfile}
 #        sed -i 's/mpicc/cc/' ${configfile}
 
 #serial
-	sed -i 's/gfortran/ftn/'${configfile}
+	sed -i 's/gfortran/ftn/' ${configfile}
         sed -i 's/gcc/cc/' ${configfile}
         
+        grep "LD              =       " ${configfile}
+        sed -i '/^CC_TOOLS       .*/a CPPCC              =       CC \$(PROMOTION) \$(OMP) \$(FCFLAGS)' ${configfile}
+        sed -i '/LD              =       /c\LD              =       CC' ${configfile}
+        grep "LD              =       " ${configfile}
+
         #also add (uncomment) "-DRSL0_ONLY" to CFLAGS_LOCAL to supress 
         #rsl.err.xxxx and rsl.out.xxxx files and write only rsl.err.0000 and rsl.out.000
         echo "using the DRSL0_ONLY flag; only the root rank will write the err and out files"

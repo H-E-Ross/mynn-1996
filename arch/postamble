@@ -223,3 +223,7 @@ setfeenv.o : setfeenv.c
 	$(RM) $@
 	$(CC) -o $@ -c $(CFLAGS) $*.c
 
+.cpp.o:
+	$(RM) $@
+	$(CPPCC) -o $@ -c $(FCFLAGS) $*.cpp
+
