@@ -464,9 +464,10 @@ SUBROUTINE mynn_tendencies_cc(kts,kte,delt,dz,rho,              &
    SUBROUTINE get_pblh_cc(kts,kte,zi,thetav1D, &
       &qke1D,zw1D,dz1D,landsea,kzi) bind(c)
       import c_float, c_int
-      integer(kind=c_int),intent(in) :: kts,kte,kzi
-      real(kind=c_float), intent(out) :: zi
+      integer(kind=c_int),intent(in) :: kts,kte
       real(kind=c_float), intent(in) :: landsea
+      real(kind=c_float), intent(inout) :: zi
+      integer(kind=c_int), intent(inout) :: kzi
       real(kind=c_float),dimension(kts:kte),intent(in)::thetav1D,qke1D,dz1D
       real(kind=c_float),dimension(kts:kte+1), intent(in) :: zw1D
     END SUBROUTINE get_pblh_cc
@@ -850,7 +851,7 @@ CONTAINS
     real(kind_phys), dimension(kts:kte) ::                  &
          &thetav,sh,sm,u1,v1,w1,p1,                         &
          &ex1,dz1,th1,tk1,rho1,qke1,tsq1,qsq1,cov1,         &
-         &sqv,sqi,sqc,sqs,                                  &
+         &sqv2,sqi2,sqc,sqs,                                  &
          &du1,dv1,dth1,dqv1,dqc1,dqi1,dqs1,ozone1,          &
          &k_m1,k_h1,qni1,dqni1,qnc1,dqnc1,qnwfa1,qnifa1,    &
          &qnbca1,dqnwfa1,dqnifa1,dqnbca1,dozone1
@@ -941,7 +942,6 @@ CONTAINS
       enddo
     endif
 
-    write(*,*) "Calling mynn2"
 !***  Begin debugging
     IMD=(IMS+IME)/2
     JMD=(JMS+JME)/2
@@ -1054,9 +1054,9 @@ CONTAINS
 
        DO i=ITS,ITF !this is where we go from 2d to 1d
           if (FLAG_QI ) then
-             sqi(:)=sqi3D(i,:)
+             sqi2(:)=sqi3D(i,:)
           else
-             sqi = 0.0
+             sqi2 = 0.0
           endif
           if (FLAG_QS ) then
              sqs(:)=sqs3D(i,:)
@@ -1079,12 +1079,12 @@ CONTAINS
                 ex1(k)=exner(i,k)
                 rho1(k)=rho(i,k)
                 sqc(k)=sqc3D(i,k) !/(1.+qv(i,k))
-                sqv(k)=sqv3D(i,k) !/(1.+qv(i,k))
-                thetav(k)=th(i,k)*(1.+p608*sqv(k))
+                sqv2(k)=sqv3D(i,k) !/(1.+qv(i,k))
+                thetav(k)=th(i,k)*(1.+p608*sqv2(k))
                 !keep snow out for now - increases ceiling bias
-                sqw(k)=sqv(k)+sqc(k)+sqi(k)!+sqs(k)
+                sqw(k)=sqv2(k)+sqc(k)+sqi2(k)!+sqs(k)
                 thl(k)=th1(k) - xlvcp/ex1(k)*sqc(k) &
-                    &         - xlscp/ex1(k)*(sqi(k))!+sqs(k))
+                    &         - xlscp/ex1(k)*(sqi2(k))!+sqs(k))
                 !Use form from Tripoli and Cotton (1981) with their
                 !suggested min temperature to improve accuracy.
                 !thl(k)=th(i,k)*(1.- xlvcp/MAX(tk1(k),TKmin)*sqc(k) &
@@ -1121,6 +1121,7 @@ CONTAINS
 
 !>  - Call get_pblh() to calculate hybrid (\f$\theta_{v}-TKE\f$) PBL height.
              CALL get_pblh_cc(KTS,KTE,PBLH(i),thetav,Qke1,zw,dz1,xland(i),KPBL(i))
+             write(*,*) "out of get_pblh"
              
 !>  - Call scale_aware() to calculate similarity functions for scale-adaptive control
 !! (\f$P_{\sigma-PBL}\f$ and \f$P_{\sigma-shcu}\f$).
@@ -1130,6 +1131,7 @@ CONTAINS
                 Psig_bl(i)=1.0
                 Psig_shcu(i)=1.0
              ENDIF
+             write(*,*) "2"
 
              ! DH* CHECK IF WE CAN DO WITHOUT CALLING THIS ROUTINE FOR RESTARTS
 !>  - Call mym_initialize() to initializes the mixing length, TKE, \f$\theta^{'2}\f$,
@@ -1141,10 +1143,11 @@ CONTAINS
              else
                  INITIALIZE_QKE_I=0
              endif
+             write(*,*) "3"
              CALL mym_initialize_cc (             & 
                   &kts,kte,xland(i),              &
                   &dz1, dx(i), zw,                &
-                  &u1, v1, thl, sqv,              &
+                  &u1, v1, thl, sqv2,              &
                   &PBLH(i), th1, thetav, sh, sm,  &
                   &ust(i), rmol(i),               &
                   &el, Qke1, Tsq1, Qsq1, Cov1,    &
@@ -1188,6 +1191,7 @@ CONTAINS
 
     ENDIF ! end initflag
 
+             write(*,*) "4"
 !> - After initializing all required variables, the regular procedures 
 !! performed at every time step are ready for execution.
     !ACF- copy qke_adv array into qke if using advection
@@ -1201,9 +1205,9 @@ CONTAINS
           dqke(i,:)=qke(i,:)
        endif
        if (FLAG_QI ) then
-          sqi(:)=sqi3D(i,:)
+          sqi2(:)=sqi3D(i,:)
        else
-          sqi = 0.0
+          sqi2 = 0.0
        endif
        if (FLAG_QS ) then
           sqs(:)=sqs3D(i,:)
@@ -1234,12 +1238,12 @@ CONTAINS
        p1(kts:kte)     =p(i,kts:kte)
        ex1(kts:kte)    =exner(i,kts:kte)
        rho1(kts:kte)   =rho(i,kts:kte)
-       sqv(kts:kte)    =sqv3D(i,kts:kte) !/(1.+qv(i,kts:kte))
+       sqv2(kts:kte)    =sqv3D(i,kts:kte) !/(1.+qv(i,kts:kte))
        sqc(kts:kte)    =sqc3D(i,kts:kte) !/(1.+qv(i,kts:kte))
-       qv1(kts:kte)    =sqv(kts:kte)/(1.-sqv(kts:kte))
-       qc1(kts:kte)    =sqc(kts:kte)/(1.-sqv(kts:kte))
-       qi1(kts:kte)    =sqi(kts:kte)/(1.-sqv(kts:kte))
-       qs1(kts:kte)    =sqs(kts:kte)/(1.-sqv(kts:kte))
+       qv1(kts:kte)    =sqv2(kts:kte)/(1.-sqv2(kts:kte))
+       qc1(kts:kte)    =sqc(kts:kte)/(1.-sqv2(kts:kte))
+       qi1(kts:kte)    =sqi2(kts:kte)/(1.-sqv2(kts:kte))
+       qs1(kts:kte)    =sqs(kts:kte)/(1.-sqv2(kts:kte))
        dqc1(kts:kte)   =0.0
        dqi1(kts:kte)   =0.0
        dqs1(kts:kte)   =0.0
@@ -1337,17 +1341,18 @@ CONTAINS
              zw(k)=zw(k-1)+dz(i,k-1)
           endif
           !keep snow out for now - increases ceiling bias
-          sqw(k)= sqv(k)+sqc(k)+sqi(k)!+sqs(k)
+          sqw(k)= sqv2(k)+sqc(k)+sqi2(k)!+sqs(k)
           thl(k)= th1(k) - xlvcp/ex1(k)*sqc(k) &
-               &         - xlscp/ex1(k)*(sqi(k))!+sqs(k))
+               &         - xlscp/ex1(k)*(sqi2(k))!+sqs(k))
           !Use form from Tripoli and Cotton (1981) with their
           !suggested min temperature to improve accuracy.
           !thl(k)=th(i,k)*(1.- xlvcp/MAX(tk1(k),TKmin)*sqc(k) &
           !    &               - xlscp/MAX(tk1(k),TKmin)*sqi(k))
-          thetav(k)=th1(k)*(1.+p608*sqv(k))
+          thetav(k)=th1(k)*(1.+p608*sqv2(k))
        enddo ! end k
        zw(kte+1)=zw(kte)+dz(i,kte)
 
+    write(*,*) "Calling mynn4"
        !initialize smoke/chem arrays (if used):
        if ( mix_chem ) then
           do ic = 1,ndvel
@@ -1388,6 +1393,7 @@ CONTAINS
        sqcg= 0.0   !ill-defined variable; qcg has been removed
        cpm=cp*(1.+0.84*qv1(kts))
        exnerg=(ps(i)/p1000mb)**rcp
+    write(*,*) "Calling mynn5"
 
        !-----------------------------------------------------
        !ORIGINAL CODE
@@ -1427,6 +1433,7 @@ CONTAINS
           phh   = phih(zet)
        end if
 
+    write(*,*) "Calling mynn6"
 !>  - Call mym_condensation_cc() to calculate the nonconvective component
 !! of the subgrid cloud fraction and mixing ratio as well as the functions
 !! used to calculate the buoyancy flux. Different cloud PDFs can be
@@ -1434,7 +1441,7 @@ CONTAINS
 
        call mym_condensation_cc (kts,kte,                   &
             &dx(i),dz1,zw,xland(i),                      &
-            &thl,sqw,sqv,sqc,sqi,sqs,                    &
+            &thl,sqw,sqv2,sqc,sqi2,sqs,                    &
             &p1,ex1,tsq1,qsq1,cov1,                      &
             &Sh,el,bl_mynn_cloudpdf,                     &
             &qc_bl1D,qi_bl1D,cldfra_bl1D,                &
@@ -1449,7 +1456,7 @@ CONTAINS
        if (bl_mynn_topdown.eq.1) then
           call topdown_cloudrad_cc(kts,kte,dz1,zw,fltv,     &
                &xland(i),kpbl(i),PBLH(i),                &
-               &sqc,sqi,sqw,thl,th1,ex1,p1,rho1,thetav,  &
+               &sqc,sqi2,sqw,thl,th1,ex1,p1,rho1,thetav,  &
                &cldfra_bl1D,rthraten(i,:),               &
                &maxKHtopdown(i),KHtopdown,TKEprodTD      )
        else
@@ -1471,7 +1478,7 @@ CONTAINS
                &bl_mynn_edmf_tke,                        &
                &bl_mynn_mixscalars,                      &
                &u1,v1,w1,th1,thl,thetav,tk1,             &
-               &sqw,sqv,sqc,qke1,                        &
+               &sqw,sqv2,sqc,qke1,                        &
                &qnc1,qni1,qnwfa1,qnifa1,qnbca1,          &
                &ust(i),flt,fltv,flq,flqv,                &
                &PBLH(i),KPBL(i),DX(i),                   &
@@ -1496,11 +1503,12 @@ CONTAINS
                &maxmf(i),ztop_plume(i),                  &
                &spp_pbl,rstoch_col, grav, gtr, p608      )
        endif
+    write(*,*) "Calling mynn7"
 
        if (bl_mynn_edmf_dd == 1) then
           call DDMF_JPL_cc(kts,kte,delt,zw,dz1,p1,       &
                &u1,v1,th1,thl,thetav,tk1,                &
-               &sqw,sqv,sqc,rho1,ex1,                    &
+               &sqw,sqv2,sqc,rho1,ex1,                    &
                &ust(i),flt,flq,                          &
                &PBLH(i),KPBL(i),                         &
                &edmf_a_dd1,edmf_w_dd1,edmf_qt_dd1,       &
@@ -1562,10 +1570,11 @@ CONTAINS
           diss_heat(1:kte) = 0.
        endif
 
+    write(*,*) "Calling mynn8"
 !>  - Call mynn_tendencies() to solve for tendencies of 
 !! \f$U, V, \theta, q_{v}, q_{c}, and q_{i}\f$.
        call mynn_tendencies_cc(kts,kte,delt, dz1, rho1,    &
-               &u1,v1,tk1,qv1,ps(i),p1,thl,sqv,sqc,sqw,ust(i),flt,   &
+               &u1,v1,tk1,qv1,ps(i),p1,thl,sqv2,sqc,sqw,ust(i),flt,   &
                &flq,flqv,flqc,wspd(i),uoce(i),voce(i),tcd, & 
                &qcd,dfm,dfh,Du1,Dv1,Dth1,diss_heat,        &
                ! mass flux components
@@ -1684,6 +1693,7 @@ CONTAINS
           qDISS(i,k)    =0.
           dqke(i,k)     =0.
        endif
+    write(*,*) "Calling mynn9"
 
        !update updraft/downdraft properties
        if (bl_mynn_output > 0) then !research mode == 1

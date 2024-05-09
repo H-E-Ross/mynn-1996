@@ -25,3 +25,6 @@ main/*a
 main/*exe
 main/*f90
 run/*exe
+external/io_netcdf/*o
+external/io_int/*o
+external/esmf_time_f90/*o

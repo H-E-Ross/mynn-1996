@@ -22,7 +22,7 @@ extern "C" void ddmf_jpl_cc(int kts, int kte, float dt, std::vector<float> zw, s
 
 extern "C" void scale_aware_cc(float dx, float pbl1, float& psig_bl, float& psig_shcu); 
 
-extern "C" void get_pblh_cc(int kts, int kte, float zi, const std::vector<float>& thetav1d, const std::vector<float>& qke1d, const std::vector<float>& zw1d, const std::vector<float>& dz1d, float landsea, int kzi);
+extern "C" void get_pblh_cc(int &kts, int &kte, float &zi, float *thetav1d, float *qke1d, float *zw1d, float *dz1d, float &landsea, int &kzi);
 
 extern "C" void retrieve_exchange_coeffs_cc(int kts, int kte, const std::vector<float>& dfm, const std::vector<float>& dfh, const std::vector<float>& dz, std::vector<float>& k_m, std::vector<float>& k_h);
 
@@ -30,7 +30,7 @@ extern "C" void dmp_mf_cc(int kts, int kte, float dt, float* zw, float* dz, floa
 
 extern "C" void mym_turbulence_cc(int kts, int kte, float xland, float closure, float* dz, float* dx, float* zw, float* u, float* v, float* thl, float* thetav, float* ql, float* qw, float* qke, float* tsq, float* qsq, float* cov, float* vt, float* vq, float sgm, float rmo, float flt, float fltv, float flq, float zi, float* theta, float* sh, float* sm, float* el, float* dfm, float* dfh, float* dfq, float* tcd, float* qcd, float* pdk, float* pdt, float* pdq, float* pdc, float* qWT1D, float* qSHEAR1D, float* qBUOY1D, float* qDISS1D, int tke_budget, float Psig_bl, float Psig_shcu, float* cldfra_bl1D, int bl_mynn_mixlength, float* edmf_w1, float* edmf_a1, float* TKEprodTD, int spp_pbl, float* rstoch_col, float debug_code, float gtr, float tv0);
 
-extern "C" void mym_initialize_cc(int kts, int kte, float xland, float dz[], float dx, float zw[], float u[], float v[], float thl[], float qw[], float rmo, float Psig_bl, float ust, float zi, float theta[], float thetav[], float sh[], float sm[], float ql[], float pdk[], float pdt[], float pdq[], float pdc[], float dtl[], float dqw[], float dtv[], float gm[], float gh[], float tsq[], float qsq[], float cov[], float el[], float qke[], float cldfra_bl1D[], int bl_mynn_mixlength, float edmf_w1[], float edmf_a1[], int INITIALIZE_QKE, int spp_pbl, float rstoch_col[],float karman,float tv0, float gtr);
+extern "C" void mym_initialize_cc(int &kts, int &kte, float &xland, float *dz, float &dx, float *zw, float *u, float *v, float *thl, float *qw, float &rmo, float &Psig_bl, float &ust, float &zi, float *theta, float *thetav, float *sh, float *sm, float *ql, float *pdk, float *pdt, float *pdq, float *pdc, float *dtl, float *dqw, float *dtv, float *gm, float *gh, float *tsq, float *qsq, float *cov, float *el, float *qke, float *cldfra_bl1D, int &bl_mynn_mixlength, float *edmf_w1, float *edmf_a1, int &INITIALIZE_QKE, int &spp_pbl, float *rstoch_col, float &karman, float &tv0, float &gtr);
 //----------------------------------------contstants-------------------------------------------
 
 // constants
@@ -1973,18 +1973,18 @@ void scale_aware_cc(float dx, float pbl1, float& psig_bl, float& psig_shcu) {
 //value could be found to work best in all conditions.
 //>\section gen_get_pblh  gsd get_pblh general algorithm
 //> @{
-void get_pblh_cc(int kts, int kte, float zi, const std::vector<float>& thetav1d, const std::vector<float>& qke1d, const std::vector<float>& zw1d, const std::vector<float>& dz1d, float landsea, int kzi) {
+void get_pblh_cc(int &kts, int &kte, float &zi, float* thetav1d, float *qke1d, float *zw1d, float* dz1d, float &landsea, int &kzi) {
+    // HR: SEGFAULTS WHEN ACCESSING VECTORS, need to look into how to pass 1d arrays to c++ from fortran
     // constants
     const float sbl_lim = 200.0;
     const float sbl_damp = 400.0;
-
+    std::cout << "in get pblh" <<std::endl;
     // local variables
     float pblh_tke, qtke, qtkem1, maxqke, tkeeps, minthv, delt_thv;
     int kthv, ktke;
 
     // initialize kpbl (kzi)
     kzi = 2;
-
     // find min thetav in the lowest 200 m agl
     kthv = 1;
     minthv = 9e9;
@@ -1994,11 +1994,11 @@ void get_pblh_cc(int kts, int kte, float zi, const std::vector<float>& thetav1d,
             kthv = k;
         }
     }
+    std::cout << "1" <<std::endl;
 
     // find thetav-based pblh (best for daytime)
     zi = 0.0;
     delt_thv = (landsea - 1.5) >= 0 ? 1.0 : 1.25;
-
     for (int k = kthv + 1; k < kte; ++k) {
         if (thetav1d[k - kts] >= (minthv + delt_thv)) {
             zi = zw1d[k - kts] - dz1d[k - 1 - kts] * std::min((thetav1d[k - kts] - (minthv + delt_thv)) / std::max(thetav1d[k - kts] - thetav1d[k - 1 - kts], 1.e-6f), 1.0f);
@@ -3184,36 +3184,46 @@ void mym_turbulence_cc(int kts, int kte, float xland, float closure, float* dz, 
 // \f$q^{'2}\f$, and \f$\theta^{'}q^{'}\f$.
 //\section gen_mym_ini GSD MYNN-EDMF mym_initialize General Algorithm
 //> @{
-void mym_initialize_cc(int kts, int kte, float xland, float dz[], float dx, float zw[], float u[], float v[], float thl[], float qw[], float rmo, float Psig_bl, float ust, float zi, float theta[], float thetav[], float sh[], float sm[], float ql[], float pdk[], float pdt[], float pdq[], float pdc[], float dtl[], float dqw[], float dtv[], float gm[], float gh[], float tsq[], float qsq[], float cov[], float el[], float qke[], float cldfra_bl1D[], int bl_mynn_mixlength, float edmf_w1[], float edmf_a1[], int INITIALIZE_QKE, int spp_pbl, float rstoch_col[],float karman,float tv0, float gtr) {
+void mym_initialize_cc(int &kts, int &kte, float &xland, float *dz, float &dx, float *zw, float *u, float *v, float *thl, float *qw, float &rmo, float &Psig_bl, float &ust, float &zi, float *theta, float *thetav, float *sh, float *sm, float *ql, float *pdk, float *pdt, float *pdq, float *pdc, float *dtl, float *dqw, float *dtv, float *gm, float *gh, float *tsq, float *qsq, float *cov, float *el, float *qke, float *cldfra_bl1D, int &bl_mynn_mixlength, float *edmf_w1, float *edmf_a1, int &INITIALIZE_QKE, int &spp_pbl, float *rstoch_col,float &karman,float &tv0, float &gtr) {
     float phm, vkz, elq, elv, b1l, b2l, pmz = 1.0, phh = 1.0, flt = 0.0, fltv = 0.0, flq = 0.0, tmpq;
     int k, l, lmax;
     float* qkw = new float[kte-kts]; 
     float* vt = new float[kte-kts];
     float* vq = new float[kte-kts];
     // At first ql, vt and vq are set to zero.
+    std::cout<<"init 1"<<std::endl;
     for (k = kts; k <= kte; k++) {
         ql[k-kts] = 0.0;
         vt[k-kts] = 0.0;
         vq[k-kts] = 0.0;
     }
     
+    std::cout<<"init 2"<<std::endl;
     // Call mym_level2() to calculate the stability functions at level 2.
     mym_level2_cc(kts, kte, dz, u, v, thl, thetav, qw, ql, vt, vq, dtl, dqw, dtv, gm, gh, sm, sh, tv0, gtr);
+    std::cout<<"init 3"<<std::endl;
     
     // Preliminary setting
     el[kts] = 0.0;
+    std::cout<<"1"<<std::endl;
     if (INITIALIZE_QKE==1) {
+    std::cout<<"2"<<std::endl;
         qke[kts] = 1.5 * ust * ust * pow(b1 * pmz, 2.0 / 3.0);
+    std::cout<<"3"<<std::endl;
         for (k = kts + 1; k <= kte; k++) {
+    std::cout<<"4"<<std::endl;
             qke[k] = qke[kts] * std::max((ust * 700.0f - zw[k]) / (std::max(ust, 0.01f) * 700.0f), 0.01f);
+    std::cout<<"5"<<std::endl;
         }
     }
     
+    std::cout<<"init 4"<<std::endl;
     phm = phh * b2 / pow(b1 * pmz, 1.0 / 3.0);
     tsq[kts] = phm * pow(flt / ust, 2);
     qsq[kts] = phm * pow(flq / ust, 2);
     cov[kts] = phm * (flt / ust) * (flq / ust);
     
+    std::cout<<"init 5"<<std::endl;
     for (k = kts + 1; k <= kte; k++) {
         vkz = karman * zw[k];
         el[k] = vkz / (1.0 + vkz / 100.0);
@@ -3222,6 +3232,7 @@ void mym_initialize_cc(int kts, int kte, float xland, float dz[], float dx, floa
         cov[k] = 0.0;
     }
     
+    std::cout<<"init 6"<<std::endl;
     // Initialization with an iterative manner
     lmax = 5;
     
@@ -3263,11 +3274,13 @@ void mym_initialize_cc(int kts, int kte, float xland, float dz[], float dx, floa
             cov[k] = b2l * (pdc[k + 1] + pdc[k]);
         }
     }
+    std::cout<<"init 7"<<std::endl;
     
     if (INITIALIZE_QKE==1) {
         qke[kts] = 0.5 * (qke[kts] + qke[kts + 1]);
         qke[kte] = qke[kte - 1];
     }
+    std::cout<<"init 8"<<std::endl;
     tsq[kte] = tsq[kte - 1];
     qsq[kte] = qsq[kte - 1];
     cov[kte] = cov[kte - 1];
