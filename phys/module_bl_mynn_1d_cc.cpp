@@ -30,7 +30,7 @@ extern "C" void dmp_mf_cc(int kts, int kte, float dt, float* zw, float* dz, floa
 
 extern "C" void mym_turbulence_cc(int kts, int kte, float xland, float closure, float* dz, float* dx, float* zw, float* u, float* v, float* thl, float* thetav, float* ql, float* qw, float* qke, float* tsq, float* qsq, float* cov, float* vt, float* vq, float sgm, float rmo, float flt, float fltv, float flq, float zi, float* theta, float* sh, float* sm, float* el, float* dfm, float* dfh, float* dfq, float* tcd, float* qcd, float* pdk, float* pdt, float* pdq, float* pdc, float* qWT1D, float* qSHEAR1D, float* qBUOY1D, float* qDISS1D, int tke_budget, float Psig_bl, float Psig_shcu, float* cldfra_bl1D, int bl_mynn_mixlength, float* edmf_w1, float* edmf_a1, float* TKEprodTD, int spp_pbl, float* rstoch_col, float debug_code, float gtr, float tv0);
 
-extern "C" void mym_initialize_cc(int &kts, int &kte, float &xland, float *dz, float &dx, float *zw, float *u, float *v, float *thl, float *qw, float &rmo, float &Psig_bl, float &ust, float &zi, float *theta, float *thetav, float *sh, float *sm, float *ql, float *pdk, float *pdt, float *pdq, float *pdc, float *dtl, float *dqw, float *dtv, float *gm, float *gh, float *tsq, float *qsq, float *cov, float *el, float *qke, float *cldfra_bl1D, int &bl_mynn_mixlength, float *edmf_w1, float *edmf_a1, int &INITIALIZE_QKE, int &spp_pbl, float *rstoch_col, float &karman, float &tv0, float &gtr);
+extern "C" void mym_initialize_cc(int &kts, int &kte, float &xland, float *dz, float &dx, float *zw, float *u, float *v, float *thl, float *qw, float &rmo, float &Psig_bl, float &ust, float &zi, float *theta, float *thetav, float *sh, float *sm, float *ql, float *pdk, float *pdt, float *pdq, float *pdc, float *dtl, float *dqw, float *dtv, float *gm, float *gh, float *tsq, float *qsq, float *cov, float *el, float *qke, float *cldfra_bl1D, int &bl_mynn_mixlength, float *edmf_w1, float *edmf_a1, int &INITIALIZE_QKE, int &spp_pbl, float *rstoch_col, float karman, float tv0, float gtr);
 //----------------------------------------contstants-------------------------------------------
 
 // constants
@@ -449,11 +449,11 @@ void boulac_length_cc(int kts, int kte, const std::vector<float>& qtke, const st
 //\section gen_mym_level2 gsd mynn-edmf mym_level2 general algorithm
 // @ {
 
-void mym_level2_cc(int kts, int kte, float* dz, float* u, float* v,
+void mym_level2_cc(int &kts, int &kte, float* dz, float* u, float* v,
                 float* thl, float* thetav, float* qw, float* ql,
                 float* vt, float* vq, float* dtl, float* dqw,
                 float* dtv, float* gm, float* gh, float* sm, float* sh, 
-		float tv0, float gtr) {
+		float &tv0, float &gtr) {
     float rfc, f1, f2, rf1, rf2, smc, shc, ri1, ri2, ri3, ri4, duz, dtz, dqz, vtt, vqq, dtq, dzk, afk, abk, ri, rf;
     float a2fac;
 
@@ -480,7 +480,7 @@ void mym_level2_cc(int kts, int kte, float* dz, float* u, float* v,
         dqz = (qw[k] - qw[k - 1]) / dzk;
 
         vtt = 1.0 + vt[k] * abk + vt[k - 1] * afk; // beta-theta in nn09, eq. 39
-        vqq = tv0 + vq[k] * abk + vq[k - 1] * afk; // beta-q
+        vqq = tv0; //+ vq[k] * abk + vq[k - 1] * afk; // beta-q
         dtq = vtt * dtz + vqq * dqz;
         // alternatively, use theta-v without the sgs clouds
         // dtq = (thetav[k] - thetav[k - 1]) / dzk;
@@ -3184,7 +3184,7 @@ void mym_turbulence_cc(int kts, int kte, float xland, float closure, float* dz, 
 // \f$q^{'2}\f$, and \f$\theta^{'}q^{'}\f$.
 //\section gen_mym_ini GSD MYNN-EDMF mym_initialize General Algorithm
 //> @{
-void mym_initialize_cc(int &kts, int &kte, float &xland, float *dz, float &dx, float *zw, float *u, float *v, float *thl, float *qw, float &rmo, float &Psig_bl, float &ust, float &zi, float *theta, float *thetav, float *sh, float *sm, float *ql, float *pdk, float *pdt, float *pdq, float *pdc, float *dtl, float *dqw, float *dtv, float *gm, float *gh, float *tsq, float *qsq, float *cov, float *el, float *qke, float *cldfra_bl1D, int &bl_mynn_mixlength, float *edmf_w1, float *edmf_a1, int &INITIALIZE_QKE, int &spp_pbl, float *rstoch_col,float &karman,float &tv0, float &gtr) {
+void mym_initialize_cc(int &kts, int &kte, float &xland, float *dz, float &dx, float *zw, float *u, float *v, float *thl, float *qw, float &rmo, float &Psig_bl, float &ust, float &zi, float *theta, float *thetav, float *sh, float *sm, float *ql, float *pdk, float *pdt, float *pdq, float *pdc, float *dtl, float *dqw, float *dtv, float *gm, float *gh, float *tsq, float *qsq, float *cov, float *el, float *qke, float *cldfra_bl1D, int &bl_mynn_mixlength, float *edmf_w1, float *edmf_a1, int &INITIALIZE_QKE, int &spp_pbl, float *rstoch_col,float karman,float tv0, float gtr) {
     float phm, vkz, elq, elv, b1l, b2l, pmz = 1.0, phh = 1.0, flt = 0.0, fltv = 0.0, flq = 0.0, tmpq;
     int k, l, lmax;
     float* qkw = new float[kte-kts]; 
@@ -3197,11 +3197,9 @@ void mym_initialize_cc(int &kts, int &kte, float &xland, float *dz, float &dx, f
         vt[k-kts] = 0.0;
         vq[k-kts] = 0.0;
     }
-    
-    std::cout<<"init 2"<<std::endl;
     // Call mym_level2() to calculate the stability functions at level 2.
     mym_level2_cc(kts, kte, dz, u, v, thl, thetav, qw, ql, vt, vq, dtl, dqw, dtv, gm, gh, sm, sh, tv0, gtr);
-    std::cout<<"init 3"<<std::endl;
+    std::cout<<"breaks here"<<std::endl;
     
     // Preliminary setting
     el[kts] = 0.0;
@@ -3216,7 +3214,7 @@ void mym_initialize_cc(int &kts, int &kte, float &xland, float *dz, float &dx, f
     std::cout<<"5"<<std::endl;
         }
     }
-    
+   
     std::cout<<"init 4"<<std::endl;
     phm = phh * b2 / pow(b1 * pmz, 1.0 / 3.0);
     tsq[kts] = phm * pow(flt / ust, 2);

@@ -1144,10 +1144,11 @@ CONTAINS
                  INITIALIZE_QKE_I=0
              endif
              write(*,*) "3"
+             write(*,*) "tv0: ", tv0
              CALL mym_initialize_cc (             & 
-                  &kts,kte,xland(i),              &
+                  &kts-1,kte-1,xland(i),          &
                   &dz1, dx(i), zw,                &
-                  &u1, v1, thl, sqv2,              &
+                  &u1, v1, thl, sqv2,             &
                   &PBLH(i), th1, thetav, sh, sm,  &
                   &ust(i), rmol(i),               &
                   &el, Qke1, Tsq1, Qsq1, Cov1,    &
