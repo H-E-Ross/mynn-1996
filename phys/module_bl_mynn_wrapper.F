@@ -118,7 +118,7 @@ SUBROUTINE mynnedmf_wrapper_run(                 &
      &  its,ite,jts,jte,kts,kte                  )
 
 !     use module_bl_mynn, only: mynn_bl_driver
-     use module_bl_mynn_driver, only: mynn_bl_driver
+     use module_bl_mynn, only: mynn_bl_driver
 
 !------------------------------------------------------------------- 
      implicit none
@@ -582,7 +582,7 @@ SUBROUTINE mynnedmf_wrapper_run(                 &
      &        IDS=ids,IDE=ide,JDS=jds,JDE=jde,KDS=kds,KDE=kde,         & !input
      &        IMS=ims,IME=ime,JMS=jms,JME=jme,KMS=kms,KME=kme,         & !input
      &        ITS=its,ITE=itf,JTS=jts,JTE=jtf,KTS=kts,KTE=kte)           !input
-!print*,"In mynn wrapper, after bl_mynn_driver"
+!print*,"In mynn wrapper, after bl_mynn"
 
      !- Convert spec hum to mixing ratio:
       do k=kts,ktf
