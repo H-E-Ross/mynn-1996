@@ -264,7 +264,7 @@ MODULE module_bl_mynn
         tice      , kind_phys
 
   !!use module_bl_mynn_1d
-  use iso_c_binding !, only: c_double, c_int, c_float, c_bool
+  use iso_c_binding !, only: c_double, c_int, c_float 
 
   IMPLICIT NONE
 
@@ -299,7 +299,7 @@ MODULE module_bl_mynn
       real(kind=c_float), dimension(kts:kte), intent(inout) :: qWT1D, qDISS1D
     END SUBROUTINE mym_predict_cc
   
-SUBROUTINE mynn_tendencies_cc(kts,kte,delt,dz,rho,                &
+SUBROUTINE mynn_tendencies_cc(kts,kte,i,delt,dz,rho,                &
        &        u,v,th,tk,qv,qc,qi,qs,qnc,qni,&
        &psfc,p,exner,thl,sqv,sqc,sqi,sqs,sqw,         &
        &        qnwfa, qnifa, qnbca, ozone,                       &
@@ -322,11 +322,9 @@ SUBROUTINE mynn_tendencies_cc(kts,kte,delt,dz,rho,                &
        &        bl_mynn_cloudmix,bl_mynn_mixqt,  &
        &        bl_mynn_edmf_mom,bl_mynn_mixscalars,       &
        &        debug_code,r_d, p608, ep_2,      &
-       &        ep_3,tv0,xlv,xlvcp,xlscp) bind(c)
-     import c_int,c_float,c_bool
-    ! these are defs in original
-    integer(kind=c_int), intent(in) :: kts,kte
-    ! checked
+       &        ep_3,tv0,xlv,xlvcp,xlscp,karman) bind(c)
+      import c_int,c_float
+      integer(kind=c_int), intent(in) :: kts,kte,i
       integer(kind=c_int), intent(in) :: FLAG_QC_I
       integer(kind=c_int), intent(in) :: FLAG_QI_I,FLAG_QNC_I,     &
                &FLAG_QNI_I,FLAG_QS_I,                        &
@@ -340,7 +338,8 @@ SUBROUTINE mynn_tendencies_cc(kts,kte,delt,dz,rho,                &
       &s_aw,s_awqt,s_awqv,s_awqc,s_awu,s_awv,s_awqnc,s_awqni,s_awqnwfa,&
       &s_awqnifa,s_awqnbca,                           &
       &sd_aw,sd_awthl,sd_awqt,sd_awqv,sd_awqc,sd_awu,sd_awv
-    real(kind=c_float), intent(in) :: ep_2,ep_3,tv0,xlv,xlvcp,xlscp
+    real(kind=c_float), intent(in) ::ep_2,ep_3,tv0,xlv,xlvcp,xlscp, &
+     &karman
 ! tendencies from mass-flux environmental subsidence and detrainment
     real(kind=c_float), dimension(kts:kte), intent(in) :: sub_thl,sub_sqv,   &
          &sub_u,sub_v,det_thl,det_sqv,det_sqc,det_u,det_v
@@ -380,9 +379,9 @@ SUBROUTINE mynn_tendencies_cc(kts,kte,delt,dz,rho,                &
     integer(kind=c_int), intent(in) :: rrfs_sd, enh_mix
     END SUBROUTINE mynn_mix_chem_cc
 
-  SUBROUTINE moisture_check_cc(kte, delt, dp, exner,   &
-                            qv, qc, qi, qs, th,     &
-                            dqv, dqc, dqi, dqs, dth ) bind (c)
+    SUBROUTINE moisture_check_cc(kte, delt, dp, exner, qv,  &
+    &          qc, qi, qs, th, dqv, dqc, dqi, dqs, dth,     &
+    &          xlvcp, xlscp, karman ) bind (c)
   !! This subroutine was adopted from the CAM-UW ShCu scheme and
   !! adapted for use here.
   !!
@@ -397,11 +396,13 @@ SUBROUTINE mynn_tendencies_cc(kts,kte,delt,dz,rho,                &
   !! applying corresponding input tendencies and corrective tendencies.
     import c_int, c_float
     integer(kind=c_int),         intent(in)     :: kte
-    real(kind=c_float), intent(in)     :: delt
+    real(kind=c_float), intent(in)     :: delt,xlvcp,xlscp,karman
     real(kind=c_float), dimension(kte), intent(in)     :: dp, exner
     real(kind=c_float), dimension(kte), intent(inout)  :: qv, qc, qi, qs, th
     real(kind=c_float), dimension(kte), intent(inout)  :: dqv, dqc, dqi, dqs, dth
   END SUBROUTINE moisture_check_cc
+
+
 
     SUBROUTINE  mym_condensation_cc (kts,kte,   &
     &            dx, dz, zw, xland,        &
@@ -513,6 +514,7 @@ SUBROUTINE mynn_tendencies_cc(kts,kte,delt,dz,rho,                &
                  & u,v,w,th,thl,thv,tk,         &
                  & qt,qv,qc,qke,                &
                  & qnc,qni,qnwfa,qnifa,qnbca,   &
+                 & exner, vt, vq,               &
                  & ust,flt,fltv,flq,flqv,       &
                  & pblh,kpbl,dx,landsea,ts,     &
             ! outputs - updraft properties
@@ -525,6 +527,8 @@ SUBROUTINE mynn_tendencies_cc(kts,kte,delt,dz,rho,                &
                  & s_awu,s_awv,s_awqke,         &
                  & s_awqnc,s_awqni,             &
                  & s_awqnwfa,s_awqnifa,s_awqnbca, &
+                 & sub_thl,sub_sqv,sub_u,sub_v, &
+                 & det_thl,det_sqv,det_u,det_v, &
             ! chem/smoke
                  & nchem,chem1,s_awchem,        &
                  & mix_chem,                    &
@@ -536,7 +540,10 @@ SUBROUTINE mynn_tendencies_cc(kts,kte,delt,dz,rho,                &
                  & maxwidth,ktop,maxmf,ztop,    &
             ! inputs for stochastic perturbations
                  & spp_pbl,rstoch_col,grav,gtr, &
-                 & p608   ) bind(c)
+                 & p608,p1000mb,rcp,xlvcp,rvovrd&
+                 & onethird,tv0,cpv,ep_2,ep_3,  &
+                 & r_v,xl,tliq,cice,xlv,xls,cp
+                 & cliq ) bind(c)
          import c_float, c_int
   ! inputs:
      integer(kind=c_int), intent(in) :: kts,kte,kpbl,momentum_opt,tke_opt,scalar_opt
@@ -545,12 +552,14 @@ SUBROUTINE mynn_tendencies_cc(kts,kte,delt,dz,rho,                &
      real(kind=c_float), dimension(kts:kte)  :: rstoch_col
 
      real(kind=c_float),dimension(kts:kte), intent(in) ::                 &
-          &U,V,W,TH,THL,TK,QT,QV,QC,                                   &
+          &U,V,W,TH,THL,TK,QT,QV,QC,VT,VQ                                 &
           &dz,THV,P,rho,qke,qnc,qni,qnwfa,qnifa,qnbca
      real(kind=c_float),dimension(kts:kte+1), intent(in) :: zw    !height at full-sigma
      real(kind=c_float), intent(in) :: flt,fltv,flq,flqv,Psig_shcu,       &
           &landsea,ts,dx,dt,ust,pblh
-     real(kind=c_float), intent(in), value :: grav, gtr, p608
+     real(kind=c_float), intent(in),value ::grav,gtr,p608,p1000mb,rcp, &
+          & xlvcp,rvovrd,xlvcp,rvovrd,onethird,tv0,cpv,ep_2,ep_3,      & 
+          & r_v,xl,tliq,cice,xlv,xls,cp
      real(kind=c_float),dimension(kts:kte), intent(out) :: edmf_a,edmf_w, &
           & edmf_qt,edmf_thl,edmf_ent,edmf_qc
      integer(kind=c_int), intent(out) :: ktop 
@@ -559,7 +568,8 @@ SUBROUTINE mynn_tendencies_cc(kts,kte,delt,dz,rho,                &
           &qc_bl1d,cldfra_bl1d,qc_bl1d_old,cldfra_bl1d_old
      real(kind=c_float),dimension(kts:kte+1), intent(in) :: s_aw,       & !sum ai*rho*wis_awphi
           &s_awthl,s_awqt,s_awqv,s_awqc,s_awqnc,s_awqni,s_awqke,        &
-          &s_awqnwfa,s_awqnifa,s_awqnbca,s_awu,s_awv
+          &s_awqnwfa,s_awqnifa,s_awqnbca,s_awu,s_awv, sub_thl,
+          &sub_sqv,sub_u,sub_v,det_thl,det_sqv,det_u,det_v
      real(kind=c_float),dimension(kts:kte+1,nchem), intent(in) :: s_awchem
      real(kind=c_float), dimension(kts:kte,nchem), intent(in) :: chem1
 
@@ -815,6 +825,9 @@ CONTAINS
                          & IDS,IDE,JDS,JDE,KDS,KDE           &
                          &,IMS,IME,JMS,JME,KMS,KME           &
                          &,ITS,ITE,JTS,JTE,KTS,KTE
+
+!    real :: start, finish
+
 #define WRF_TEST_CC_1 1
 #define WRF_TEST_CC_2
 #define WRF_TEST_CC
@@ -827,6 +840,7 @@ CONTAINS
 # define kts 1
 # define kte HARDCODE_VERTICAL
 #endif
+
 
 ! initflag > 0  for TRUE
 ! else        for FALSE
@@ -974,6 +988,9 @@ CONTAINS
        &FLAG_QNI_I,FLAG_QS_I,               &
        &FLAG_QNWFA_I,FLAG_QNIFA_I,          &
        &FLAG_QNBCA_I,FLAG_OZONE_I
+
+!      call cpu_time(start)
+
       kts_cc=kts-1
       kte_cc=kte-1
 #ifdef WRF_TEST_CC_2
@@ -1687,16 +1704,16 @@ CONTAINS
           else
               mix_chem_i=0
           endif
-          call dmp_mf_cc(                                   &
-               &kts_cc,kte_cc,delt,zw,dz1,p1,rho1,             &
+          call dmp_mf_cc(                                &
+               &kts_cc,kte_cc,delt,zw,dz1,p1,rho1,       &
                &bl_mynn_edmf_mom,                        &
                &bl_mynn_edmf_tke,                        &
                &bl_mynn_mixscalars,                      &
                &u1,v1,w1,th1,thl,thetav,tk1,             &
-               &sqw,sqv2,sqc,qke1,                        &
+               &sqw,sqv2,sqc,qke1,                       &
                &qnc1,qni1,qnwfa1,qnifa1,qnbca1,          &
                &ust(i),flt,fltv,flq,flqv,                &
-               &PBLH(i),KPBL_cc(i),DX(i),                   &
+               &PBLH(i),KPBL_cc(i),DX(i),                &
                &xland(i),th_sfc,                         &
             ! now outputs - tendencies
             ! &,dth1mf,dqv1mf,dqc1mf,du1mf,dv1mf         &
@@ -1709,15 +1726,18 @@ CONTAINS
                &s_awu1,s_awv1,s_awqke1,                  &
                &s_awqnc1,s_awqni1,                       &
                &s_awqnwfa1,s_awqnifa1,s_awqnbca1,        &
+               & sub_thl,sub_sqv,sub_u,sub_v,            &
+               & det_thl,det_sqv,det_u,det_v,            &
             ! chem/smoke mixing
                &nchem,chem1,s_awchem1,                   &
-               &mix_chem_i,                                &
+               &mix_chem_i,                              &
                &qc_bl1D,cldfra_bl1D,                     &
                &qc_bl1D_old,cldfra_bl1D_old,             &
                &Psig_shcu(i),                            &               
                &maxwidth(i),ktop_plume(i),               &
                &maxmf(i),ztop_plume(i),                  &
-               &spp_pbl,rstoch_col, grav, gtr, p608      )
+               &spp_pbl,rstoch_col, grav, gtr, p608,     &
+               &p1000mb,rcp,xlvcp,rvovrd)
        endif
 #else
        if (bl_mynn_edmf > 0) then
@@ -2344,6 +2364,10 @@ CONTAINS
 # undef kts
 # undef kte
 #endif
+
+    !call cpu_time(finish)
+    !print '("Time for MYNN driver (C++) = ",f6.3," seconds.")',finish-start
+
 
     END SUBROUTINE mynn_bl_driver
 !> @}
@@ -5914,9 +5938,10 @@ ENDIF
     ENDIF
 
     !ensure non-negative moist species
-    CALL moisture_check(kte, delt, delp, exner,        &
+    CALL moisture_check_cc(kte, delt, delp, exner,        &
                         sqv2, sqc2, sqi2, sqs2, thl,   &
-                        dqv, dqc, dqi, dqs, dth        )
+                        dqv, dqc, dqi, dqs, dth,       &
+                        xlvcp, xlscp, karman)
 
     !=====================
     ! OZONE TENDENCY CHECK
@@ -5989,7 +6014,7 @@ ENDIF
     !ensure non-negative moist species
     !note: if called down here, dth needs to be updated, but
     !      if called before the theta-tendency calculation, do not compute dth
-    !CALL moisture_check(kte, delt, delp, exner,     &
+    !CALL moisture_check_cc(kte, delt, delp, exner,     &
     !                    sqv, sqc, sqi, thl,         &
     !                    dqv, dqc, dqi, dth )
 
@@ -6031,7 +6056,7 @@ ENDIF
   END SUBROUTINE mynn_tendencies
 
 ! ==================================================================
-  SUBROUTINE moisture_check(kte, delt, dp, exner,   &
+  SUBROUTINE moisture_check2(kte, delt, dp, exner,   &
                             qv, qc, qi, qs, th,     &
                             dqv, dqc, dqi, dqs, dth )
 
@@ -6119,7 +6144,7 @@ ENDIF
 
     return
 
-  END SUBROUTINE moisture_check
+  END SUBROUTINE moisture_check2
 
 ! ==================================================================
 
@@ -6614,7 +6639,10 @@ ENDIF
             ! output info
                  & maxwidth,ktop,maxmf,ztop,    &
             ! inputs for stochastic perturbations
-                 & spp_pbl,rstoch_col           ) 
+                 & spp_pbl,rstoch_col,
+            ! Constants
+                 & grav,gtr,p608,p1000mb,rcp,   &
+                 &xlvcp,rvovrd,onethird, tv0) 
 
   ! inputs:
      integer, intent(in) :: KTS,KTE,KPBL,momentum_opt,tke_opt,scalar_opt

@@ -72,7 +72,7 @@ extern "C" void get_pblh_cc(int &kts, int &kte, float &zi, float *thetav1d, floa
 
 extern "C" void retrieve_exchange_coeffs_cc(int& kts, int& kte, float* dfm, float* dfh, const float* dz, float* k_m, float* k_h);
 
-extern "C" void dmp_mf_cc(const int& kts, const int& kte, float& dt, float* zw, float* dz, float* p, float* rho, int& momentum_opt, int& tke_opt, int& scalar_opt, float* u, float* v, float* w, float* th, float* thl, float* thv, float* tk, float* qt, float* qv, float* qc, float* qke, float* qnc, float* qni, float* qnwfa, float* qnifa, float* qnbca, float& ust, float& flt, float& fltv, float& flq, float& flqv, float& pblh, int& kpbl, float& dx, float& landsea, float& ts, float* edmf_a, float* edmf_w, float* edmf_qt, float* edmf_thl, float* edmf_ent, float* edmf_qc, float* s_aw, float* s_awthl, float* s_awqt, float* s_awqv, float* s_awqc, float* s_awu, float* s_awv, float* s_awqke, float* s_awqnc, float* s_awqni, float* s_awqnwfa, float* s_awqnifa, float* s_awqnbca, int& nchem, float** chem1, float** s_awchem, bool& mix_chem, float* qc_bl1d, float* cldfra_bl1d, float* qc_bl1d_old, float* cldfra_bl1d_old, float& psig_shcu, float& maxwidth, int& ktop, float& maxmf, float& ztop, float* rstoch_col, const float grav, float gtr, float p608);
+extern "C" void dmp_mf_cc(const int& kts, const int& kte, float& dt, float* zw, float* dz, float* p, float* rho, int& momentum_opt, int& tke_opt, int& scalar_opt, float* u, float* v, float* w, float* th, float* thl, float* thv, float* tk, float* qt, float* qv, float* qc, float* qke, float* qnc, float* qni, float* qnwfa, float* qnifa, float* qnbca, float* exner, float *vt, float* vq, float& ust, float& flt, float& fltv, float& flq, float& flqv, float& pblh, int& kpbl, float& dx, float& landsea, float& ts, float* edmf_a, float* edmf_w, float* edmf_qt, float* edmf_thl, float* edmf_ent, float* edmf_qc, float* s_aw, float* s_awthl, float* s_awqt, float* s_awqv, float* s_awqc, float* s_awu, float* s_awv, float* s_awqke, float* s_awqnc, float* s_awqni, float* s_awqnwfa, float* s_awqnifa, float* s_awqnbca, float* sub_thl, float *sub_sqv, float * sub_u, float * sub_v, float det_thl, float * det_sqv, float * det_sqc, float* det_u, float* det_v, int& nchem, float** chem1, float** s_awchem, bool& mix_chem, float* qc_bl1d, float* cldfra_bl1d, float* qc_bl1d_old, float* cldfra_bl1d_old, float& psig_shcu, float& maxwidth, int& ktop, float& maxmf, float& ztop, float* rstoch_col, const float grav, float gtr, float p608, float onethird, float tv0, float cpv, float ep_2, float ep_3, float r_v,  float xl, float tliq, float cice, float xlv, float xls, float cp, float cliq);
 
 extern "C" void mym_turbulence_cc(int& kts, int& kte, float& xland, float& closure, float* dz, float* dx, float* zw, float* u, float* v, float* thl, float* thetav, float* ql, float* qw, float* qke, float* tsq, float* qsq, float* cov, float* vt, float* vq, float& rmo, float& flt, float& fltv, float& flq, float& zi, float* theta, float* sh, float* sm, float* el, float* dfm, float* dfh, float* dfq, float* tcd, float* qcd, float* pdk, float* pdt, float* pdq, float* pdc, float* qWT1D, float* qSHEAR1D, float* qBUOY1D, float* qDISS1D, int& tke_budget, float& Psig_bl, float& Psig_shcu, float* cldfra_bl1D, int& bl_mynn_mixlength, float* edmf_w1, float* edmf_a1, float* TKEprodTD, int& spp_pbl, float* rstoch_col, int& debug_code, float& gtr, float& tv0);
 
@@ -1536,8 +1536,6 @@ void mynn_tendencies_cc(const int& kts,const int& kte, const float& i, const flo
       printf("%g ",dth[k]);
     printf("\n");
   */
-    
-//HR: comments go wrong somewhere in this function (see line 3444 for original function comments)
 
     // Activate nonlocal mixing from the mass-flux scheme for
     // number concentrations and aerosols (0.0 = no; 1.0 = yes)	  
@@ -2935,8 +2933,11 @@ void ddmf_jpl_cc(int& kts, int& kte, float& dt, const float* zw, const float* dz
               const float* rthraten, float& svp1, const float& grav, const float& onethird, const float& p1000mb, 
 	      float& rcp, float& xlvcp, float& cp, float& rvovrd ) {
     int ndown = 5;
+    //  draw downdraft starting height randomly between cloud base and cloud top
     int dd_initk[ndown];
     float randnum[ndown];
+
+    // downdraft properties
     float downw[kte + 1][ndown];
     float downthl[kte + 1][ndown];
     float downqt[kte + 1][ndown];
@@ -2945,8 +2946,12 @@ void ddmf_jpl_cc(int& kts, int& kte, float& dt, const float* zw, const float* dz
     float downu[kte + 1][ndown];
     float downv[kte + 1][ndown];
     float downthv[kte + 1][ndown];
+
+    // entrainment variables
     float ent[kte + 1][ndown];
     int enti[kte + 1][ndown];
+
+    // internal variables
     int k, i, ki, kminrad, qltop, p700_ind, qlbase;
     float wthv, wstar, qstar, thstar, sigmaw, sigmaqt, sigmath, z0, pwmin, pwmax, wmin, wmax, wlv, wtv, went, mindownw;
     float b, qtn, thln, thvn, qcn, un, vn, qken, wn2, wn, thvk, pk, entexp, entw, beta_dm, entexp_m, rho_int;
@@ -2954,24 +2959,34 @@ void ddmf_jpl_cc(int& kts, int& kte, float& dt, const float* zw, const float* dz
     float minrad, zminrad, radflux, f0, wst_rad, wst_dd;
     bool cloudflg;
     float sigq, xl, rsl, cpm, a, mf_cf, diffqt, fng, qww, alpha, beta, bb, f, pt, t, q2p, b9, satvp, rhgrid;
-    float wa = 1.0, wb = 1.5, z00 = 100.0, bcoeff = 0.2;
+
+    // w parameters
+    float wa = 1.0, wb = 1.5, z00 = 100.0, bcoeff = 0.2; //HR: These should be passed in
+    // entrainment parameters
     float l0 = 80, ent0 = 0.2;
-    float dp, dl, adn;
+    // downdraft properties
+    float dp,  // diameter of plume 
+	  dl,  // diameter increment
+	  adn; // total area of downdrafts
     int debug_mf = 0;
+
     dl = (1000.0f - 500.0f) / ndown;
-    pwmin = -3.0;
+    pwmin = -3.0; // drawing from the negative tail -3sigma to -1sigma
     pwmax = -1.0;
+
+    // initialize downdraft properties
     for(k=kts;k<=kte+1;k++) {
-    for(i=0;i<ndown;i++) {
-    downw[k][i] = 0.0f;
-    downthl[k][i] = 0.0f;
-    downthv[k][i] = 0.0f;
-    downqt[k][i] = 0.0f;
-    downqc[k][i] = 0.0f;
-    downa[k][i] = 0.0f;
-    downu[k][i] = 0.0f;
-    downv[k][i] = 0.0f;
-    }
+        for(i=0;i<ndown;i++) {
+            downw[k][i] = 0.0f;
+	    downthl[k][i] = 0.0f;
+	    downthv[k][i] = 0.0f;
+	    downqt[k][i] = 0.0f;
+	    downqc[k][i] = 0.0f;
+	    downa[k][i] = 0.0f;
+	    downu[k][i] = 0.0f;
+	    downv[k][i] = 0.0f;
+    	}
+    // outputs - variables needed for solver (sd_aw - sum ai*wi, sd_awphi - sum ai*wi*phii)
     sd_aw[k] = 0.0f;
     sd_awthl[k] = 0.0f;
     sd_awqt[k] = 0.0f;
@@ -2982,6 +2997,7 @@ void ddmf_jpl_cc(int& kts, int& kte, float& dt, const float* zw, const float* dz
     sd_awqke[k] = 0.0f;
     }
     for(k=kts;k<=kte;k++) {
+    // outputs - downdraft properties
     edmf_a_dd[k] = 0.0f;
     edmf_w_dd[k] = 0.0f;
     edmf_qt_dd[k] = 0.0f;
@@ -2998,42 +3014,79 @@ void ddmf_jpl_cc(int& kts, int& kte, float& dt, const float* zw, const float* dz
     for (int i = 0; i < ndown; i++) {
         dd_initk[i] = 0.0;
     }
+
+    // FIRST, CHECK FOR STRATOCUMULUS-TOPPED BOUNDARY LAYERS
     cloudflg = false;
     minrad = 100.0;
     kminrad = kpbl;
     zminrad = pblh;
-    qltop = 0;
+    qltop = 0; // initialize at 0
     qlbase = 0;
     wthv = wthl + svp1 * wqt;
     for (int i = std::max(2, kpbl - 2); i <= kpbl + 3; i++) {
         if (qc[i] > 1.0e-6 && cldfra_bl1d[i] > 0.5f) {
-            cloudflg = true;
-            qltop = i;
+            cloudflg = true; // found Sc cloud
+            qltop = i;       // index for Sc cloud top
         }
-    }
-    for (int i = qltop; i >= kts; i--) {
-        if (qc[i] > 1e-6) {
-            qlbase = i;
-        }
-    }
-    qlbase = (qltop + qlbase) / 2;
-    for (int i = 0; i < ndown; i++) {
-        dd_initk[i] = qltop;
     }
 
+    for (int i = qltop; i >= kts; i--) {
+        if (qc[i] > 1e-6) {
+            qlbase = i; // index for Sc cloud base
+        }
+    }
+    qlbase = (qltop + qlbase) / 2; // changed base to half way through the cloud
+
+    // call init_random_seed_1()
+    // call RANDOM_NUMBER(randNum)
+    for (int i = 0; i < ndown; i++) {
+	// downdraft starts somewhere between cloud base to cloud top
+	// the probability is equally distributed
+        dd_initk[i] = qltop; // nint(randNum(i)*real(qlTop-qlBase)) + qlBase
+    }
+
+    // LOOP RADFLUX
     f0 = 0.0;
-    for (int i = 0; i <= qltop; i++) {
-        radflux = rthraten[i] * exner[i];
-        radflux = radflux * cp / grav * (p[i] - p[i + 1]);
+    for (int i = 0; i <= qltop; i++) { // Snippet from YSU, YSU loops until qlTop - 1
+        radflux = rthraten[i] * exner[i]; // Converts theta/s to temperature/s
+        radflux = radflux * cp / grav * (p[i] - p[i + 1]); // Converts K/s to W/m^2
         if (radflux < 0.0f) {
             f0 = abs(radflux) + f0;
         }
     }
     f0 = std::max(f0, 1.0f);
+
+    // Allow the total fractional area of the downdrafts to be proportional
+    // to the radiative forcing:
+    // for  50 W/m2, Adn = 0.10
+    // for 100 W/m2, Adn = 0.15
+    // for 150 W/m2, Adn = 0.20
     adn = std::min(0.05f + f0 * 0.001f, 0.3f);
+
+    // found Sc cloud and cloud not at surface, trigger downdraft
     if (cloudflg) {
 
-    p700_ind = 0;
+    // !get entrainent coefficient
+    // do i=1,NDOWN
+    //      do k=kts+1,kte
+    //           ENTf(k,i)=(ZW(k+1)-ZW(k))/L0
+    //      enddo
+    // enddo
+    //
+    //  get Poisson P(dz/L0)
+    //  call Poisson(1,NDOWN,kts+1,kte,ENTf,ENTi)
+
+    // entrainent: Ent=Ent0/dz*P(dz/L0)
+    // do i=1,NDOWN
+    //    do k=kts+1,kte
+    //            ENT(k,i)=real(ENTi(k,i))*Ent0/(ZW(k+1)-ZW(k))
+    //            ENT(k,i) = 0.002
+    //            ENT(k,i) = min(ENT(k,i),0.9/(ZW(k+1)-ZW(k)))
+    //     enddo
+    // enddo
+
+    // !!![EW: INVJUMP] find 700mb height then subtract trpospheric lapse rate!!!	    
+    p700_ind = 0; // p1D is 70000
     float min_value = p[0];
     for (int i = kts; i <= kte; ++i) {
 	float pval=abs(p[i]-70000.0f);
@@ -3046,63 +3099,130 @@ void ddmf_jpl_cc(int& kts, int& kte, float& dt, const float* zw, const float* dz
         jump_thetav = thv[p700_ind] - thv[1] - (thv[p700_ind] - thv[qltop + 3]) / (zw[p700_ind] - zw[qltop + 3]) * (zw[p700_ind] - zw[qltop]);
         jump_qt = qc[p700_ind] + qv[p700_ind] - qc[1] - qv[1];
         jump_thetal = thl[p700_ind] - thl[1] - (thl[p700_ind] - thl[qltop + 3]) / (zw[p700_ind] - zw[qltop + 3]) * (zw[p700_ind] - zw[qltop]);
-        refthl = thl[qltop];
-        refthv = thv[qltop];
-        refqt = qt[qltop];
+
+        refthl = thl[qltop]; // sum(thl(1:qlTop)) / (qlTop) ! avg over BL for now or just at qlTop
+        refthv = thv[qltop]; // sum(thv(1:qlTop)) / (qlTop)
+        refqt = qt[qltop];   // sum(qt(1:qlTop))  / (qlTop)
+			     
+	// wstar_rad, following Lock and MacVean (1999a)
         wst_rad = pow(grav * zw[qltop] * f0 / (refthl * rho[qltop] * cp), 0.333);
         wst_rad = std::max(wst_rad, 0.1f);
         wstar = std::max(0.0, pow(grav / thv[1] * wthv * pblh, onethird));
         went = thv[1] / (grav * jump_thetav * zw[qltop]) * (0.15f * (pow(wstar, 3) + 5 * pow(ust, 3)) + 0.35f * pow(wst_rad, 3));
         qstar = abs(went * jump_qt / wst_rad);
         thstar = f0 / (rho[qltop] * cp * wst_rad) - went * jump_thetav / wst_rad;
+	// wstar_dd = mixrad + surface wst
         wst_dd = pow(0.15f * (pow(wstar, 3) + 5 * pow(ust, 3)) + 0.35f * pow(wst_rad, 3), 0.333);
 
-        sigmaw = 0.2f * wst_dd;
-        sigmaqt = 40 * qstar;
-        sigmath = 1.0f * thstar;
+        sigmaw = 0.2f * wst_dd;  // 0.8*wst_dd !wst_rad tuning parameter ! 0.5 was good
+        sigmaqt = 40 * qstar;    // 50 was good
+        sigmath = 1.0f * thstar; // 0.5 was good
+
         wmin = sigmaw * pwmin;
         wmax = sigmaw * pwmax;
-        for (int i = 0; i < ndown; i++) {
+
+        for (int i = 0; i < ndown; i++) { // downdraft now starts at different height
             ki = dd_initk[i];
+
             wlv = wmin + (wmax - wmin) / ndown * (i - 1);
             wtv = wmin + (wmax - wmin) / ndown * i;
+
+	    // DOWNW(ki,I)=0.5*(wlv+wtv)
             downw[ki][i] = wlv;
+	    // multiply downa by cloud fraction, so it's impact will diminish if
+	    // clouds are mixed away over the course of the longer radiation time step
+	    // DOWNA(ki,I)=0.5*ERF(wtv/(sqrt(2.)*sigmaW))-0.5*ERF(wlv/(sqrt(2.)*sigmaW))
             downa[ki][i] = adn / ndown;
             downu[ki][i] = (u[ki - 1] * dz[ki] + u[ki] * dz[ki - 1]) / (dz[ki] + dz[ki - 1]);
             downv[ki][i] = (v[ki - 1] * dz[ki] + v[ki] * dz[ki - 1]) / (dz[ki] + dz[ki - 1]);
+	    
+	    // reference now depends on where dd starts
+	    // refTHL = 0.5 * (thl(ki) + thl(ki-1))
+	    // refTHV = 0.5 * (thv(ki) + thv(ki-1))
+	    // refQT  = 0.5 * (qt(ki)  + qt(ki-1) )
             refthl = (thl[ki - 1] * dz[ki] + thl[ki] * dz[ki - 1]) / (dz[ki] + dz[ki - 1]);
             refthv = (thv[ki - 1] * dz[ki] + thv[ki] * dz[ki - 1]) / (dz[ki] + dz[ki - 1]);
             refqt = (qt[ki - 1] * dz[ki] + qt[ki] * dz[ki - 1]) / (dz[ki] + dz[ki - 1]);
+
+	    // DOWNQC(ki,I) = 0.0
             downqc[ki][i] = (qc[ki - 1] * dz[ki] + qc[ki] * dz[ki - 1]) / (dz[ki] + dz[ki - 1]);
-            downqt[ki][i] = refqt;
+            downqt[ki][i] = refqt; // + 0.5  *downw[ki][i]*sigmaQT/sigmaW
             downthv[ki][i] = refthv + 0.01f * downw[ki][i] * sigmath / sigmaw;
             downthl[ki][i] = refthl + 0.01f * downw[ki][i] * sigmath / sigmaw;
+            
+	    // input :: QT,THV,P,zagl,  output :: THL, QC
+	    // Pk  =(P(ki-1)*DZ(ki)+P(ki)*DZ(ki-1))/(DZ(ki)+DZ(ki-1))
+	    // call condensation_edmf_r(DOWNQT(ki,I),   &
+	    //      &        DOWNTHL(ki,I),Pk,ZW(ki),   &
+	    //           &     DOWNTHV(ki,I),DOWNQC(ki,I)    )
+	
         
-        for (int k = dd_initk[i] - 1; k >= kts + 1; k--) {
+	// print*, " Begin integration of downdrafts:"
+	// print *, "Plume # =", I,"======================="
+        for (int k = dd_initk[i] - 1; k >= kts + 1; k--) { // diameter of plume (meters)
+							   //
+	    // Entrainment from Tian and Kuang (2016), with constraints
             wmin = 0.3f + dp * 0.0005;
             ent[k+1][i] = 0.33f / (std::min(std::max(-1.0f * downw[k + 1][i], wmin), 0.9f) * dp);
-            entexp = ent[k+1][i] * dz[k];
-            entexp_m = ent[k+1][i] * 0.333f * dz[k];
+
+	    // starting at the first interface level below cloud top
+	    // EntExp=exp(-ENT(K,I)*dz(k))
+	    // EntExp_M=exp(-ENT(K,I)/3.*dz(k))
+            entexp = ent[k+1][i] * dz[k]; // for all scalars
+            entexp_m = ent[k+1][i] * 0.333f * dz[k]; // test for momentum
+
             qtn = downqt[k + 1][i] * (1.0f - entexp) + qt[k] * entexp;
             thln = downthl[k + 1][i] * (1.0f - entexp) + thl[k] * entexp;
             un = downu[k + 1][i] * (1.0f - entexp) + u[k] * entexp_m;
             vn = downv[k + 1][i] * (1.0f - entexp) + v[k] * entexp_m;
+	    // QKEn=DOWNQKE(k-1,I)*(1.-EntExp) + QKE(k)*EntExp
+
+	    /*
+	    QTn =DOWNQT(K+1,I) +(QT(K) -DOWNQT(K+1,I)) *(1.-EntExp)
+            THLn=DOWNTHL(K+1,I)+(THL(K)-DOWNTHL(K+1,I))*(1.-EntExp)
+            Un  =DOWNU(K+1,I)  +(U(K)  -DOWNU(K+1,I))*(1.-EntExp_M)
+            Vn  =DOWNV(K+1,I)  +(V(K)  -DOWNV(K+1,I))*(1.-EntExp_M)
+	     */
+
+	    // given new p & z, solve for thvn & qcn
             pk = (p[k - 1] * dz[k] + p[k] * dz[k - 1]) / (dz[k] + dz[k - 1]);
             condensation_edmf_cc(qtn, thln, pk, zw[k], thvn, qcn,p1000mb,rcp,xlvcp,rvovrd);
+	    // B=grav*(0.5*(THVn+DOWNTHV(k+1,I))/THV(k)-1.)
             thvk = (thv[k - 1] * dz[k] + thv[k] * dz[k - 1]) / (dz[k] + dz[k - 1]);
             b = grav * (thvn / thvk - 1.0f);
+	    // Beta_dm = 2*Wb*ENT(K,I) + 0.5/(ZW(k)-dz(k)) * &
+	    // &    max(1. - exp((ZW(k) -dz(k))/Z00 - 1. ) , 0.)
+	    // EntW=exp(-Beta_dm * dz(k))
             entw = entexp;
+	    // if (Beta_dm >0) then
+	    //    Wn2=DOWNW(K+1,I)**2*EntW - Wa*B/Beta_dm * (1. - EntW)
+	    // else
+	    //    Wn2=DOWNW(K+1,I)**2      - 2.*Wa*B*dz(k)
+	    // end if
+
             mindownw = std::min(downw[k + 1][i], -0.2f);
             wn = downw[k + 1][i] + (-2.0f * ent[k+1][i] * downw[k + 1][i] - bcoeff * b / mindownw) * std::min(dz[k], 250.0f);
+
+	    // Do not allow a parcel to accelerate more than 1.25 m/s over 200 m.
+	    // Add max acceleration of -2.0 m/s for coarse vertical resolution.
             if (wn < downw[k + 1][i] - std::min(1.25f * dz[k] / 200.0f, -2.0f)) {
                 wn = downw[k + 1][i] - std::min(1.25f * dz[k] / 200.0f, -2.0f);
             }
+	    // Add symmetrical max decrease in velocity (less negative)
             if (wn > downw[k + 1][i] + std::min(1.25f * dz[k] / 200.0f, 2.0f)) {
                 wn = downw[k + 1][i] + std::min(1.25f * dz[k] / 200.0f, 2.0f);
             }
             wn = std::max(std::min(wn, 0.0f), -3.0f);
-            if (wn < 0.0f) {
-                downw[k][i] = wn;
+
+	    // print *, "  k       =",      k,      " z    =", ZW(k)
+	    // print *, "  entw    =",ENT(K,I),     " Bouy =", B
+	    // print *, "  downthv =",   THVn,      " thvk =", thvk
+	    // print *, "  downthl =",   THLn,      " thl  =", thl(k)
+	    // print *, "  downqt  =",   QTn ,      " qt   =", qt(k)
+	    // print *, "  downw+1 =",DOWNW(K+1,I), " Wn2  =", Wn
+
+            if (wn < 0.0f) { // terminate when velocity is too small
+                downw[k][i] = wn; // -sqrt(Wn2)
                 downthv[k][i] = thvn;
                 downthl[k][i] = thln;
                 downqt[k][i] = qtn;
@@ -3112,6 +3232,7 @@ void ddmf_jpl_cc(int& kts, int& kte, float& dt, const float* zw, const float* dz
                 downa[k][i] = downa[k + 1][i];
             } 
 	    else {
+		// plumes must go at least 2 levels
                 if (dd_initk[i] - k < 2) {
                     downw[k][i] = 0.0f;
                     downthv[k][i] = 0.0f;
@@ -3125,11 +3246,15 @@ void ddmf_jpl_cc(int& kts, int& kte, float& dt, const float* zw, const float* dz
                 }
             }
         }
-    }
+    } // end cloud flag
+
     for (int i = 0; i < ndown; i++) {
-      downw[0][i] = 0.0f;
+      downw[0][i] = 0.0f; // make sure downdraft does not go to the surface
       downa[0][i] = 0.0f;
     }
+
+    // Combine both moist and dry plume, write as one averaged plume
+    // Even though downdraft starts at different height, average all up to qlTop
     for (int k = qltop; k >= kts; k--) {
         for (int i = 0; i < ndown; i++) {
             edmf_a_dd[k] += downa[k - 1][i];
@@ -3147,6 +3272,9 @@ void ddmf_jpl_cc(int& kts, int& kte, float& dt, const float* zw, const float* dz
             edmf_qc_dd[k] /= edmf_a_dd[k];
         }
     }
+
+    // computing variables needed for solver
+
     for (int k = kts; k <= qltop; k++) {
         rho_int = (rho[k] * dz[k + 1] + rho[k + 1] * dz[k]) / (dz[k + 1] + dz[k]);
         for (int i = 0; i < ndown; i++) {
@@ -3200,25 +3328,34 @@ void topdown_cloudrad_cc(int& kts, int& kte, const float* dz1, const float* zw, 
     }
 
     if (std::max(kminrad, kpbl) < 1) cloudflg = false;
-
     if (cloudflg) {
         zl1 = dz1[kts];
         k = std::max(kpbl - 1, kminrad - 1);
+	// Best estimate of height of TKE source (top of downdrafts):
+	// zminrad = 0.5*pblh(i) + 0.5*zminrad
+	
         templ = thl[k - kts] * ex1[k - kts];
+	// rvls is ws at full level
         rvls = 100.f * 6.112f * std::exp(17.67f * (templ - 273.16) / (templ - 29.65)) * (ep_2 / p1[k + 1 - kts]);
         temps = templ + (sqw[k - kts] - rvls) / (cp / xlv + ep_2 * xlv * rvls / (r_d * std::pow(templ, 2)));
         rvls = 100.f * 6.112f * std::exp(17.67f * (temps - 273.15) / (temps - 29.65)) * (ep_2 / p1[k + 1 - kts]);
         rcldb = std::max(sqw[k - kts] - rvls, 0.0f);
-        dthvx = (thl[k + 2 - kts] + th1[k + 2 - kts] * p608 * sqw[k + 2 - kts]) - (thl[k - kts] + th1[k - kts] * p608 * sqw[k - kts]);
+        // entrainment efficiency
+	dthvx = (thl[k + 2 - kts] + th1[k + 2 - kts] * p608 * sqw[k + 2 - kts]) - (thl[k - kts] + th1[k - kts] * p608 * sqw[k - kts]);
         dthvx = std::max(dthvx, 0.1f);
         tmp1 = xlvcp * rcldb / (ex1[k - kts] * dthvx);
+        // Originally from Nichols and Turton (1986), where a2 = 60, but lowered
+	// here to 8, as in Grenier and Bretherton (2001).
         ent_eff = 0.2f + 0.2f * 8.f * tmp1;
+
         radsum = 0.0;
         for (kk = std::max(0, kpbl - 3) ; kk <= kpbl + 1 + 3 - 1; ++kk) {
             radflux = rthraten[kk - kts] * ex1[kk - kts]; // converts theta/s to temp/s
             radflux = radflux * cp / grav * (p1[kk - kts] - p1[kk + 1 - kts]); // converts temp/s to w/m^2
             if (radflux < 0.0f) radsum = std::abs(radflux) + radsum;
         }
+
+	// More strict limits over land to reduce stable-layer mixouts
         if ((xland - 1.5f) >= 0) { // water
             radsum = std::min(radsum, 90.0f);
             bfx0 = std::max(radsum / rho1[k - kts] / cp, 0.0f);
@@ -3226,21 +3363,31 @@ void topdown_cloudrad_cc(int& kts, int& kte, const float* dz1, const float* zw, 
             radsum = std::min(0.25f * radsum, 30.0f); // practically turn off over land
             bfx0 = std::max(radsum / rho1[k - kts] / cp - std::max(fltv, 0.0f), 0.0f);
         }
+
+	// entrainment from PBL top thermals
         wm3 = grav / thetav[k - kts] * bfx0 * std::min(pblh, 1500.f); // this is wstar3
         bfxpbl = -ent_eff * bfx0;
         dthvx = std::max(thetav[k + 1 - kts] - thetav[k - kts], 0.1f);
         we = std::max(bfxpbl / dthvx, -std::sqrt(std::pow(wm3, twothirds)));
 
         for (kk = kts; kk <= kpbl + 3; ++kk) {
+	    // Analytic vertical profile
             zfac[kk - kts] = std::min(std::max((1.f - (zw[kk + 1 - kts] - zl1) / (zminrad - zl1)), zfmin), 1.0f);
             zfacent[kk - kts] = 10.f * std::max((zminrad - zw[kk + 1 - kts]) / zminrad, 0.0f) * ((1.f - zfac[kk - kts])*(1.f - zfac[kk - kts])*(1.f - zfac[kk - kts]));
+
+	    // Calculate an eddy diffusivity profile (not used at the moment)
             wscalek2[kk - kts] = std::pow((phifac * karman * wm3 * (zfac[kk - kts])), onethird);
+	    // Modify shape of Kh to be similar to Lock et al (2000): use pfac = 3.0
             khtopdown[kk - kts] = wscalek2[kk - kts] * karman * (zminrad - zw[kk + 1 - kts]) * ((1.f - zfac[kk - kts]) * (1.f - zfac[kk - kts]) * (1.f - zfac[kk - kts])); // pfac
             khtopdown[kk - kts] = std::max(khtopdown[kk - kts], 0.0f);
+
+	    // Calculate TKE production = 2(g/TH)(w'TH'), where w'TH' = A(TH/g)wstar^3/PBLH,
+	    // A = ent_eff, and wstar is associated with the radiative cooling at top of PBL.
+	    // An analytic profile controls the magnitude of this TKE prod in the vertical.
             tkeprodtd[kk - kts] = 2.f * ent_eff * wm3 / std::max(pblh, 100.f) * zfacent[kk - kts];
             tkeprodtd[kk - kts] = std::max(tkeprodtd[kk - kts], 0.0f);
         }
-    }
+    } // end cloud check
     maxkhtopdown = std::numeric_limits<float>::min();
     for (kk = kts; kk <= kte; ++kk) {
       maxkhtopdown = std::max(maxkhtopdown,khtopdown[kk]);
@@ -3248,6 +3395,72 @@ void topdown_cloudrad_cc(int& kts, int& kte, const float* dz1, const float* zw, 
 }
 
 void scale_aware_cc(float& dx, float& pbl1, float& psig_bl, float& psig_shcu) {
+/*
+ !---------------------------------------------------------------
+    !             NOTES ON SCALE-AWARE FORMULATION
+    !                    
+    !JOE: add scale-aware factor (Psig) here, taken from Honnert et al. (2011,
+    !     JAS) and/or from Hyeyum Hailey Shin and Song-You Hong (2013, JAS)
+    !
+    ! Psig_bl tapers local mixing
+    ! Psig_shcu tapers nonlocal mixing 
+
+    real(kind_phys), intent(in)  :: dx,pbl1
+    real(kind_phys), intent(out) :: Psig_bl,Psig_shcu
+    real(kind_phys)              :: dxdh
+
+    Psig_bl=1.0
+    Psig_shcu=1.0
+    dxdh=MAX(2.5*dx,10.)/MIN(PBL1,3000.) 
+    ! Honnert et al. 2011, TKE in PBL  *** original form used until 201605
+    !Psig_bl= ((dxdh**2) + 0.07*(dxdh**0.667))/((dxdh**2) + &
+    !         (3./21.)*(dxdh**0.67) + (3./42.))
+    ! Honnert et al. 2011, TKE in entrainment layer
+    !Psig_bl= ((dxdh**2) + (4./21.)*(dxdh**0.667))/((dxdh**2) + &
+     !        (3./20.)*(dxdh**0.67) + (7./21.))
+    ! New form to preseve parameterized mixing - only down 5% at dx = 750 m
+     Psig_bl= ((dxdh**2) + 0.106*(dxdh**0.667))/((dxdh**2) +0.066*(dxdh**0.667) + 0.071)
+        
+    !assume a 500 m cloud depth for shallow-cu clods
+    dxdh=MAX(2.5*dx,10.)/MIN(PBL1+500.,3500.)
+    ! Honnert et al. 2011, TKE in entrainment layer *** original form used until 201605
+    !Psig_shcu= ((dxdh**2) + (4./21.)*(dxdh**0.667))/((dxdh**2) + &
+    !         (3./20.)*(dxdh**0.67) + (7./21.))
+
+    ! Honnert et al. 2011, TKE in cumulus
+    !Psig(i)= ((dxdh**2) + 1.67*(dxdh**1.4))/((dxdh**2) +1.66*(dxdh**1.4) +
+    !0.2)
+
+    ! Honnert et al. 2011, w'q' in PBL
+    !Psig(i)= 0.5 + 0.5*((dxdh**2) + 0.03*(dxdh**1.4) -
+    !(4./13.))/((dxdh**2) + 0.03*(dxdh**1.4) + (4./13.))
+    ! Honnert et al. 2011, w'q' in cumulus
+    !Psig(i)= ((dxdh**2) - 0.07*(dxdh**1.4))/((dxdh**2) -0.07*(dxdh**1.4) +
+    !0.02)
+
+    ! Honnert et al. 2011, q'q' in PBL
+    !Psig(i)= 0.5 + 0.5*((dxdh**2) + 0.25*(dxdh**0.667) -0.73)/((dxdh**2)
+    !-0.03*(dxdh**0.667) + 0.73)
+    ! Honnert et al. 2011, q'q' in cumulus
+    !Psig(i)= ((dxdh**2) - 0.34*(dxdh**1.4))/((dxdh**2) - 0.35*(dxdh**1.4)
+    !+ 0.37)
+
+    ! Hyeyum Hailey Shin and Song-You Hong 2013, TKE in PBL (same as Honnert's above)
+    !Psig_shcu= ((dxdh**2) + 0.070*(dxdh**0.667))/((dxdh**2)
+    !+0.142*(dxdh**0.667) + 0.071)
+    ! Hyeyum Hailey Shin and Song-You Hong 2013, TKE in entrainment zone  *** switch to this form 201605
+    Psig_shcu= ((dxdh**2) + 0.145*(dxdh**0.667))/((dxdh**2) +0.172*(dxdh**0.667) + 0.170)
+
+    ! Hyeyum Hailey Shin and Song-You Hong 2013, w'theta' in PBL
+    !Psig(i)= 0.5 + 0.5*((dxdh**2) -0.098)/((dxdh**2) + 0.106)
+! Hyeyum Hailey Shin and Song-You Hong 2013, w'theta' in entrainment zone
+    !Psig(i)= 0.5 + 0.5*((dxdh**2) - 0.112*(dxdh**0.25) -0.071)/((dxdh**2)
+    !+ 0.054*(dxdh**0.25) + 0.10)
+
+    !print*,"in scale_aware; dx, dxdh, Psig(i)=",dx,dxdh,Psig(i)
+
+ */
+
     float dxdh;
     psig_bl = 1.0f;
     psig_shcu = 1.0f;
@@ -3259,7 +3472,7 @@ void scale_aware_cc(float& dx, float& pbl1, float& psig_bl, float& psig_shcu) {
     // assume a 500 m cloud depth for shallow-cu clouds
     dxdh = std::max(2.5f * dx, 10.0f) / std::min(pbl1 + 500.0f, 3500.0f);
     
-    // hyeyum hailey shin and song-you hong 2013, tke in entrainment zone
+    // Hyeyum Hailey Shin and Song-You Hong 2013, TKE in entrainment zone  *** switch to this form 201605
     psig_shcu = ((dxdh * dxdh) + 0.145f * std::pow(dxdh, 0.667f)) / ((dxdh * dxdh) + 0.172f * std::pow(dxdh, 0.667f) + 0.170f);
     
     // clamping psig_bl and psig_shcu to [0, 1]
@@ -3270,6 +3483,7 @@ void scale_aware_cc(float& dx, float& pbl1, float& psig_bl, float& psig_shcu) {
 
 // ==================================================================
 //>\ingroup gsd_mynn_edmf
+void get_pblh_cc(int &kts, int &kte, float &zi, float* thetav1d, float *qke1d, float *zw1d, float* dz1d, float &landsea, int &kzi) {
 // this subroutine calculates hybrid diagnotic boundary-layer height (pblh).
 //
 // notes on the pblh formulation: the 1.5-theta-increase method defines
@@ -3288,11 +3502,9 @@ void scale_aware_cc(float& dx, float& pbl1, float& psig_bl, float& psig_shcu) {
 //value could be found to work best in all conditions.
 //>\section gen_get_pblh  gsd get_pblh general algorithm
 //> @{
-void get_pblh_cc(int &kts, int &kte, float &zi, float* thetav1d, float *qke1d, float *zw1d, float* dz1d, float &landsea, int &kzi) {
-    // HR: SEGFAULTS WHEN ACCESSING VECTORS, need to look into how to pass 1d arrays to c++ from fortran
-    // constants
-    const float sbl_lim = 200.0;
-    const float sbl_damp = 400.0;
+    // constants HR: these should be passed in
+    const float sbl_lim = 200.0;  // upper limit of stable BL height (m).
+    const float sbl_damp = 400.0; // transition length for blending (m).
 
     // local variables
     float pblh_tke, qtke, qtkem1, maxqke, tkeeps, minthv, delt_thv;
@@ -3300,14 +3512,17 @@ void get_pblh_cc(int &kts, int &kte, float &zi, float* thetav1d, float *qke1d, f
 
     // initialize kpbl (kzi)
     kzi = 2;
+
     // find min thetav in the lowest 200 m agl
     kthv = 1;
     minthv = 9e9;
     for (int k = kts + 1; k <= kte && zw1d[k - kts] <= 200.; ++k) {
+    // DO k=kts+1,kte-1
         if (minthv > thetav1d[k - kts]) {
             minthv = thetav1d[k - kts];
             kthv = k;
         }
+        // IF (zw1D(k) .GT. sbl_lim) exit
     }
 
     // find thetav-based pblh (best for daytime)
@@ -3315,37 +3530,50 @@ void get_pblh_cc(int &kts, int &kte, float &zi, float* thetav1d, float *qke1d, f
     delt_thv = (landsea - 1.5f) >= 0 ? 1.0f : 1.25;
     for (int k = kthv + 1; k < kte; ++k) {
         if (thetav1d[k - kts] >= (minthv + delt_thv)) {
+
             zi = zw1d[k - kts] - dz1d[k - 1 - kts] * std::min((thetav1d[k - kts] - (minthv + delt_thv)) / std::max(thetav1d[k - kts] - thetav1d[k - 1 - kts], 1.e-6f), 1.0f);
             break;
         }
         if (k == kte - 1) zi = zw1d[kts + 1 - kts]; // exit safeguard
     }
 
-    // for stable boundary layers, use tke method to complement the thetav-based definition
+    // THETAV-BASED DEFINITION (WHEN THE THETA-V BASED PBLH IS BELOW ~0.5 KM).
+    // THE TANH WEIGHTING FUNCTION WILL MAKE THE TKE-BASED DEFINITION NEGLIGIBLE
+    // WHEN THE THETA-V-BASED DEFINITION IS ABOVE ~1 KM.
     pblh_tke = 0.0;
     maxqke = std::max(qke1d[kts - kts], 0.0f);
     tkeeps = maxqke / 40.0;
-    tkeeps = std::max(tkeeps, 0.02f);
+    tkeeps = std::max(tkeeps, 0.02f); //0.025f)
 
+    // DO WHILE (PBLH_TKE .EQ. 0.)
     for (int k = kts + 1; k < kte; ++k) {
-        qtke = std::max(qke1d[k - kts] / 2.0f, 0.0f);
+	// QKE CAN BE NEGATIVE (IF CKmod == 0)... MAKE TKE NON-NEGATIVE.
+        qtke = std::max(qke1d[k - kts] / 2.0f, 0.0f);  // maximum TKE
         qtkem1 = std::max(qke1d[k - 1 - kts] / 2.0f, 0.0f);
         if (qtke <= tkeeps) {
             pblh_tke = zw1d[k - kts] - dz1d[k - 1 - kts] * std::min((tkeeps - qtke) / std::max(qtkem1 - qtke, 1.0e-6f), 1.0f);
+	// N CASE OF NEAR ZERO TKE, SET PBLH = LOWEST LEVEL.
             pblh_tke = std::max(pblh_tke, zw1d[kts + 1 - kts]);
             break;
+	// print *,"PBLH_TKE:",i,PBLH_TKE, Qke1D(k)/2., zw1D(kts+1)
         }
         if (k == kte - 1) pblh_tke = zw1d[kts + 1 - kts]; // exit safeguard
     }
 
-    // limit pblh_tke to not exceed the thetav-based pbl height +/- 350 m
+    // - With TKE advection turned on, the TKE-based PBLH can be very large 
+    //  in grid points with convective precipitation (> 8 km!),
+    //  so an artificial limit is imposed to not let PBLH_TKE exceed the
+    //  theta_v-based PBL height +/- 350 m.
+    //  This has no impact on 98-99% of the domain, but is the simplest patch
+    //  that adequately addresses these extremely large PBLHs.
     pblh_tke = std::min(pblh_tke, zi + 350.0f);
     pblh_tke = std::max(pblh_tke, std::max(zi - 350.0f, 10.0f));
 
     float wt = 0.5f * std::tanh((zi - sbl_lim) / sbl_damp) + 0.5;
-    if (maxqke > 0.05) {
-        zi = pblh_tke * (1.0f - wt) + zi * wt;
-    }
+    if (maxqke > 0.05) { 
+        zi = pblh_tke * (1.0f - wt) + zi * wt; // BLEND THE TWO PBLH TYPES HERE: 
+    } // else: Cold pool situation - default to theta_v-based def
+
 
     // compute kpbl (kzi)
     for (int k = kts + 1; k < kte; ++k) {
@@ -3356,6 +3584,7 @@ void get_pblh_cc(int &kts, int &kte, float &zi, float* thetav1d, float *qke1d, f
     }
 }
 
+//!>\ingroup gsd_mynn_edmf
 void retrieve_exchange_coeffs_cc(int& kts, int& kte, float* dfm, float* dfh, const float* dz, float* k_m, float* k_h) {
     float dzk;
     k_m[kts] = 0.0;
@@ -3384,35 +3613,56 @@ void retrieve_exchange_coeffs_cc(int& kts, int& kte, float* dfm, float* dfh, con
 //           sigmal levels (or interfaces beween the model layers).
 //
 //>\ingroup gsd_mynn_edmf
-// this subroutine calculates the mixing lengths.
-
 void mym_length(int kts, int kte, float xland, float* dz, float* dx, float* zw, float rmo, float flt, float fltv, float flq, float* vt, float* vq, float* u1, float* v1, float* qke, float* dtv, float* el, float zi, float* theta, float* qkw, float psig_bl, float* cldfra_bl1d, int bl_mynn_mixlength, float* edmf_w1, float* edmf_a1, const float grav, const float karman, float tv0, float gtr) {
+     // this subroutine calculates the mixing lengths.
     int i, j, k;
     float elt, vsc;
     float qtke[kte+1], elblmin[kte+1], elblavg[kte+1], thetaw[kte+1];
     float wt, wt2, zi2, h1, h2, hs, elblmin0, elblavg0, cldavg;
-    float cns, alp1, alp2, alp3, alp4, alp5, alp6;
-    float minzi = 300.0;
-    float maxdz = 750.0;
-    float mindz = 300.0;
-    float zslh = 100.0;
-    float csl = 2.0;
+    
+    // THE FOLLOWING CONSTANTS ARE IMPORTANT FOR REGULATING THE
+    // MIXING LENGTHS
+    float cns, //for surface layer (els) in stable conditions
+	  alp1, // for turbulent length scale (elt)
+	  alp2, // for buoyancy length scale (elb)
+	  alp3, // for buoyancy enhancement factor of elb
+	  alp4, // for surface layer (els) in unstable conditions
+	  alp5, // for BouLac mixing length or above PBLH
+	  alp6; // //for mass-flux/
+    
+    float minzi = 300.0; // min mixed-layer height
+    float maxdz = 750.0; // max (half) transition layer depth
+			 // =0.3*2500 m PBLH, so the transition
+			 // layer stops growing for PBLHs > 2.5 km.
+    float mindz = 300.0; // 300  !min (half) transition layer depth
+
+    //SURFACE LAYER LENGTH SCALE MODS TO REDUCE IMPACT IN UPPER BOUNDARY LAYER
+    float zslh = 100.0; // Max height correlated to surface conditions (m)
+    float csl = 2.0; // CSL = constant of proportionality to L O(1)
+
     float qke_elb_min = 0.018f;
     float afk, abk, zwk, zwk1, dzk, qdz, vflx, bv, tau_cloud, wstar, elb, els, elf, el_stab, el_mf, el_stab_mf, elb_mf, pblh_plus_ent, uonset, ugrid, wt_u, el_les;
-    float ctau = 1000.0;
+    float ctau = 1000.0; // constant for tau_cloud
+
+    // tv0 = 0.61*tref
+    // gtr = 9.81/tref
 
     switch(bl_mynn_mixlength) {
-        case 0:
-            cns = 2.7;
-            alp1 = 0.23;
-            alp2 = 1.0;
-            alp3 = 5.0;
-            alp4 = 100.0;
-            alp5 = 0.3;
-            zi2 = std::min(10000.0f, zw[kte-2]);
+        case 0: //  ORIGINAL MYNN MIXING LENGTH + BouLac
+            
+            cns = 2.7; 
+            alp1 = 0.23; 
+            alp2 = 1.0; 
+            alp3 = 5.0; 
+            alp4 = 100.0; 
+            alp5 = 0.3; 
+
+	    // Impose limits on the height integration for elt and the transition layer depth
+            zi2 = std::min(10000.0f, zw[kte-2]); // originally integrated to model top, not just 10 km.
             h1 = std::max(0.3f * zi2, mindz);
-            h1 = std::min(h1, maxdz);
-            h2 = h1 / 2.0;
+            h1 = std::min(h1, maxdz);  // 1/2 transition layer depth
+            h2 = h1 / 2.0;  // 1/4 transition layer depth
+
             qkw[kts] = std::sqrt(std::max(qke[kts], 1.0e-10f));
             for (k = kts+1; k <= kte; k++) {
                 afk = dz[k] / (dz[k] + dz[k-1]);
@@ -3421,6 +3671,8 @@ void mym_length(int kts, int kte, float xland, float* dz, float* dx, float* zw, 
             }
             elt = 1.0e-5;
             vsc = 1.0e-5;
+
+	    // **  Strictly, zwk*h(i,j) -> ( zwk*h(i,j)+z0 )  **
             k = kts + 1;
             zwk = zw[k];
             while (zwk <= zi2 + h1) {
@@ -3431,55 +3683,76 @@ void mym_length(int kts, int kte, float xland, float* dz, float* dx, float* zw, 
                 k = k + 1;
                 zwk = zw[k];
             }
+
             elt = alp1 * elt / vsc;
             vflx = (vt[kts] + 1.0f) * flt + (vq[kts] + tv0) * flq;
             vsc = std::pow(gtr * elt * std::max(vflx, 0.0f), 1.0f / 3.0f);
+
+	    // **  Strictly, el(i,k=1) is not zero.  **
             el[kts] = 0.0;
             zwk1 = zw[kts+1];
+
             for (k = kts+1; k <= kte; k++) {
-                zwk = zw[k];
+                zwk = zw[k]; // full-sigma levels
+
+		// **  Length scale limited by the buoyancy effect  **
                 if (dtv[k] > 0.0f) {
                     bv = std::sqrt(gtr * dtv[k]);
                     elb = alp2 * qkw[k] / bv * (1.0f + alp3 / alp2 * std::sqrt(vsc / (bv * elt)));
                     elf = alp2 * qkw[k] / bv;
-                } else {
+                } 
+		else {
                     elb = 1.0e10;
                     elf = elb;
                 }
-                if (rmo > 0.0f) {
+
+                // **  Length scale in the surface layer  **
+		if (rmo > 0.0f) {
                     els = karman * zwk / (1.0f + cns * std::min(zwk * rmo, zmax));
                 } else {
                     els = karman * zwk * std::pow(1.0f - alp4 * zwk * rmo, 0.2f);
                 }
+
+		// ** HARMONC AVERGING OF MIXING LENGTH SCALES:
+		//     el(k) =      MIN(elb/( elb/elt+elb/els+1.0 ),elf)
+		//     el(k) =      elb/( elb/elt+elb/els+1.0 )
+
                 wt = 0.5f * std::tanh((zwk - (zi2 + h1)) / h2) + 0.5;
+
                 el[k] = std::min(elb / (elb / elt + elb / els + 1.0f), elf);
             }
             break;
-        case 1:
+        case 1: // NONLOCAL (using BouLac) FORM OF MIXING LENGTH
             ugrid = std::sqrt(u1[kts] * u1[kts] + v1[kts] * v1[kts]);
             uonset = 15.0;
             wt_u = (1.0f - std::min(std::max(ugrid - uonset, 0.0f) / 30.0f, 0.5f));
-            cns = 2.7;
+            cns = 2.7; // was 3.5
             alp1 = 0.23;
             alp2 = 0.3;
-            alp3 = 2.5f * wt_u;
+            alp3 = 2.5f * wt_u; // taper off bouyancy enhancement in shear-driven pbls
             alp4 = 5.0;
             alp5 = 0.3;
-            alp6 = 50.0;
+            alp6 = 50.0; 
+
+	    // Impose limits on the height integration for elt and the transition layer depth
             zi2 = std::max(zi, 300.0f);
             h1 = std::max(0.3f * zi2, 300.0f);
-            h1 = std::min(h1, 600.0f);
-            h2 = h1 / 2.0;
-            qkw[kts] = std::sqrt(std::max(qke[kts], 1.0e-10f));
-            for (k = kts+1; k <= kte; k++) {
+            h1 = std::min(h1, 600.0f);  // 1/2 transition layer depth
+            h2 = h1 / 2.0;              // 1/4 transition layer depth
+
+            qkw[kts] = std::sqrt(std::max(qke[kts], 1.0e-10f));  // tke at full sigma levels
+            for (k = kts+1; k <= kte; k++) {                     // theta at full-sigma levels
                 afk = dz[k] / (dz[k] + dz[k-1]);
+
                 abk = 1.0f - afk;
                 qkw[k] = std::sqrt(std::max(qke[k] * abk + qke[k-1] * afk, 1.0e-3f));
-                qtke[k] = 0.5f * (qkw[k] * qkw[k]);
+                qtke[k] = 0.5f * (qkw[k] * qkw[k]); // q -> TKE
                 thetaw[k] = theta[k] * abk + theta[k-1] * afk;
             }
             elt = 1.0e-5;
             vsc = 1.0e-5;
+
+	    // **  Strictly, zwk*h(i,j) -> ( zwk*h(i,j)+z0 )  **
             k = kts + 1;
             zwk = zw[k];
             while (zwk <= zi2 + h1) {
@@ -3490,13 +3763,23 @@ void mym_length(int kts, int kte, float xland, float* dz, float* dx, float* zw, 
                 k = k + 1;
                 zwk = zw[k];
             }
+	    
             elt = std::min(std::max(alp1 * elt / vsc, 10.0f), 400.0f);
+	    // avoid use of buoyancy flux functions which are ill-defined at the surface
+	    // vflx = ( vt(kts)+1.0 )*flt + ( vq(kts)+tv0 )*flq
             vflx = fltv;
             vsc = std::pow(gtr * elt * std::max(vflx, 0.0f), 1.0f / 3.0f);
+
+	    // **  Strictly, el(i,j,1) is not zero.  **
             el[kts] = 0.0;
-            zwk1 = zw[kts+1];
+            zwk1 = zw[kts+1]; // full-sigma levels
+
+	    // COMPUTE BouLac mixing length
+	    boulac_length_cc(kts,kte,zw,dz,qtke,thetaw,elblmin, elblavg,gtr);
+
             for (k = kts+1; k <= kte; k++) {
-                zwk = zw[k];
+                zwk = zw[k];	// full-sigma levels
+		//    **  Length scale limited by the buoyancy effect  **
                 if (dtv[k] > 0.0f) {
                     bv = std::max(std::sqrt(gtr * dtv[k]), 0.0001f);
                     elb = std::max(alp2 * qkw[k], alp6 * edmf_a1[k-1] * edmf_w1[k-1]) / bv * (1.0f + alp3 * std::sqrt(vsc / (bv * elt)));
@@ -3507,41 +3790,61 @@ void mym_length(int kts, int kte, float xland, float* dz, float* dx, float* zw, 
                     elb = 1.0e10;
                     elf = elb;
                 }
+		//    **  Length scale in the surface layer  **
                 if (rmo > 0.0f) {
                     els = karman * zwk / (1.0f + cns * std::min(zwk * rmo, zmax));
                 } else {
                     els = karman * zwk * std::pow(1.0f - alp4 * zwk * rmo, 0.2f);
                 }
+		//   ** NOW BLEND THE MIXING LENGTH SCALES:
                 wt = 0.5f * std::tanh((zwk - (zi2 + h1)) / h2) + 0.5;
+
+		// add blending to use BouLac mixing length in free atmos;
+		// defined relative to the PBLH (zi) + transition layer (h1)
+		// el(k) = MIN(elb/( elb/elt+elb/els+1.0 ),elf)
+		// try squared-blending - but take out elb (makes it underdiffusive)
+		// el(k) = SQRT( els**2/(1. + (els**2/elt**2) +(els**2/elb**2)))
                 el[k] = std::min(elb / (elb / elt + elb / els + 1.0f), elf);
+		// include scale-awareness, except for original MYNN
                 el[k] = el[k] * psig_bl;
             }
             break;
-        case 2:
+        case 2:  // Local (mostly) mixing length formulation
+
             uonset = 3.5f + dz[kts] * 0.1;
             ugrid = std::sqrt(u1[kts] * u1[kts] + v1[kts] * v1[kts]);
-            cns = 3.5;
+            cns = 3.5; // JOE-test  * (1.0 - MIN(MAX(Ugrid - Uonset, 0.0)/10.0, 1.0))
             alp1 = 0.22;
             alp2 = 0.30;
             alp3 = 2.0;
             alp4 = 5.0;
-            alp5 = alp2;
-            alp6 = 50.0;
+            alp5 = alp2; // like alp2, but for free atmosphere
+            alp6 = 50.0; // used for MF mixing length
+
+	    //  Impose limits on the height integration for elt and the transition layer depth
+	    //  zi2=MAX(zi,minzi)
             zi2 = std::max(zi, minzi);
+	    // h1=MAX(0.3*zi2,mindz)
+	    // !h1=MIN(h1,maxdz)         // 1/2 transition layer depth
             h1 = std::max(0.3f * zi2, mindz);
             h1 = std::min(h1, maxdz);
-            h2 = h1 * 0.5;
-            qtke[kts] = std::max(0.5f * qke[kts], 0.5f*qkemin);
+            h2 = h1 * 0.5;  // 1/4 transition layer depth
+
+            qtke[kts] = std::max(0.5f * qke[kts], 0.5f*qkemin); // tke at full sigma levels
             qkw[kts] = std::sqrt(std::max(qke[kts], qkemin));
+
             for (k = kts+1; k <= kte; k++) {
                 afk = dz[k] / (dz[k] + dz[k-1]);
                 abk = 1.0f - afk;
                 qkw[k] = std::sqrt(std::max(qke[k] * abk + qke[k-1] * afk, qkemin));
-                qtke[k] = 0.5f * qkw[k] * qkw[k];
+                qtke[k] = 0.5f * qkw[k] * qkw[k]; // qkw -> TKE
                 thetaw[k] = theta[k] * abk + theta[k-1] * afk;
             }
+
             elt = 1.0e-5;
             vsc = 1.0e-5;
+
+	    //   **  Strictly, zwk*h(i,j) -> ( zwk*h(i,j)+z0 )  **
             k = kts + 1;
             zwk = zw[k];
             while (zwk <= zi2 + h1) {
@@ -3552,43 +3855,88 @@ void mym_length(int kts, int kte, float xland, float* dz, float* dx, float* zw, 
                 k = k + 1;
                 zwk = zw[k];
             }
+
             elt = std::min(std::max(alp1 * elt / vsc, 10.0f), 400.0f);
+	    // avoid use of buoyancy flux functions which are ill-defined at the surface
+	    // vflx = ( vt(kts)+1.0 )*flt +( vq(kts)+tv0 )*flq
             vflx = fltv;
             vsc = std::pow(gtr * elt * std::max(vflx, 0.0f), 1.0f / 3.0f);
+
+	    // **  Strictly, el(i,j,1) is not zero.  **
             el[kts] = 0.0;
             zwk1 = zw[kts+1];
+
             for (k = kts+1; k <= kte; k++) {
-                zwk = zw[k];
+                zwk = zw[k];	// full-sigma levels
                 dzk = 0.5f * (dz[k] + dz[k-1]);
                 cldavg = 0.5f * (cldfra_bl1d[k-1] + cldfra_bl1d[k]);
+
+		// **  Length scale limited by the buoyancy effect  **
                 if (dtv[k] > 0.0f) {
+		    // impose min value on bv
                     bv = std::max(std::sqrt(gtr * dtv[k]), 0.001f);
+		    // elb_mf = alp2*qkw(k) / bv  &
                     elb_mf = std::max(alp2 * qkw[k], alp6 * edmf_a1[k-1] * edmf_w1[k-1]) / bv * (1.0f + alp3 * std::sqrt(vsc / (bv * elt)));
                     elb = std::min(std::max(alp5 * qkw[k], alp6 * edmf_a1[k] * edmf_w1[k]) / bv, zwk);
+
+		    // tau_cloud = MIN(MAX(0.5*zi/((gtr*zi*MAX(vflx,1.0e-4))**onethird),30.),150.)
                     wstar = 1.25f * std::pow(gtr * zi * std::max(vflx, 1.0e-4f), 1.0f / 3.0f);
                     tau_cloud = std::min(std::max(ctau * wstar / grav, 30.0f), 150.0f);
+		    // minimize influence of surface heat flux on tau far away from the PBLH.
                     wt = 0.5f * std::tanh((zwk - (zi2 + h1)) / h2) + 0.5;
                     tau_cloud = tau_cloud * (1.0f - wt) + 50.0f * wt;
                     elf = std::min(std::max(tau_cloud * std::sqrt(std::min(qtke[k], 40.0f)), alp6 * edmf_a1[k] * edmf_w1[k] / bv), zwk);
+		    /*
+		     !IF (zwk > zi .AND. elf > 400.) THEN
+	             !   ! COMPUTE BouLac mixing length
+        	     !   !CALL boulac_length0(k,kts,kte,zw,dz,qtke,thetaw,elBLmin0,elBLavg0)
+              	     !   !elf = alp5*elBLavg0
+                     !   elf = MIN(MAX(50.*SQRT(qtke(k)), 400.), zwk)
+       		     !ENDIF
+		     */ 
+
                 } else {
+		    // use version in development for RAP/HRRR 2016
+		    // JAYMES-
+		    // tau_cloud is an eddy turnover timescale;
+		    // see Teixeira and Cheinet (2004), Eq. 1, and
+		    // Cheinet and Teixeira (2003), Eq. 7.  The
+		    // coefficient 0.5 is tuneable. Expression in
+		    // denominator is identical to vsc (a convective
+		    // velocity scale), except that elt is relpaced
+		    // by zi, and zero is replaced by 1.0e-4 to
+		    // prevent division by zero.
+		    // tau_cloud = MIN(MAX(0.5*zi/((gtr*zi*MAX(vflx,1.0e-4))**onethird),50.),150.)
                     wstar = 1.25f * std::pow(gtr * zi * std::max(vflx, 1.0e-4f), 1.0f / 3.0f);
                     tau_cloud = std::min(std::max(ctau * wstar / grav, 50.0f), 200.0f);
+		    // minimize influence of surface heat flux on tau far away from the PBLH.
                     wt = 0.5f * std::tanh((zwk - (zi2 + h1)) / h2) + 0.5;
+		    // tau_cloud = tau_cloud*(1.-wt) + 50.*wt
                     tau_cloud = tau_cloud * (1.0f - wt) + std::max(100.0, dzk * 0.25) * wt;
+
                     elb = std::min(tau_cloud * std::sqrt(std::min(qtke[k], 40.0f)), zwk);
-                    elf = elb;
+		    // elf = elb
+                    elf = elb; // /(1. + (elb/800.))  !bound free-atmos mixing length to < 800 m
                     elb_mf = elb;
                 }
-                elf = elf / (1.0f + (elf / 800.0f));
-                elb_mf = std::max(elb_mf, 0.01f);
+                elf = elf / (1.0f + (elf / 800.0f)); // bound free-atmos mixing length to < 800 m.
+                elb_mf = std::max(elb_mf, 0.01f); // to avoid divide-by-zero below
+						  
+		//  **  Length scale in the surface layer  **
                 if (rmo > 0.0f) {
                     els = karman * zwk / (1.0f + cns * std::min(zwk * rmo, zmax));
                 } else {
                     els = karman * zwk * std::pow(1.0f - alp4 * zwk * rmo, 0.2f);
                 }
-                wt = 0.5f * std::tanh((zwk - (zi2 + h1)) / h2) + 0.5;
+                
+		// ** NOW BLEND THE MIXING LENGTH SCALES:
+		wt = 0.5f * std::tanh((zwk - (zi2 + h1)) / h2) + 0.5;
+
+		// try squared-blending
                 el[k] = std::sqrt(els * els / (1.0f + (els * els / elt * elt) + (els * els / elb_mf * elb_mf)));
                 el[k] = el[k] * (1.0f - wt) + elf * wt;
+
+		// include scale-awareness. For now, use simple asymptotic kz -> 12 m (should be ~dz).
                 el_les = std::min(els / (1.0f + (els / 12.0f)), elb_mf);
                 el[k] = el[k] * psig_bl + (1.0f - psig_bl) * el_les;
             }
@@ -3598,6 +3946,34 @@ void mym_length(int kts, int kte, float xland, float* dz, float* dx, float* zw, 
 
 // ==================================================================
 //>\ingroup gsd_mynn_edmf
+void dmp_mf_cc(const int& kts,const int& kte, float& dt, float* zw, float* dz, float* p, float* rho, 
+		int& momentum_opt, int& tke_opt, int& scalar_opt, float* u, float* v, float* w, float* th, 
+		float* thl, float* thv, float* tk, float* qt, float* qv, float* qc, float* qke, float* qnc, 
+		float* qni, float* qnwfa, float* qnifa, float* qnbca, float* exner, float *vt, float* vq, 
+		float& ust, float& flt, float& fltv, float& flq, float& flqv, float& pblh, int& kpbl, float& dx, 
+		float& landsea, float& ts, 
+		// outputs - updraft properties
+		float* edmf_a, float* edmf_w, float* edmf_qt, float* edmf_thl, float* edmf_ent, float* edmf_qc, 
+		// outputs - variables needed for solver
+		float* s_aw, float* s_awthl, float* s_awqt, float* s_awqv, float* s_awqc, float* s_awu, float* s_awv,
+	       	float* s_awqke, float* s_awqnc, float* s_awqni, float* s_awqnwfa, float* s_awqnifa, float* s_awqnbca, 
+		float* sub_thl, float *sub_sqv, float * sub_u, float * sub_v, float * det_thl, float * det_sqv, 
+		float* det_sqc, float* det_u, float* det_v,
+		// chem/smoke
+		int& nchem, float** chem1, float** s_awchem, bool& mix_chem, 
+		// in/outputs - subgrid scale clouds
+		float* qc_bl1d, float* cldfra_bl1d, float* qc_bl1d_old, float* cldfra_bl1d_old, 
+		// inputs - flags for moist arrays
+		float& psig_shcu, 
+		//  output info
+		float& maxwidth, int& ktop, float& maxmf, float& ztop, 
+		// inputs for stochastic perturbations
+		float* rstoch_col, 
+		// constants passed from Fortran
+		const float grav, float gtr, float p608, float p1000mb, float rcp, float xlvcp, float rvovrd, 
+		float onethird, float tv0, float cpv, float ep_2, float ep_3, float r_v, float xl, float tliq, 
+		float cice, float xlv, float xls, float cp, float cliq) {
+
 // this subroutine is the dynamic multi-plume (dmp) mass-flux scheme.
 //
 // dmp_mf() calculates the nonlocal turbulent transport from the dynamic
@@ -3616,7 +3992,6 @@ void mym_length(int kts, int kte, float xland, float* dz, float* dx, float* zw, 
 // this scheme remains under development, so consider it experimental code.
 //
 
-void dmp_mf_cc(const int& kts,const int& kte, float& dt, float* zw, float* dz, float* p, float* rho, int& momentum_opt, int& tke_opt, int& scalar_opt, float* u, float* v, float* w, float* th, float* thl, float* thv, float* tk, float* qt, float* qv, float* qc, float* qke, float* qnc, float* qni, float* qnwfa, float* qnifa, float* qnbca, float& ust, float& flt, float& fltv, float& flq, float& flqv, float& pblh, int& kpbl, float& dx, float& landsea, float& ts, float* edmf_a, float* edmf_w, float* edmf_qt, float* edmf_thl, float* edmf_ent, float* edmf_qc, float* s_aw, float* s_awthl, float* s_awqt, float* s_awqv, float* s_awqc, float* s_awu, float* s_awv, float* s_awqke, float* s_awqnc, float* s_awqni, float* s_awqnwfa, float* s_awqnifa, float* s_awqnbca, int& nchem, float** chem1, float** s_awchem, bool& mix_chem, float* qc_bl1d, float* cldfra_bl1d, float* qc_bl1d_old, float* cldfra_bl1d_old, float& psig_shcu, float& maxwidth, int& ktop, float& maxmf, float& ztop, float* rstoch_col, const float grav, float gtr, float p608) {
     int nup = 8;
     int debug_mf = 0;
     float nup2;
@@ -3626,40 +4001,89 @@ void dmp_mf_cc(const int& kts,const int& kte, float& dt, float* zw, float* dz, f
     int k, i, k50;
     float fltv2, wstar, qstar, thstar, sigmaw, sigmaqt, sigmath, z0, pwmin, pwmax, wmin, wmax, wlv, psig_w, maxw, wpbl;
     float b, qtn, thln, thvn, qcn, un, vn, qken, qncn, qnin, qnwfan, qnifan, qnbcan, wn2, wn, entexp, entexm, entw, bcoeff, thvkm1, thvk, pk, rho_int;
+
+    // w parameters
     float wa = 0.6666666865348816; //2./3.
     float wb = 0.0020000000949949, wc = 1.5;
+
+    // Lateral entrainment parameters ( L0=100 and ENT0=0.1) were taken from
+    // Suselj et al (2013, jas). Note that Suselj et al (2014,waf) use L0=200 and ENT0=0.2.
     float l0 = 100., ent0 =  0.1000000014901161;
-    float atot = 0.1000000014901161;
-    float lmax = 1000.;
-    float lmin = 300.;
-    float dlmin = 0.;
-    float minwidth;
-    float dl;
-    float dcut = 1.2000000476837158;
-    float d;
+
+    // Parameters/variables for regulating plumes:
+    float atot = 0.1000000014901161; // Maximum total fractional area of all updrafts
+    float lmax = 1000.; // diameter of largest plume (absolute maximum, can be smaller)
+    float lmin = 300.; // diameter of smallest plume (absolute minimum, can be larger)
+    float dlmin = 0.; // delta increase in the diameter of smallest plume (large fltv)
+    float minwidth; // actual width of smallest plume
+    float dl; // variable increment of plume size
+    float dcut = 1.2000000476837158; // max diameter of plume to parameterize relative to dx (km)
+    float d; // = -2.3 to -1.7  ;=-1.9 in Neggers paper; power law exponent for number density (N=Cl^d)
+
     float cn, c, l, n, an2, hux, wspd_pbl, cloud_base, width_flx;
+
+    // chem/smoke
     float chemn[nchem];
     float upchem[kte+1+1][nup][nchem];
     float ic;
     float edmf_chem[kte+1+1][nchem];
     float envm_u[kte+1+1],envm_v[kte+1+1],envm_sqc[kte+1+1],envm_thl[kte+1+1],envm_sqv[kte+1+1];
+    float edmf_th[kte+1+1];
+
+    // JOE: add declaration of ERF
+    // real(kind_phys):: ERF
+
     bool superadiabatic;
-    float sigq, xl, rsl, cpm, a, qmq, mf_cf, aup, q1, diffqt, qsat_tk, fng, qww, alpha, beta, bb, f, pt, t, q2p, b9, satvp, rhgrid, ac_mf, ac_strat, qc_mf;
-    float cf_thresh = 0.5;
+
+    // VARIABLES FOR CHABOUREAU-BECHTOLD CLOUD FRACTION
+    float sigq, rsl, cpm, a, qmq, mf_cf, aup, q1, diffqt, qsat_tk, fng, qww, alpha, beta, bb, f, pt, t, q2p, b9, satvp, rhgrid, ac_mf, ac_strat, qc_mf;
+    float cf_thresh = 0.5; // only overwrite stratus CF less than this value
+
+    // Variables for plume interpolation/saturation check
     float exneri[kte+1], dzi[kte+1], rhoz[kte+1];
     float thp, qtp, qcp, qcs, esat, qsl;
     float csigma, acfac, ac_wsp;
+
+    // plume overshoot
     int overshoot;
     float bvf, frz, dzp;
+
+    // Flux limiter: not let mass-flux of heat between k=1&2 exceed (fluxportion)*(surface heat flux).
     float adjustment, flx1, flt2;
-    float fluxportion = 0.75;
+    float fluxportion = 0.75; // Set liberally, so has minimal impact. Note that
+			      // 0.5 starts to have a noticeable impact
+			      // over land (decrease maxMF by 10-20%), but no impact over water.
+    
+    
     float sublim, qc_ent, qv_ent, qt_ent, thl_ent, detrate, detrateuv, oow, exc_fac, aratio, detturb, qc_grid, qc_sgs, exc_heat, exc_moist, tk_int, tvs, qc_plume;
+
     float cdet = 0.0222222227603197;//1./45.;
-    float dzpmax = 300.;
+    float dzpmax = 300.; // limit dz used in detrainment - can be excessing in thick layers
+    // parameter "Csub" determines the propotion of upward vertical velocity that contributes to
+    // environmenatal subsidence. Some portion is expected to be compensated by downdrafts instead of
+    // gentle environmental subsidence. 1.0 assumes all upward vertical velocity in the mass-flux scheme
+    // is compensated by "gentle" environmental subsidence.
     float csub = 0.25;
-    float pgfac = 0.00;
+
+    // Factor for the pressure gradient effects on momentum transport
+    float pgfac = 0.00; // Zhang and Wu showed 0.4 is more appropriate for lower troposphere
     float uk, ukm1, vk, vkm1, dxsa;
 
+    /*
+     ! check the inputs
+!     print *,'dt',dt
+!     print *,'dz',dz
+!     print *,'u',u
+!     print *,'v',v
+!     print *,'thl',thl
+!     print *,'qt',qt
+!     print *,'ust',ust
+!     print *,'flt',flt
+!     print *,'flq',flq
+!     print *,'pblh',pblh
+     */ 
+
+    // Initialize individual updraft properties
     for (int i = 0; i < nup; i++) {
         for (int j = kts; j <= kte+1; j++) {
             upw[j][i] = 0.0;
@@ -3682,12 +4106,14 @@ void dmp_mf_cc(const int& kts,const int& kte, float& dt, float* zw, float* dz, f
 		upchem[j][i][nchemi] = 0.0;
         }
     }
+
     for (int i = kts; i <= kte; i++) {
         for (int j = 0; j < nup; j++) {
             ent[i][j] = 0.001;
             enti[i][j] = 0;
         }
     }
+    //  Initialize mean updraft properties
     for (int k = kts; k <= kte; k++) {
       edmf_a[k] = 0.0;
       edmf_w[k] = 0.0;
@@ -3701,6 +4127,7 @@ void dmp_mf_cc(const int& kts,const int& kte, float& dt, float* zw, float* dz, f
 	}
     }
 
+    // initialize the variables needed for implicit solver
     for (int k = kts; k <= kte+1; k++) {
       s_aw[k] = 0.0;
       s_awthl[k] = 0.0;
@@ -3716,12 +4143,14 @@ void dmp_mf_cc(const int& kts,const int& kte, float& dt, float* zw, float* dz, f
       s_awqnifa[k] = 0.0;
       s_awqnbca[k] = 0.0;
       if(mix_chem)
+	// initialize chem/smoke
 	for(int nchemi = 0; nchemi < nchem; nchemi++)
 	  s_awchem[k][nchemi] = 0.0;
     }
     //    printf("missing sub_thl in dmp_mf\n");
     //   exit(1);
-    /*
+
+    //Initialize explicit tendencies for subsidence & detrainment
     for (int k = kts; k <= kte; k++) {
       sub_thl[k] = 0.0;
       sub_sqv[k] = 0.0;
@@ -3729,11 +4158,14 @@ void dmp_mf_cc(const int& kts,const int& kte, float& dt, float* zw, float* dz, f
       sub_v[k] = 0.0;
       det_thl[k] = 0.0;
       det_sqv[k] = 0.0;
+      det_sqc[k] = 0.0;
       det_u[k] = 0.0;
       det_v[k] = 0.0;
-      nup2[k] = nup[k];
     }
-    */
+    nup2 = nup; // start with nup, but set to zero if activation criteria fails
+    
+    // Taper off MF scheme when significant resolved-scale motions
+    // are present This function needs to be asymetric...
     maxw = 0.0;
     cloud_base = 9000.0;
     for (int k = kts; k < kte-1; k++) {
@@ -3745,21 +4177,32 @@ void dmp_mf_cc(const int& kts,const int& kte, float& dt, float* zw, float* dz, f
             wpbl = 2.*w[k];
         }
         maxw = std::max(maxw, float(abs(wpbl)));
+
+	// Find highest k-level below 50m AGL
         if (zw[k] <= 50.f) {
             k50 = k;
         }
+
+	// Search for cloud base
         float qc_sgs = std::max(qc[k], qc_bl1d[k]);
         if (qc_sgs > 1e-5 && cldfra_bl1d[k] >= 0.5f && cloud_base == 9000.0f) {
             cloud_base = 0.5f*(zw[k]+zw[k+1]);
         }
     }
+
+    // do nothing for small w (< 1 m/s), but linearly taper off for w > 1.0 m/s
     maxw = std::max(0.f, maxw - 1.0f);
     psig_w = std::max(0.0f, 1.0f - maxw);
     psig_w = std::min(psig_w, psig_shcu);
+
+    // Completely shut off MF scheme for strong resolved-scale vertical velocities.
     fltv2 = fltv;
     if (psig_w == 0.0f && fltv > 0.0f) {
         fltv2 = -1.*fltv;
     }
+
+    // If surface buoyancy is positive we do integration, otherwise no.
+    // Also, ensure that it is at least slightly superadiabatic up through 50 m
     superadiabatic = false;
     tvs = ts*(1.0+p608*qv[kts]);
     for (int k = 0; k < std::max(1, k50-1); k++) {
@@ -3779,43 +4222,74 @@ void dmp_mf_cc(const int& kts,const int& kte, float& dt, float* zw, float* dz, f
             }
         }
     }
+
+    // Determine the numer of updrafts/plumes in the grid column:
+    // Some of these criteria may be a little redundant but useful for bullet-proofing.
+    //   (1) largest plume = 1.2 * dx.
+    //   (2) Apply a scale-break, assuming no plumes with diameter larger than 1.1*PBLH can exist.
+    //   (3) max plume size beneath clouds deck approx = 0.5 * cloud_base.
+    //   (4) add wspd-dependent limit, when plume model breaks down. (hurricanes)
+    //   (5) limit to reduce max plume sizes in weakly forced conditions. This is only
+    //       meant to "soften" the activation of the mass-flux scheme.
+    // Criteria(1)
     maxwidth = std::min(dx*dcut, lmax);
+    // Criteria(2)
     maxwidth = std::min(maxwidth, 1.1f*pblh);
+    // Criteria(3)
     if (landsea-1.5f < 0) {
         maxwidth = std::min(maxwidth, 0.5f*cloud_base);
     } else {
         maxwidth = std::min(maxwidth, 0.9f*cloud_base);
     }
+    // Criteria(4)
     wspd_pbl = sqrt(std::max(u[kts]*u[kts] + v[kts]*v[kts], 0.01f));
-    if (landsea-1.5f < 0) {
+    // Note: area fraction (acfac) is modified below
+    //  Criteria (5) - only a function of flt (not fltv)
+    if (landsea-1.5f < 0) { //land
         width_flx = std::max(std::min(1000.f*(0.6f*float(tanh((fltv - 0.040f)/0.04f)) + .5f),1000.f), 0.f);
-    } else {
+    } else { // water
         width_flx = std::max(std::min(1000.f*(0.6f*float(tanh((fltv - 0.007f)/0.02f)) + .5f),1000.f), 0.f);
     }
     maxwidth = std::min(maxwidth, width_flx);
     minwidth = lmin;
+    // allow min plume size to increase in large flux conditions (eddy diffusivity should be
+    // large enough to handle the representation of small plumes).
     if (maxwidth >= (lmax - 1.0f) && fltv > 0.2f) {
         minwidth = lmin + dlmin*std::min((fltv-0.2f)/0.3f, 1.f);
     }
-    if (maxwidth <= minwidth) {
+    if (maxwidth <= minwidth) { // deactivate MF component
         nup2 = 0;
         maxwidth = 0.0;
     }
+
+    // Initialize values for 2d output fields:
     ktop = 0;
     ztop = 0.0;
     maxmf = 0.0;
+
+    // Begin plume processing if passes criteria
     if (fltv2 > 0.002 && maxwidth > minwidth && superadiabatic) {
         float cn = 0.;
-        float d = -1.9;
+        float d = -1.9; // set d to value suggested by Neggers 2015 (JAMES).
         float dl = (maxwidth - minwidth)/float(nup-1);
         for (int i = 0; i < nup; i++) {
+	    // diameter of plume
             float l = minwidth + dl*float(i);
-            cn = cn + l*l*l * (l*l)/(dx*dx) * dl;
+            cn = cn + l*l*l * (l*l)/(dx*dx) * dl; // sum fractional area of each plume
         }
-        float c = atot/cn;
-        float acfac;
-        acfac = 0.5f*tanh((fltv2 - 0.02f)/0.05f) + 0.5f;
+        float c = atot/cn; // Normalize C according to the defined total fraction (Atot)
 
+	// Make updraft area (UPA) a function of the buoyancy flux
+        float acfac;
+	if ((landsea-1.5)<0){ // land
+	    acfac = 0.5f*tanh((fltv2 - 0.02f)/0.05f) + 0.5f;
+	}else{ // water
+	    acfac = 0.5f*tanh((fltv2 - 0.01f)/0.03f) + 0.5f;
+	}
+	// add a windspeed-dependent adjustment to acfac that tapers off
+	// the mass-flux scheme linearly above sfc wind speeds of 10 m/s.
+	// Note: this effect may be better represented by an increase in
+	// entrainment rate for high wind consitions (more ambient turbulence).
         float ac_wsp;
         if (wspd_pbl <= 10.f) {
             ac_wsp = 1.0;
@@ -3823,53 +4297,78 @@ void dmp_mf_cc(const int& kts,const int& kte, float& dt, float* zw, float* dz, f
             ac_wsp = 1.0f - std::min((wspd_pbl - 10.0f)/15.f, 1.0f);
         }
         acfac = acfac * ac_wsp;
+
+	// Find the portion of the total fraction (Atot) of each plume size:
         float an2 = 0.;
         for (int i = 0; i < nup; i++) {
+	    // diameter of plume
             float l = minwidth + dl*float(i);
-            float n = c*l*l*l * (l*l)/(dx*dx) * dl;
-            upa[kts][i] = n*l*l/(dx*dx) * dl;
+            float n = c*l*l*l * (l*l)/(dx*dx) * dl; // number density of plume n
+            upa[kts][i] = n*l*l/(dx*dx) * dl;       // fractional area of plume n
+
             upa[kts][i] = upa[kts][i]*acfac;
-            an2 = an2 + upa[kts][i];
+            an2 = an2 + upa[kts][i];		    // total fractional area of all plumes
+	    // print*," plume size=",l,"; area=",UPA(1,I),"; total=",An2
         }
+
+	// set initial conditions for updrafts
         float z0 = 50.;
-        float pwmin = 0.1;
-        float pwmax = 0.4;
+        float pwmin = 0.1; // was 0.5
+        float pwmax = 0.4;  // was 3.0
+			    //
         float wstar = std::max(1.e-2, pow(gtr*fltv2*pblh, 1./3.f));
         float qstar = std::max(flq, 1.0e-5f)/wstar;
         float thstar = flt/wstar;
+
         float csigma;
-        if (landsea-1.5f >= 0) {
-            csigma = 1.34;
+        if (landsea-1.5f >= 0) { 
+            csigma = 1.34; // water
         } else {
-            csigma = 1.34;
+            csigma = 1.34; // land
         }
+
         float exc_fac;
         if (env_subs) {
             exc_fac = 0.0;
         } else {
             if (landsea-1.5f >= 0) {
+		// water: increase factor to compensate for decreased pwmin/pwmax
                 exc_fac = 0.58*4.0;
             } else {
+		// land: no need to increase factor - already sufficiently large superadiabatic layers
                 exc_fac = 0.58;
             }
         }
+	// decrease excess for large wind speeds
         exc_fac = exc_fac * ac_wsp;
+
+	// Note: sigmaW is typically about 0.5*wstar
         float sigmaw = csigma*wstar*pow(z0/pblh, 1./3.f)*(1 - 0.8*z0/pblh);
         float sigmaqt = csigma*qstar*pow(z0/pblh, 1./3.f);
         float sigmath = csigma*thstar*pow(z0/pblh, 1./3.f);
+
+	// Note: Given the pwmin & pwmax set above, these max/mins are rarely exceeded
         float wmin = std::min(sigmaw*pwmin, 0.1f);
         float wmax = std::min(sigmaw*pwmax, 0.5f);
+
+	// SPECIFY SURFACE UPDRAFT PROPERTIES AT MODEL INTERFACE BETWEEN K = 1 & 2
         for (int i = 0; i < nup; i++) {
             float wlv = wmin+(wmax-wmin)/nup2*float(i);
+	    // SURFACE UPDRAFT VERTICAL VELOCITY
             upw[kts][i] = wmin + float(i+1)/float(nup)*(wmax-wmin);
             upu[kts][i] = (u[kts]*dz[kts+1]+u[kts+1]*dz[kts])/(dz[kts]+dz[kts+1]);
             upv[kts][i] = (v[kts]*dz[kts+1]+v[kts+1]*dz[kts])/(dz[kts]+dz[kts+1]);
             upqc[kts][i] = 0.0;
+	    // UPQC(1,I)=(QC(kts)*DZ(kts+1)+QC(kts+1)*DZ(kts))/(DZ(kts)+DZ(kts+1))
+
             float exc_heat = exc_fac*upw[kts][i]*sigmath/sigmaw;
             upthv[kts][i] = (thv[kts]*dz[kts+1]+thv[kts+1]*dz[kts])/(dz[kts]+dz[kts+1]) + exc_heat;
             upthl[kts][i] = (thl[kts]*dz[kts+1]+thl[kts+1]*dz[kts])/(dz[kts]+dz[kts+1]) + exc_heat;
-            float exc_moist = exc_fac*upw[kts][i]*sigmaqt/sigmaw;
+            
+	    // calculate exc_moist by use of surface fluxes
+	    float exc_moist = exc_fac*upw[kts][i]*sigmaqt/sigmaw;
             upqt[kts][i] = (qt[kts]*dz[kts+1]+qt[kts+1]*dz[kts])/(dz[kts]+dz[kts+1]) + exc_moist;
+
             upqke[kts][i] = (qke[kts]*dz[kts+1]+qke[kts+1]*dz[kts])/(dz[kts]+dz[kts+1]);
             upqnc[kts][i] = (qnc[kts]*dz[kts+1]+qnc[kts+1]*dz[kts])/(dz[kts]+dz[kts+1]);
             upqni[kts][i] = (qni[kts]*dz[kts+1]+qni[kts+1]*dz[kts])/(dz[kts]+dz[kts+1]);
@@ -3877,6 +4376,7 @@ void dmp_mf_cc(const int& kts,const int& kte, float& dt, float* zw, float* dz, f
             upqnifa[kts][i] = (qnifa[kts]*dz[kts+1]+qnifa[kts+1]*dz[kts])/(dz[kts]+dz[kts+1]);
             upqnbca[kts][i] = (qnbca[kts]*dz[kts+1]+qnbca[kts+1]*dz[kts])/(dz[kts]+dz[kts+1]);
         }
+
         if (mix_chem) {
             for (int i = 0; i < nup; i++) {
                 for (int ic = 0; ic < nchem; ic++) {
@@ -3884,6 +4384,8 @@ void dmp_mf_cc(const int& kts,const int& kte, float& dt, float* zw, float* dz, f
                 }
             }
         }
+	
+	// Initialize environmental variables which can be modified by detrainmen
 	for (int ii=kts;ii>=kte;ii++){
             envm_thl[ii-kts] = thl[ii];
             envm_sqv[ii-kts] = qv[ii];
@@ -3895,26 +4397,48 @@ void dmp_mf_cc(const int& kts,const int& kte, float& dt, float* zw, float* dz, f
             rhoz[k] = (rho[k]*dz[k+1]+rho[k+1]*dz[k])/(dz[k+1]+dz[k]);
         }
         rhoz[kte] = rho[kte];
+
+	// dxsa is scale-adaptive factor governing the pressure-gradient term of the momentum transport
         dxsa = 1.f - std::min(std::max((12000.0f-dx)/(12000.0f-3000.0f), 0.f), 1.f);
+
         for (int i = 0; i < nup; i++) {
             float qc_ent = 0.0;
             int overshoot = 0;
-            float l = minwidth + dl*float(i);
+            float l = minwidth + dl*float(i); // diameter of plume
             for (int k = kts+1; k < kte-1; k++) {
-                float wmin = 0.3f + l*0.0005;
+		// Entrainment from Tian and Kuang (2016)
+		// ENT(k,i) = 0.35/(MIN(MAX(UPW(K-1,I),0.75),1.9)*l)
+                float wmin = 0.3f + l*0.0005; // MAX(pblh-ZW(k+1), 0.0)/pblh
                 ent[k][i] = 0.33/(std::min(std::max(upw[k-1][i], wmin), 0.9f)*l);
+
+		// Entrainment from Negggers (2015, JAMES)
+		// ENT(k,i) = 0.02*l**-0.35 - 0.0009
+		// ENT(k,i) = 0.04*l**-0.50 - 0.0009   !more plume diversity
+		// ENT(k,i) = 0.04*l**-0.495 - 0.0009  !"neg1+"
+
+		// Minimum background entrainment
                 ent[k][i] = std::max(ent[k][i], 0.0003f);
+		// ENT(k,i) = max(ENT(k,i),0.05/ZW(k))  !not needed for Tian and Kuang
+		
+		// increase entrainment for plumes extending very high.
                 if (zw[k] >= std::min(pblh+1500.f, 4000.f)) {
                     ent[k][i] = ent[k][i] + (zw[k]-std::min(pblh+1500.f,4000.f))*5.0e-6f;
                 }
+
+		// SPP
                 ent[k][i] = ent[k][i] * (1.0f - rstoch_col[k]);
+
                 ent[k][i] = std::min(ent[k][i], 0.9f/(zw[k+1]-zw[k]));
+
+		// Define environment U & V at the model interface levels
                 float uk = (u[k]*dz[k+1]+u[k+1]*dz[k])/(dz[k+1]+dz[k]);
                 float ukm1 = (u[k-1]*dz[k]+u[k]*dz[k-1])/(dz[k-1]+dz[k]);
                 float vk = (v[k]*dz[k+1]+v[k+1]*dz[k])/(dz[k+1]+dz[k]);
                 float vkm1 = (v[k-1]*dz[k]+v[k]*dz[k-1])/(dz[k-1]+dz[k]);
+
+		//  Linear entrainment:
                 float entexp = ent[k][i]*(zw[k+1]-zw[k]);
-                float entexm = entexp*0.3333;
+                float entexm = entexp*0.3333; // reduce entrainment for momentum
                 float qtn = upqt[k-1][i]*(1.-entexp) + qt[k]*entexp;
                 float thln = upthl[k-1][i]*(1.-entexp) + thl[k]*entexp;
                 float un = upu[k-1][i]*(1.-entexm) + u[k]*entexm + dxsa*pgfac*(uk - ukm1);
@@ -3925,63 +4449,117 @@ void dmp_mf_cc(const int& kts,const int& kte, float& dt, float* zw, float* dz, f
                 float qnwfan = upqnwfa[k-1][i]*(1.-entexp) + qnwfa[k]*entexp;
                 float qnifan = upqnifa[k-1][i]*(1.-entexp) + qnifa[k]*entexp;
                 float qnbcan = upqnbca[k-1][i]*(1.-entexp) + qnbca[k]*entexp;
+
+		// capture the updated qc, qt & thl modified by entranment alone,
+		// since they will be modified later if condensation occurs.
                 float qc_ent = qcn;
                 float qt_ent = qtn;
                 float thl_ent = thln;
+		
+		/*
+		 ! Exponential Entrainment:
+	          !EntExp= exp(-ENT(K,I)*(ZW(k)-ZW(k-1)))
+	          !QTn =QT(K) *(1-EntExp)+UPQT(K-1,I)*EntExp
+	          !THLn=THL(K)*(1-EntExp)+UPTHL(K-1,I)*EntExp
+	          !Un  =U(K)  *(1-EntExp)+UPU(K-1,I)*EntExp
+	          !Vn  =V(K)  *(1-EntExp)+UPV(K-1,I)*EntExp
+	          !QKEn=QKE(k)*(1-EntExp)+UPQKE(K-1,I)*EntExp
+		 */ 
+
                 if (mix_chem) {
                     for (int ic = 0; ic < nchem; ic++) {
+			// Exponential Entrainment:
+			// chemn(ic) = chem(k,ic)*(1-EntExp)+UPCHEM(K-1,I,ic)*EntExp
+			// Linear entrainment:
                         chemn[ic] = upchem[k-1][i][ic]*(1.-entexp) + chem1[k][ic]*entexp;
                     }
                 }
+
+		// Define pressure at model interface
                 float pk = (p[k]*dz[k+1]+p[k+1]*dz[k])/(dz[k+1]+dz[k]);
-//                condensation_edmf_cc(qtn, thln, pk, zw[k+1], thvn, qcn);
+		// Compute plume properties thvn and qcn
+                condensation_edmf_cc(qtn, thln, pk, zw[k+1], thvn, qcn, p1000mb,rcp,xlvcp,rvovrd);
+
+		// Define environment THV at the model interface levels
                 float thvk = (thv[k]*dz[k+1]+thv[k+1]*dz[k])/(dz[k+1]+dz[k]);
                 float thvkm1 = (thv[k-1]*dz[k]+thv[k]*dz[k-1])/(dz[k-1]+dz[k]);
+
+		// B=g*(0.5*(THVn+UPTHV(k-1,I))/THV(k-1) - 1.0)
                 float b = grav*(thvn/thvk - 1.0f);
                 if (b > 0.f) {
-                    bcoeff = 0.15;
+                    bcoeff = 0.15;   // w typically stays < 2.5, so doesnt hit the limits nearly as much
                 } else {
-                    bcoeff = 0.2;
+                    bcoeff = 0.2; // 0.33
                 }
+
+		// Original StEM with exponential entrainment
+		// EntW=exp(-2.*(Wb+Wc*ENT(K,I))*(ZW(k)-ZW(k-1)))
+		// Wn2=UPW(K-1,I)**2*EntW + (1.-EntW)*0.5*Wa*B/(Wb+Wc*ENT(K,I))
+		//  Original StEM with linear entrainment
+		//  Wn2=UPW(K-1,I)**2*(1.-EntExp) + EntExp*0.5*Wa*B/(Wb+Wc*ENT(K,I))
+		//  Wn2=MAX(Wn2,0.0)
+		//  WA: TEMF form
+		//  IF (B>0.0 .AND. UPW(K-1,I) < 0.2 ) THEN
                 if (upw[k-1][i] < 0.2f) {
                     wn = upw[k-1][i] + (-2.f * ent[k][i] * upw[k-1][i] + bcoeff*b / std::max(upw[k-1][i], 0.2f)) * std::min(zw[k]-zw[k-1], 250.f);
                 } else {
                     wn = upw[k-1][i] + (-2.f * ent[k][i] * upw[k-1][i] + bcoeff*b / upw[k-1][i]) * std::min(zw[k]-zw[k-1], 250.f);
                 }
+		// Do not allow a parcel to accelerate more than 1.25 m/s over 200 m.
+		// Add max increase of 2.0 m/s for coarse vertical resolution.
                 if (wn > upw[k-1][i] + std::min(1.25f*(zw[k]-zw[k-1])/200.f, 2.0f)) {
                     wn = upw[k-1][i] + std::min(1.25f*(zw[k]-zw[k-1])/200.f, 2.0f);
                 }
+		// Add symmetrical max decrease in w
                 if (wn < upw[k-1][i] - std::min(1.25f*(zw[k]-zw[k-1])/200.f, 2.0f)) {
                     wn = upw[k-1][i] - std::min(1.25f*(zw[k]-zw[k-1])/200.f, 2.0f);
                 }
                 wn = std::min(std::max(wn, 0.0f), 3.0f);
+
+		// Check to make sure that the plume made it up at least one level.
+		// if it failed, then set nup2=0 and exit the mass-flux portion.
                 if (k == kts+1 && wn == 0.f) {
                     nup2 = 0;
                     break;
                 }
+
                 if (debug_mf == 1) {
                     if (wn >= 3.0f) {
+			// surface values
 			std::cout << "**** suspiciously large w:" << std::endl;
 			std::cout << "qcn: " << qcn << " ent: " << ent[k][i] << " nup2: " << nup2 << std::endl;
 			std::cout << "pblh: " << pblh << " wn: " << wn << " upw(k-1): " << upw[k-1][i] << std::endl;
 			std::cout << "k: " << k << " b: " << b << " dz: " << zw[k]-zw[k-1] << std::endl;
                     }
                 }
+
+		// Allow strongly forced plumes to overshoot if KE is sufficient
                 if (wn <= 0.0f && overshoot == 0) {
                     overshoot = 1;
                     if (thvk-thvkm1 > 0.0f) {
                         float bvf = sqrt(gtr*(thvk-thvkm1)/dz[k]);
+			// vertical Froude number
                         float frz = upw[k-1][i]/(bvf*dz[k]);
-                        dzp = dz[k]*std::max(std::min(frz, 1.0f), 0.0f);
+			// IF ( Frz >= 0.5 ) Wn =  MIN(Frz,1.0)*UPW(K-1,I)
+                        dzp = dz[k]*std::max(std::min(frz, 1.0f), 0.0f); // portion of highest layer the plume penetrates
                     }
                 } else {
                     dzp = dz[k];
                 }
-                float aratio = std::min(upa[k-1][i]/(1.f-upa[k-1][i]), 0.5f);
+
+		// minimize the plume penetratration in stratocu-topped PBL
+		// IF (fltv2 < 0.06) THEN
+		//    IF(ZW(k+1) >= pblh-200. .AND. qc(k) > 1e-5 .AND. I > 4) Wn=0.
+		// ENDIF
+
+		// Modify environment variables (representative of the model layer - envm*)
+		// following the updraft dynamical detrainment of Asai and Kasahara (1967, JAS).
+		// Reminder: w is limited to be non-negative (above)
+                float aratio = std::min(upa[k-1][i]/(1.f-upa[k-1][i]), 0.5f); // limit should never get hit
                 float detturb = 0.00008;
-                float oow = -0.060/std::max(1.0f, (0.5f*(wn+upw[k-1][i])));
-                float detrate = std::min(std::max(oow*(wn-upw[k-1][i])/dz[k], detturb), 0.0002f);
-                float detrateuv = std::min(std::max(oow*(wn-upw[k-1][i])/dz[k], detturb), 0.0001f);
+                float oow = -0.060/std::max(1.0f, (0.5f*(wn+upw[k-1][i]))); // coef for dynamical detrainment rate
+                float detrate = std::min(std::max(oow*(wn-upw[k-1][i])/dz[k], detturb), 0.0002f); // dynamical detrainment rate (m^-1
+                float detrateuv = std::min(std::max(oow*(wn-upw[k-1][i])/dz[k], detturb), 0.0001f); // dynamical detrainment rate (m^-1)
                 envm_thl[k-kts] = envm_thl[k-kts] + (0.5f*(thl_ent + upthl[k-1][i]) - thl[k])*detrate*aratio*std::min(dzp, dzpmax);
                 float qv_ent = 0.5f*(std::max(qt_ent-qc_ent, 0.0f) + std::max(upqt[k-1][i]-upqc[k-1][i], 0.0f));
                 envm_sqv[k-kts] = envm_sqv[k] + (qv_ent-qv[k])*detrate*aratio*std::min(dzp, dzpmax);
@@ -3994,10 +4572,13 @@ void dmp_mf_cc(const int& kts,const int& kte, float& dt, float* zw, float* dz, f
                     }
                     envm_sqc[k-kts] = envm_sqc[k-kts] + std::max(upa[k-1][i]*0.5f*(qcn + upqc[k-1][i]) - qc_grid, 0.0f)*detrate*aratio*std::min(dzp, dzpmax);
                 }
+
                 envm_u[k] = envm_u[k] + (0.5f*(un + upu[k-1][i]) - u[k])*detrateuv*aratio*std::min(dzp, dzpmax);
                 envm_v[k] = envm_v[k] + (0.5f*(vn + upv[k-1][i]) - v[k])*detrateuv*aratio*std::min(dzp, dzpmax);
-                if (wn > 0.f) {
-                    upw[k][i] = wn;
+                
+		if (wn > 0.f) {
+		    // Update plume variables at current k index
+                    upw[k][i] = wn; // sqrt(Wn2)
                     upthv[k][i] = thvn;
                     upthl[k][i] = thln;
                     upqt[k][i] = qtn;
@@ -4016,24 +4597,28 @@ void dmp_mf_cc(const int& kts,const int& kte, float& dt, float* zw, float* dz, f
                             upchem[k][i][ic] = chemn[ic];
                         }
                     }
-                    ktop = std::max(ktop, k);
+                    ktop = std::max(ktop, k); 
                 } else {
-                    break;
+                    break; // exit k-loop
                 }
             }
+
         if (debug_mf == 1) {
 	    bool print_mf=false;
 	    for (int ii=kts;ii>=kte;ii++){
-            if (upw[ii][i] > 10.0f || upa[ii][i] < 0.0f || upa[ii][i] > atot || nup2 > 10)
-	    {
-               print_mf=true;
-	    }
+		//surface values
+                if (upw[ii][i] > 10.0f || upa[ii][i] < 0.0f || upa[ii][i] > atot || nup2 > 10)
+                {
+                   print_mf=true;
+                }
 	    }
 	    if (print_mf)
 	    {
+		// surface values
 		std::cout << "flq: " << flq << " fltv: " << fltv << " nup2: " << nup2 << std::endl;
 		std::cout << "pblh: " << pblh << " wstar: " << wstar << " ktop: " << ktop << std::endl;
 		std::cout << "sigmaw: " << sigmaw << " sigmath: " << sigmath << " sigmaqt: " << sigmaqt << std::endl;
+		// means
 		std::cout << "u: " << u << std::endl;
 		std::cout << "v: " << v << std::endl;
 		std::cout << "thl: " << thl << std::endl;
@@ -4051,25 +4636,37 @@ void dmp_mf_cc(const int& kts,const int& kte, float& dt, float* zw, float* dz, f
             }
          }
     } else {
+	// At least one of the conditions was not met for activating the MF scheme.
         nup2 = 0;
-    }
+    } // end criteria check for mass-flux scheme
+    
     ktop = std::min(ktop, kte-1);
     if (ktop == 0) {
         ztop = 0.0;
     } else {
         ztop = zw[ktop];
     }
+
   if (nup2 > 0) {
         for (int i = 0; i < nup; i++) {
             for (int k = kts; k <= kte-1; k++) {
                 s_aw[k+1] += rhoz[k]*upa[k][i]*upw[k][i]*psig_w;
                 s_awthl[k+1] += rhoz[k]*upa[k][i]*upw[k][i]*upthl[k][i]*psig_w;
                 s_awqt[k+1] += rhoz[k]*upa[k][i]*upw[k][i]*upqt[k][i]*psig_w;
+		// to conform to grid mean properties, move qc to qv in grid mean
+		// saturated layers, so total water fluxes are preserved but
+		// negative qc fluxes in unsaturated layers is reduced.
+		// if (qc(k) > 1e-12 .or. qc(k+1) > 1e-12) then
                 qc_plume = upqc[k][i];
+		// else
+		//   qc_plume = 0.0
+		// endif
                 s_awqc[k+1] += rhoz[k]*upa[k][i]*upw[k][i]*qc_plume*psig_w;
                 s_awqv[k+1] = s_awqt[k+1] - s_awqc[k+1];
             }
         }
+
+	//momentum
         if (momentum_opt > 0) {
             for (int i = 0; i < nup; i++) {
                 for (int k = kts; k <= kte-1; k++) {
@@ -4078,6 +4675,8 @@ void dmp_mf_cc(const int& kts,const int& kte, float& dt, float* zw, float* dz, f
                 }
             }
         }
+
+	// tke
         if (tke_opt > 0) {
             for (int i = 0; i < nup; i++) {
                 for (int k = kts; k <= kte-1; k++) {
@@ -4085,6 +4684,8 @@ void dmp_mf_cc(const int& kts,const int& kte, float& dt, float* zw, float* dz, f
                 }
             }
         }
+
+	// chem
         if (mix_chem) {
             for (int k = kts; k <= kte; k++) {
                 for (int i = 0; i < nup; i++) {
@@ -4094,6 +4695,7 @@ void dmp_mf_cc(const int& kts,const int& kte, float& dt, float* zw, float* dz, f
                 }
             }
         }
+
         if (scalar_opt > 0) {
             for (int k = kts; k <= kte; k++) {
                 for (int i = 0; i < nup; i++) {
@@ -4105,121 +4707,319 @@ void dmp_mf_cc(const int& kts,const int& kte, float& dt, float* zw, float* dz, f
                 }
             }
         }
-    }
-    if (s_aw[kts+1] != 0.0f) {
-        dzi[kts] = 0.5f*(dz[kts] + dz[kts+1]);
-        flx1 = std::max(s_aw[kts+1]*(th[kts] - th[kts+1])/dzi[kts], 1.0e-5f);
-    } else {
-        flx1 = 0.0;
-    }
-    adjustment = 1.0;
-    flt2=std::max(flt,0.0f);
-    if (flx1 > fluxportion*flt2/dz[kts] && flx1 > 0.0f) {
-        adjustment = fluxportion*flt2/dz[kts]/flx1;
-        for (int k = kts+1; k <= kte; k++) {
-            s_aw[k] *= adjustment;
-            s_awthl[k] *= adjustment;
-            s_awqt[k] *= adjustment;
-            s_awqc[k] *= adjustment;
-            s_awqv[k] = s_awqt[k] - s_awqc[k];
+    
+
+        // Flux limiter: Check ratio of heat flux at top of first model layer
+        // and at the surface. Make sure estimated flux out of the top of the
+        // layer is < fluxportion*surface_heat_flux
+        if (s_aw[kts+1] != 0.0f) {
+           dzi[kts] = 0.5f*(dz[kts] + dz[kts+1]); // dz centered at model interface
+            flx1 = std::max(s_aw[kts+1]*(th[kts] - th[kts+1])/dzi[kts], 1.0e-5f);
+        } else {
+            flx1 = 0.0;
+            // print*,"ERROR: s_aw(kts+1) == 0, NUP=",NUP," NUP2=",NUP2,&
+            //        " superadiabatic=",superadiabatic," KTOP=",KTOP
         }
-        if (momentum_opt > 0) {
+        adjustment = 1.0;
+        // Print*,"Flux limiter in MYNN-EDMF, adjustment=",fluxportion*flt/dz(kts)/flx1
+        // Print*,"flt/dz=",flt/dz(kts)," flx1=",flx1," s_aw(kts+1)=",s_aw(kts+1)
+        flt2=std::max(flt,0.0f);
+        if (flx1 > fluxportion*flt2/dz[kts] && flx1 > 0.0f) {
+            adjustment = fluxportion*flt2/dz[kts]/flx1;
             for (int k = kts+1; k <= kte; k++) {
-                s_awu[k] *= adjustment;
-                s_awv[k] *= adjustment;
+                s_aw[k] *= adjustment;
+                s_awthl[k] *= adjustment;
+                s_awqt[k] *= adjustment;
+                s_awqc[k] *= adjustment;
+                s_awqv[k] = s_awqt[k] - s_awqc[k];
             }
-        }
-        if (tke_opt > 0) {
-            for (int k = kts+1; k <= kte; k++) {
-                s_awqke[k] *= adjustment;
-            }
-        }
-        if (mix_chem) {
-            for (int k = kts+1; k <= kte; k++) {
-                for (int ic = 0; ic < nchem; ic++) {
-                    s_awchem[k][ic] *= adjustment;
+            if (momentum_opt > 0) {
+                for (int k = kts+1; k <= kte; k++) {
+                    s_awu[k] *= adjustment;
+                    s_awv[k] *= adjustment;
                 }
             }
-        }
-        for (int k = kts; k <= kte-1; k++) {
-            *upa[k] *= adjustment;
-        }
-    }
-    for (int k = kts; k <= kte-1; k++) {
-	for (int i = 1; i<=nup; i++){
-            edmf_a[k] += *upa[k,i];
-            edmf_w[k] += (*upa[k,i])*(*upw[k,i]);
-            edmf_qt[k] += (*upa[k,i])*(*upqt[k,i]);
-            edmf_thl[k] += (*upa[k,i])*(*upthl[k,i]);
-            edmf_ent[k] += (*upa[k,i])*(*ent[k,i]);
-            edmf_qc[k] += (* upa[k,i]) * (*upqc[k,i]);
-	}
-    }
-    for (int k = kts; k <= kte-1; k++) {
-        if (edmf_a[k] > 0.0f) {
-            edmf_w[k] /= edmf_a[k];
-            edmf_qt[k] /= edmf_a[k];
-            edmf_thl[k] /= edmf_a[k];
-            edmf_ent[k] /= edmf_a[k];
-            edmf_qc[k] /= edmf_a[k];
-            edmf_a[k] *= psig_w;
-            if (edmf_a[k]*edmf_w[k] > maxmf) {
-                maxmf = edmf_a[k]*edmf_w[k];
+            if (tke_opt > 0) {
+                for (int k = kts+1; k <= kte; k++) {
+                    s_awqke[k] *= adjustment;
+                }
+            }
+            if (mix_chem) {
+                for (int k = kts+1; k <= kte; k++) {
+                    for (int ic = 0; ic < nchem; ic++) {
+                        s_awchem[k][ic] *= adjustment;
+                    }
+                }
+            }
+            for (int k = kts; k <= kte-1; k++) {
+                *upa[k] *= adjustment;
             }
         }
-    }
-    if (mix_chem) {
+        // Print*,"adjustment=",adjustment," fluxportion=",fluxportion," flt=",flt
+  
+        // Calculate mean updraft properties for output:
+        // all edmf_* variables at k=1 correspond to the interface at top of first model layer
         for (int k = kts; k <= kte-1; k++) {
-	    for (int i = 1; i<=nup;i++){
-                for (int ic = 0; ic < nchem; ic++) {
-                    edmf_chem[k][ic] += rhoz[k]*upa[k][i]*upchem[k][i][ic];
-		}
+            for (int i = 1; i<=nup; i++){
+                edmf_a[k] += *upa[k,i];
+                edmf_w[k] += (*upa[k,i])*(*upw[k,i]);
+                edmf_qt[k] += (*upa[k,i])*(*upqt[k,i]);
+                edmf_thl[k] += (*upa[k,i])*(*upthl[k,i]);
+                edmf_ent[k] += (*upa[k,i])*(*ent[k,i]);
+                edmf_qc[k] += (* upa[k,i]) * (*upqc[k,i]);
             }
         }
         for (int k = kts; k <= kte-1; k++) {
+            // Note that only edmf_a is multiplied by Psig_w. This takes care of the
+            // scale-awareness of the subsidence below:
             if (edmf_a[k] > 0.0f) {
-                for (int ic = 0; ic < nchem; ic++) {
-                    edmf_chem[k][ic] /= edmf_a[k];
+                edmf_w[k] /= edmf_a[k];
+                edmf_qt[k] /= edmf_a[k];
+                edmf_thl[k] /= edmf_a[k];
+                edmf_ent[k] /= edmf_a[k];
+                edmf_qc[k] /= edmf_a[k];
+                edmf_a[k] *= psig_w;
+     	        // FIND MAXIMUM MASS-FLUX IN THE COLUMN:
+                if (edmf_a[k]*edmf_w[k] > maxmf) {
+                    maxmf = edmf_a[k]*edmf_w[k];
+                }
+           }
+       } // end k
+      
+        // smoke/chem
+        if (mix_chem) {
+            for (int k = kts; k <= kte-1; k++) {
+    	        for (int i = 1; i<=nup;i++){
+                    for (int ic = 0; ic < nchem; ic++) {
+                        edmf_chem[k][ic] += rhoz[k]*upa[k][i]*upchem[k][i][ic];
+  	  	    }
                 }
             }
+            for (int k = kts; k <= kte-1; k++) {
+                if (edmf_a[k] > 0.0f) {
+                    for (int ic = 0; ic < nchem; ic++) {
+                        edmf_chem[k][ic] /= edmf_a[k];
+                    }
+                }
+            } // end k
+         } 
+
+    // Calculate the effects environmental subsidence.
+    // All envi_*variables are valid at the interfaces, like the edmf_* variables
+    float envi_w[kte+1], envi_a[kte+1];
+    if (env_subs) {
+        for (int k = kts + 1; k < kte; ++k) {
+             // First, smooth the profiles of w & a
+             envi_w[k] = onethird * (edmf_w[k - 1] + edmf_w[k] + edmf_w[k + 1]);
+             envi_a[k] = onethird * (edmf_a[k - 1] + edmf_a[k] + edmf_a[k + 1]) * adjustment;
         }
+    
+         // Define env variables at k=kts (top of first model layer)
+        envi_w[kts] = edmf_w[kts];
+        envi_a[kts] = edmf_a[kts];
+    
+        // Define env variables at k=kte
+        envi_w[kte] = 0.0f;
+        envi_a[kte] = edmf_a[kte];
+    
+        // Define env variables at k=kte+1
+        envi_w[kte + 1] = 0.0f;
+        envi_a[kte + 1] = edmf_a[kte];
+    
+        // Add limiter for very long time steps (i.e. dt > 300 s)
+        float sublim;
+        if (envi_w[kts] > 0.9f * dz[kts] / dt) {
+            sublim = 0.9f * dz[kts] / dt / envi_w[kts];
+        } else {
+            sublim = 1.0f;
+        }
+    
+        // Transform w & a into env variables
+        for (int k = kts; k <= kte; ++k) {
+             float temp = envi_a[k];
+             envi_a[k] = 1.0f - temp;
+             envi_w[k] = csub * sublim * envi_w[k] * temp / (1.0f - temp);
+        }
+    
+        // Calculate tendencies from subsidence and detrainment valid at the middle of each model layer
+        dzi[kts] = 0.5f * (dz[kts] + dz[kts + 1]);
+        sub_thl[kts] = 0.5f * envi_w[kts] * envi_a[kts] * (rho[kts + 1] * thl[kts + 1] - rho[kts] * thl[kts]) / dzi[kts] / rhoz[k];
+        sub_sqv[kts] = 0.5f * envi_w[kts] * envi_a[kts] * (rho[kts + 1] * qv[kts + 1] - rho[kts] * qv[kts]) / dzi[kts] / rhoz[k];
+    
+        for (int k = kts + 1; k < kte; ++k) {
+            dzi[k] = 0.5f * (dz[k] + dz[k + 1]);
+            sub_thl[k] = 0.5f * (envi_w[k] + envi_w[k - 1]) * 0.5f * (envi_a[k] + envi_a[k - 1]) * (rho[k + 1] * thl[k + 1] - rho[k] * thl[k]) / dzi[k] / rhoz[k];
+            sub_sqv[k] = 0.5f * (envi_w[k] + envi_w[k - 1]) * 0.5f * (envi_a[k] + envi_a[k - 1]) * (rho[k + 1] * qv[k + 1] - rho[k] * qv[k]) / dzi[k] / rhoz[k];
+        }
+
+        for (int k = kts; k < kte; ++k) {
+            det_thl[k] = cdet * (envm_thl[k] - thl[k]) * envi_a[k] * psig_w;
+            det_sqv[k] = cdet * (envm_sqv[k] - qv[k]) * envi_a[k] * psig_w;
+            det_sqc[k] = cdet * (envm_sqc[k] - qc[k]) * envi_a[k] * psig_w;
+        }
+
+        if (momentum_opt > 0) {
+            sub_u[kts] = 0.5f * envi_w[kts] * envi_a[kts] * (rho[kts + 1] * u[kts + 1] - rho[kts] * u[kts]) / dzi[kts] / rhoz[k];
+             sub_v[kts] = 0.5f * envi_w[kts] * envi_a[kts] * (rho[kts + 1] * v[kts + 1] - rho[kts] * v[kts]) / dzi[kts] / rhoz[k];
+        
+            for (int k = kts + 1; k < kte; ++k) {
+                sub_u[k] = 0.5f * (envi_w[k] + envi_w[k - 1]) * 0.5f * (envi_a[k] + envi_a[k - 1]) * (rho[k + 1] * u[k + 1] - rho[k] * u[k]) / dzi[k] / rhoz[k];
+                sub_v[k] = 0.5f * (envi_w[k] + envi_w[k - 1]) * 0.5f * (envi_a[k] + envi_a[k - 1]) * (rho[k + 1] * v[k + 1] - rho[k] * v[k]) / dzi[k] / rhoz[k];
+            }
+
+            for (int k = kts; k < kte; ++k) {
+                det_u[k] = cdet * (envm_u[k] - u[k]) * envi_a[k] * psig_w;
+                det_v[k] = cdet * (envm_v[k] - v[k]) * envi_a[k] * psig_w;
+            }
+        }
+    } // end subsidence/env detrainment
+
+    // First, compute exner, plume theta, and dz centered at interface
+    for (int k = kts; k < kte; ++k) {
+        exneri[k] = (exner[k] * dz[k + 1] + exner[k + 1] * dz[k]) / (dz[k + 1] + dz[k]);
+         edmf_th[k] = edmf_thl[k] + xlvcp / exneri[k] * edmf_qc[k];
+         dzi[k] = 0.5f * (dz[k] + dz[k + 1]);
     }
+
+    // JOE: ADD CLDFRA_bl1d, qc_bl1d
+    for (int k = kts + 1; k < kte - 1; ++k) {
+         if (k > ktop) break;
+         if (0.5f * (edmf_qc[k] + edmf_qc[k - 1]) > 0.0f && (cldfra_bl1d[k] < cf_thresh)) {
+        // Interpolate plume quantities to mass levels
+            float Aup = (edmf_a[k] * dzi[k - 1] + edmf_a[k - 1] * dzi[k]) / (dzi[k - 1] + dzi[k]);
+            float THp = (edmf_th[k] * dzi[k - 1] + edmf_th[k - 1] * dzi[k]) / (dzi[k - 1] + dzi[k]);
+            float QTp = (edmf_qt[k] * dzi[k - 1] + edmf_qt[k - 1] * dzi[k]) / (dzi[k - 1] + dzi[k]);
+        
+            // Convert TH to T
+            float t = THp * exner[k];
+        
+            // SATURATED VAPOR PRESSURE
+            float esat = esat_blend_cc(tk[k]);
+        
+            // SATURATED SPECIFIC HUMIDITY
+            float qsl = ep_2 * esat / std::max(1.e-7f, (p[k] - ep_3 * esat));
+
+            // Condensed liquid in the plume on mass levels
+            float QCp;
+            if (edmf_qc[k] > 0.0f && edmf_qc[k - 1] > 0.0f) {
+                 QCp = (edmf_qc[k] * dzi[k - 1] + edmf_qc[k - 1] * dzi[k]) / (dzi[k - 1] + dzi[k]);
+            } else {
+                QCp = std::max(edmf_qc[k], edmf_qc[k - 1]);
+            }
+
+            // COMPUTE CLDFRA & QC_BL FROM MASS-FLUX SCHEME
+            xl = xl_blend_cc(tk[k],xlv,xls,cpv,cliq,cice); // obtain blended heat capacity
+            float qsat_tk = qsat_blend_cc(tk[k], p[k]); // get saturation water vapor mixing ratio
+            float rsl = xl * qsat_tk / (r_v * tk[k] * tk[k]); // slope of C-C curve at t (abs temp)
+            float cpm = cp + qt[k] * cpv; // CB02, sec. 2, para. 1
+            float a = 1.0f / (1.0f + xl * rsl / cpm); // CB02 variable "a"
+            float b9 = a * rsl; // CB02 variable "b"
+
+            float q2p = xlvcp / exner[k];
+            float pt = thl[k] + q2p * QCp * Aup; // potential temp (env + plume)
+            float bb = b9 * tk[k] / pt; // bb is "b9" in BCMT95
+            float qww = 1.0f + 0.61f * qt[k];
+            float alpha = 0.61f * pt;
+            float beta = pt * xl / (tk[k] * cp) - 1.61f * pt;
+
+            // Now calculate convective component of the cloud fraction
+            float f;
+            if (a > 0.0f) {
+                f = std::min(1.0f / a, 4.0f); // f is vertical profile scaling function (CB2005)
+            } else {
+                f = 1.0f;
+            }
+
+            // CB form
+            float sigq = 10.0f * Aup * (QTp - qt[k]); // convective component of sigma (CB2005)
+            sigq = std::max(sigq, qsat_tk * 0.02f);
+            sigq = std::min(sigq, qsat_tk * 0.25f);
+
+            float qmq = a * (qt[k] - qsat_tk); // saturation deficit/excess
+            float Q1 = qmq / sigq; // the numerator of Q1
+
+            float mf_cf;
+            if ((landsea - 1.5f) >= 0) { // WATER
+                mf_cf = std::min(std::max(0.5 + 0.36 * atan(1.55 * Q1), 0.01), 0.6);
+                mf_cf = std::max(mf_cf, 1.2f * Aup);
+                mf_cf = std::min(mf_cf, 5.0f * Aup);
+            } else { // LAND
+                mf_cf = std::min(std::max(0.5 + 0.36 * atan(1.55 * Q1), 0.01), 0.6);
+                mf_cf = std::max(mf_cf, 1.8f * Aup);
+                mf_cf = std::min(mf_cf, 5.0f * Aup);
+            }
+
+            // Update cloud fractions and specific humidities in grid cells
+            if ((landsea - 1.5f) >= 0) { // water
+                if (QCp * Aup > 5e-5f) {
+                     qc_bl1d[k] = 1.86f * (QCp * Aup) - 2.2e-5f;
+                } else {
+                    qc_bl1d[k] = 1.18f * (QCp * Aup);
+                }
+                cldfra_bl1d[k] = mf_cf;
+                ac_mf = mf_cf;
+            } else { // land
+            if (QCp * Aup > 5e-5f) {
+                qc_bl1d[k] = 1.86f * (QCp * Aup) - 2.2e-5f;
+            } else {
+                qc_bl1d[k] = 1.18f * (QCp * Aup);
+            }
+            cldfra_bl1d[k] = mf_cf;
+            ac_mf = mf_cf;
+        }
+
+            // Now recalculate the terms for the buoyancy flux for mass-flux clouds
+            Q1 = std::max(Q1, -2.25f);
+            float Fng;
+            if (Q1 >= 1.0f) {
+                Fng = 1.0f;
+            } else if (Q1 >= -1.7f && Q1 < 1.0f) {
+                Fng = exp(-0.4f * (Q1 - 1.0f));
+            } else if (Q1 >= -2.5f && Q1 < -1.7f) {
+                Fng = 3.0f + exp(-3.8f * (Q1 + 1.7f));
+            } else {
+                Fng = std::min(23.9 + exp(-1.6 * (Q1 + 2.5)), 60.0);
+            }
+
+        // Link the buoyancy flux function to active clouds only (c*Aup)
+            vt[k] = qww - (1.5f * Aup) * beta * bb * Fng - 1.0f;
+            vq[k] = alpha + (1.5f * Aup) * beta * a * Fng - tv0;
+            } // end k-loop
+        } // end if (env_subs)
+    } //end nup2 > 0
+
+
+    // Modify output (negative: dry plume, positive: moist plume)
     if (ktop > 0) {
-	float maxqc=0;
-        for (int ii=0;ii > ktop; ii++){
-		if (edmf_qc[ii]>maxqc){
-		    maxqc = edmf_qc[ii];
-		}
-	}
-        if (maxqc < 1.0e-8) {
-            maxmf = -1.0*maxmf;
-        }
+        float maxqc = *std::max_element(edmf_qc + 1, edmf_qc + ktop + 1);
+        if (maxqc < 1.E-8f) maxmf = -1.0f * maxmf;
     }
-    if (edmf_w[0] > 4.0f) {
+
+    // Debugging
+    if (edmf_w[1] > 4.0f) {
+        // Surface values
         std::cout << "flq: " << flq << " fltv: " << fltv2 << std::endl;
         std::cout << "pblh: " << pblh << " wstar: " << wstar << std::endl;
-        std::cout << "sigmaw: " << sigmaw << " sigmath: " << sigmath << " sigmaqt: " << sigmaqt << std::endl;
-        std::cout << "edmf_a: ";
-        for (int i = 0; i < 14; i++) {
-            std::cout << edmf_a[i] << " ";
-        }
+        std::cout << "sigmaW= " << sigmaw << " sigmaTH= " << sigmath << " sigmaQT= " << sigmaqt << std::endl;
+
+        // Mean updrafts
+        std::cout << " edmf_a: ";
+        for (int i = 1; i <= 14; ++i) std::cout << edmf_a[i] << " ";
         std::cout << std::endl;
-        std::cout << "edmf_w: ";
-        for (int i = 0; i < 14; i++) {
-            std::cout << edmf_w[i] << " ";
-        }
+
+        std::cout << " edmf_w: ";
+        for (int i = 1; i <= 14; ++i) std::cout << edmf_w[i] << " ";
         std::cout << std::endl;
-        std::cout << "edmf_qt: ";
-        for (int i = 0; i < 14; i++) {
-            std::cout << edmf_qt[i] << " ";
-        }
+
+        std::cout << " edmf_qt: ";
+        for (int i = 1; i <= 14; ++i) std::cout << edmf_qt[i] << " ";
         std::cout << std::endl;
-        std::cout << "edmf_thl: ";
-        for (int i = 0; i < 14; i++) {
-            std::cout << edmf_thl[i] << " ";
-        }
+
+        std::cout << " edmf_thl: ";
+        for (int i = 1; i <= 14; ++i) std::cout << edmf_thl[i] << " ";
         std::cout << std::endl;
     }
+
 }
 
 
