@@ -500,10 +500,10 @@ SUBROUTINE mynn_tendencies_cc(kts,kte,i,delt,dz,rho,                &
       real(kind=c_float),dimension(kts:kte+1), intent(in) :: zw1D
     END SUBROUTINE get_pblh_cc
 
-    SUBROUTINE scale_aware_cc(dx,PBL1,Psig_bl,Psig_shcu) bind(c)
+    SUBROUTINE scale_aware_cc(dx,PBL1,psig_bl,psig_shcu) bind(c)
         import c_float
         real(kind=c_float), intent(in)  :: dx,pbl1
-        real(kind=c_float), intent(out) :: Psig_bl,Psig_shcu
+        real(kind=c_float), intent(out) :: psig_bl,psig_shcu
     END SUBROUTINE scale_aware_cc
 
   SUBROUTINE dmp_mf_cc(                            &
@@ -526,104 +526,105 @@ SUBROUTINE mynn_tendencies_cc(kts,kte,i,delt,dz,rho,                &
                  & s_awqv,s_awqc,               &
                  & s_awu,s_awv,s_awqke,         &
                  & s_awqnc,s_awqni,             &
-                 & s_awqnwfa,s_awqnifa,s_awqnbca, &
-                 & sub_thl,sub_sqv,sub_u,sub_v, &
-                 & det_thl,det_sqv,det_u,det_v, &
+                 & s_awqnwfa,s_awqnifa,         &
+                 & s_awqnbca,sub_thl,sub_sqv,   &
+                 & sub_u,sub_v,det_thl,det_sqv, &
+                 & det_sqc, det_u,det_v,        &
             ! chem/smoke
                  & nchem,chem1,s_awchem,        &
                  & mix_chem,                    &
             ! in/outputs - subgrid scale clouds
                  & qc_bl1d,cldfra_bl1d,         &
-                 & qc_bl1D_old,cldfra_bl1D_old, &
-                 & Psig_shcu,                   &
+                 & psig_shcu,                   &
             ! output info
                  & maxwidth,ktop,maxmf,ztop,    &
             ! inputs for stochastic perturbations
                  & spp_pbl,rstoch_col,grav,gtr, &
-                 & p608,p1000mb,rcp,xlvcp,rvovrd&
+                 & p608,p1000mb,rcp,xlvcp,rvovrd,&
                  & onethird,tv0,cpv,ep_2,ep_3,  &
-                 & r_v,xl,tliq,cice,xlv,xls,cp
+                 & r_v,tliq,cice,xlv,xls,cp, &
                  & cliq ) bind(c)
          import c_float, c_int
-  ! inputs:
-     integer(kind=c_int), intent(in) :: kts,kte,kpbl,momentum_opt,tke_opt,scalar_opt
+! inputs:
+     integer(kind=c_int), intent(in) :: kts,kte,kpbl,momentum_opt,     &
+          &tke_opt,scalar_opt
 ! Stochastic
      integer(kind=c_int),intent(in)  :: spp_pbl,mix_chem,nchem
      real(kind=c_float), dimension(kts:kte)  :: rstoch_col
 
-     real(kind=c_float),dimension(kts:kte), intent(in) ::                 &
-          &U,V,W,TH,THL,TK,QT,QV,QC,VT,VQ                                 &
-          &dz,THV,P,rho,qke,qnc,qni,qnwfa,qnifa,qnbca
+     real(kind=c_float),dimension(kts:kte), intent(in) ::              &
+          &u,v,w,th,thl,tk,qt,qv,qc,vt,vq,                             &
+          &dz,THV,P,rho,qke,qnc,qni,qnwfa,qnifa,qnbca, exner
      real(kind=c_float),dimension(kts:kte+1), intent(in) :: zw    !height at full-sigma
-     real(kind=c_float), intent(in) :: flt,fltv,flq,flqv,Psig_shcu,       &
+     real(kind=c_float), intent(in) :: flt,fltv,flq,flqv,psig_shcu,    &
           &landsea,ts,dx,dt,ust,pblh
      real(kind=c_float), intent(in),value ::grav,gtr,p608,p1000mb,rcp, &
-          & xlvcp,rvovrd,xlvcp,rvovrd,onethird,tv0,cpv,ep_2,ep_3,      & 
-          & r_v,xl,tliq,cice,xlv,xls,cp
-     real(kind=c_float),dimension(kts:kte), intent(out) :: edmf_a,edmf_w, &
-          & edmf_qt,edmf_thl,edmf_ent,edmf_qc
+          & xlvcp,rvovrd,onethird,tv0,cpv,ep_2,ep_3,      & 
+          & r_v,tliq,cice,xlv,xls,cp,cliq
+     real(kind=c_float),dimension(kts:kte), intent(out) :: edmf_a, &
+          & edmf_w,edmf_qt,edmf_thl,edmf_ent,edmf_qc
      integer(kind=c_int), intent(out) :: ktop 
      real(kind=c_float), intent(out) :: maxmf,ztop,maxwidth
-     real(kind=c_float),dimension(kts:kte), intent(inout) ::            &
-          &qc_bl1d,cldfra_bl1d,qc_bl1d_old,cldfra_bl1d_old
-     real(kind=c_float),dimension(kts:kte+1), intent(in) :: s_aw,       & !sum ai*rho*wis_awphi
-          &s_awthl,s_awqt,s_awqv,s_awqc,s_awqnc,s_awqni,s_awqke,        &
-          &s_awqnwfa,s_awqnifa,s_awqnbca,s_awu,s_awv, sub_thl,
-          &sub_sqv,sub_u,sub_v,det_thl,det_sqv,det_u,det_v
-     real(kind=c_float),dimension(kts:kte+1,nchem), intent(in) :: s_awchem
+     real(kind=c_float),dimension(kts:kte), intent(inout) ::        &
+          &qc_bl1d,cldfra_bl1d         
+     real(kind=c_float),dimension(kts:kte+1), intent(in) :: s_aw,   & !sum ai*rho*wis_awphi
+          &s_awthl,s_awqt,s_awqv,s_awqc,s_awqnc,s_awqni,s_awqke,    &
+          &s_awqnwfa,s_awqnifa,s_awqnbca,s_awu,s_awv, sub_thl,      &
+          &sub_sqv,sub_u,sub_v,det_thl,det_sqv,det_sqc,det_u,det_v
+     real(kind=c_float),dimension(kts:kte+1,nchem),intent(in) :: s_awchem
      real(kind=c_float), dimension(kts:kte,nchem), intent(in) :: chem1
 
- END SUBROUTINE dmp_mf_cc
+END SUBROUTINE dmp_mf_cc
 
-  SUBROUTINE  mym_turbulence_cc (                             &
-    &            kts,kte,                                     &
-    &            xland,closure,                               &            
-    &            dz, dx, zw,                                  &
-    &            u, v, thl, thetav, ql, qw,                   &
-    &            qke, tsq, qsq, cov,                          &
-    &            vt, vq,                                      &
-    &            rmo, flt, fltv, flq,                         &
-    &            zi,theta,                                    &
-    &            sh, sm,                                      &
-    &            El,                                          &
-    &            Dfm, Dfh, Dfq, Tcd, Qcd, Pdk, Pdt, Pdq, Pdc, &
-    &            qWT1D,qSHEAR1D,qBUOY1D,qDISS1D,              &
-    &            tke_budget,                                  &
-    &            Psig_bl,Psig_shcu,cldfra_bl1D,               &
-    &            bl_mynn_mixlength,                           &
-    &            edmf_w1,edmf_a1,                             &
-    &            TKEprodTD,                                   &
-    &            spp_pbl,rstoch_col,debug_code,               &
-    &            gtr, tv0) bind(c)
+SUBROUTINE  mym_turbulence_cc (                             &
+     &            kts,kte,                                     &
+     &            xland,closure,                               &        
+     &            dz, dx, zw,                                  &
+     &            u, v, thl, thetav, ql, qw,                   &
+     &            qke, tsq, qsq, cov,                          &
+     &            vt, vq,                                      &
+     &            rmo, flt, fltv, flq,                         &
+     &            zi,theta,                                    &
+     &            sh, sm,                                      &
+     &            El,                                          &
+     &            Dfm, Dfh, Dfq, Tcd, Qcd, Pdk, Pdt, Pdq, Pdc, &
+     &            qWT1D,qSHEAR1D,qBUOY1D,qDISS1D,              &
+     &            tke_budget,                                  &
+     &            psig_bl,psig_shcu,cldfra_bl1D,               &
+     &            bl_mynn_mixlength,                           &
+     &            edmf_w1,edmf_a1,                             &
+     &            TKEprodTD,                                   &
+     &            spp_pbl,rstoch_col,debug_code,               &
+     &            gtr, tv0) bind(c)
          import c_float, c_int
-    integer(kind=c_int), intent(in)   :: kts,kte
-    integer(kind=c_int), intent(in)   :: debug_code
-    integer(kind=c_int), intent(in)   :: bl_mynn_mixlength,tke_budget
-    real(kind=c_float), intent(in)    :: closure, gtr, tv0
-    real(kind=c_float), dimension(kts:kte),   intent(in) :: dz
-    real(kind=c_float), dimension(kts:kte) :: qkw,dtl,dqw,dtv,gm,gh,sm,sh
-    real(kind=c_float), dimension(kts:kte+1), intent(in) :: zw
-    real(kind=c_float), intent(in)       :: rmo,flt,fltv,flq,                 &
-         &Psig_bl,Psig_shcu,xland,dx,zi
-    real(kind=c_float), dimension(kts:kte), intent(in) :: u,v,thl,thetav,qw,  &
+     integer(kind=c_int), intent(in)   :: kts,kte
+     integer(kind=c_int), intent(in)   :: debug_code
+     integer(kind=c_int), intent(in)   :: bl_mynn_mixlength,tke_budget
+     real(kind=c_float), intent(in)    :: closure, gtr, tv0
+     real(kind=c_float), dimension(kts:kte),   intent(in) :: dz
+     real(kind=c_float), dimension(kts:kte) :: qkw,dtl,dqw,dtv,gm,gh,sm,sh
+     real(kind=c_float), dimension(kts:kte+1), intent(in) :: zw
+     real(kind=c_float), intent(in)       :: rmo,flt,fltv,flq,         &
+         &psig_bl,psig_shcu,xland,dx,zi
+     real(kind=c_float), dimension(kts:kte), intent(in) :: u,v,thl,thetav,qw,  &
          &ql,vt,vq,qke,tsq,qsq,cov,cldfra_bl1D,edmf_w1,edmf_a1,            &
          &TKEprodTD, theta
-    real(kind=c_float), dimension(kts:kte), intent(out) :: dfm,dfh,dfq,       &
+     real(kind=c_float), dimension(kts:kte), intent(out) :: dfm,dfh,dfq,       &
          &pdk,pdt,pdq,pdc,tcd,qcd,el
-    real(kind=c_float), dimension(kts:kte), intent(inout) ::                  &
+     real(kind=c_float), dimension(kts:kte), intent(inout) ::                  &
          qWT1D,qSHEAR1D,qBUOY1D,qDISS1D
-    real(kind=c_float), dimension(kts:kte),intent(in)     :: rstoch_col
-    integer(kind=c_int),         intent(in)                   ::    spp_pbl
+     real(kind=c_float), dimension(kts:kte),intent(in)     :: rstoch_col
+     integer(kind=c_int),         intent(in)                   ::    spp_pbl
 
-  END SUBROUTINE mym_turbulence_cc
+END SUBROUTINE mym_turbulence_cc
 
- SUBROUTINE  mym_initialize_cc (                                &
+SUBROUTINE  mym_initialize_cc (                                &
        &            kts,kte,xland,                            &
        &            dz, dx, zw,                               &
        &            u, v, thl, qw,                            &
        &            zi, theta, thetav, sh, sm,                &
        &            ust, rmo, el,                             &
-       &            qke, tsq, qsq, cov, Psig_bl, cldfra_bl1D, &
+       &            qke, tsq, qsq, cov, psig_bl, cldfra_bl1D, &
        &            bl_mynn_mixlength,                        &
        &            edmf_w1,edmf_a1,                          &
        &            INITIALIZE_QKE,                           &
@@ -632,7 +633,7 @@ SUBROUTINE mynn_tendencies_cc(kts,kte,i,delt,dz,rho,                &
     integer(kind=c_int), intent(in)           :: kts,kte
     integer(kind=c_int), intent(in)           :: bl_mynn_mixlength
     integer(kind=c_int), intent(in)           :: INITIALIZE_QKE, spp_pbl
-    real(kind=c_float), intent(in)   :: rmo, Psig_bl, xland
+    real(kind=c_float), intent(in)   :: rmo, psig_bl, xland
     real(kind=c_float), intent(in)   :: dx, ust, zi, karman, tv0, gtr
     real(kind=c_float), dimension(kts:kte),   intent(in) :: dz
     real(kind=c_float), dimension(kts:kte+1), intent(in) :: zw
@@ -923,7 +924,6 @@ CONTAINS
 !local vars
     integer :: ITF,JTF,KTF, IMD,JMD
     integer :: i,j,k,kproblem
-    integer :: kts_cc,kte_cc
     integer,dimension(ims:ime) ::                           &
          &KPBL_cc
     real(kind_phys), dimension(kts:kte) ::                  &
@@ -991,8 +991,6 @@ CONTAINS
 
 !      call cpu_time(start)
 
-      kts_cc=kts-1
-      kte_cc=kte-1
 #ifdef WRF_TEST_CC_2
       CLOSE(10)
       OPEN(10, file='output_cc.txt', status='replace')
@@ -1250,15 +1248,15 @@ CONTAINS
 !! (\f$P_{\sigma-PBL}\f$ and \f$P_{\sigma-shcu}\f$).
              IF (scaleaware > 0.) THEN
 #ifdef WRF_TEST_CC
-                CALL scale_aware_cc(dx(i),PBLH(i),Psig_bl(i),Psig_shcu(i))
+                CALL scale_aware_cc(dx(i),PBLH(i),psig_bl(i),psig_shcu(i))
 #else
-                CALL SCALE_AWARE(dx(i),PBLH(i),Psig_bl(i),Psig_shcu(i))
+                CALL SCALE_AWARE(dx(i),PBLH(i),psig_bl(i),psig_shcu(i))
 #endif
              ELSE
-                Psig_bl(i)=1.0
-                Psig_shcu(i)=1.0
+                psig_bl(i)=1.0
+                psig_shcu(i)=1.0
              ENDIF
-!             write(10,*),dx(i),PBLH(i),Psig_bl(i),Psig_shcu(i)
+!             write(10,*),dx(i),PBLH(i),psig_bl(i),psig_shcu(i)
 !             STOP
              ! DH* CHECK IF WE CAN DO WITHOUT CALLING THIS ROUTINE FOR RESTARTS
 !>  - Call mym_initialize() to initializes the mixing length, TKE, \f$\theta^{'2}\f$,
@@ -1274,13 +1272,13 @@ CONTAINS
 !     #ifdef WRF_TEST_CC_FLOAT
 #ifdef WRF_TEST_CC_1
              CALL mym_initialize_cc (             & 
-                  &kts_cc,kte_cc,xland(i),              &
+                  &kts,kte,xland(i),              &
                   &dz1, dx(i), zw,                &
                   &u1, v1, thl, sqv2,             &
                   &PBLH(i), th1, thetav, sh, sm,  &
                   &ust(i), rmol(i),               &
                   &el, Qke1, Tsq1, Qsq1, Cov1,    &
-                  &Psig_bl(i),                    &
+                  &psig_bl(i),                    &
                   &cldfra_bl1D,                   &
                   &bl_mynn_mixlength,             &
                   &edmf_w1,edmf_a1,               &
@@ -1295,7 +1293,7 @@ CONTAINS
                   &PBLH(i), th1, thetav, sh, sm,  &
                   &ust(i), rmol(i),               &
                   &el, Qke1, Tsq1, Qsq1, Cov1,    &
-                  &Psig_bl(i), cldfra_bl1D,       &
+                  &psig_bl(i), cldfra_bl1D,       &
                   &bl_mynn_mixlength,             &
                   &edmf_w1,edmf_a1,               &
                   &INITIALIZE_QKE,                &
@@ -1330,7 +1328,7 @@ CONTAINS
 !                  &PBLH(i), th1, "thetav", thetav, "sh", sh,"sm", sm,  &
 !                  &"ust",ust(i), rmol(i),               &
 !                  &el, Qke1, Tsq1, Qsq1, Cov1,    &
-!                  &Psig_bl(i), cldfra_bl1D,       &
+!                  &psig_bl(i), cldfra_bl1D,       &
 !                  &bl_mynn_mixlength,             &
 !                  &edmf_w1,edmf_a1,               &
 !                  &INITIALIZE_QKE,                &
@@ -1570,15 +1568,15 @@ CONTAINS
 !! components, respectively.
        if (scaleaware > 0.) then
 #ifdef WRF_TEST_CC_1
-          call SCALE_AWARE_CC(dx(i),PBLH(i),Psig_bl(i),Psig_shcu(i))
+          call SCALE_AWARE_CC(dx(i),PBLH(i),psig_bl(i),psig_shcu(i))
 #else
-          call SCALE_AWARE(dx(i),PBLH(i),Psig_bl(i),Psig_shcu(i))
+          call SCALE_AWARE(dx(i),PBLH(i),psig_bl(i),psig_shcu(i))
 #endif
        else
-          Psig_bl(i)=1.0
-          Psig_shcu(i)=1.0
+          psig_bl(i)=1.0
+          psig_shcu(i)=1.0
        endif
-!             write(10,'(4(F25.16))'),dx(i),PBLH(i),Psig_bl(i),Psig_shcu(i)
+!             write(10,'(4(F25.16))'),dx(i),PBLH(i),psig_bl(i),psig_shcu(i)
 !             STOP
        sqcg= 0.0   !ill-defined variable; qcg has been removed
        cpm=cp*(1.+0.84*qv1(kts))
@@ -1628,7 +1626,7 @@ CONTAINS
 !! selected by use of the namelist parameter \p bl_mynn_cloudpdf.
 !! differences like 4e-9 in qke and identical in T, U, V, W
 #ifdef WRF_TEST_CC_1
-       call mym_condensation_cc (kts_cc,kte_cc,          &
+       call mym_condensation_cc (kts,kte,          &
             &dx(i),dz1,zw,xland(i),                      &
             &thl,sqw,sqv2,sqc,sqi2,sqs2,                 &
             &p1,ex1,tsq1,qsq1,cov1,                      &
@@ -1659,7 +1657,7 @@ CONTAINS
 #if WRF_TEST_CC_1
        kpbl_cc(i) = kpbl(i) - 1
        if (bl_mynn_topdown.eq.1) then
-          call topdown_cloudrad_cc(kts_cc,kte_cc,dz1,zw,fltv,     &
+          call topdown_cloudrad_cc(kts,kte,dz1,zw,fltv,     &
                &xland(i),kpbl_cc(i),PBLH(i),                &
                &sqc,sqi2,sqw,thl,th1,ex1,p1,rho1,thetav,  &
                &cldfra_bl1D,rthraten(i,:),               &
@@ -1705,15 +1703,16 @@ CONTAINS
               mix_chem_i=0
           endif
           call dmp_mf_cc(                                &
-               &kts_cc,kte_cc,delt,zw,dz1,p1,rho1,       &
+               &kts,kte,delt,zw,dz1,p1,rho1,       &
                &bl_mynn_edmf_mom,                        &
                &bl_mynn_edmf_tke,                        &
                &bl_mynn_mixscalars,                      &
                &u1,v1,w1,th1,thl,thetav,tk1,             &
                &sqw,sqv2,sqc,qke1,                       &
                &qnc1,qni1,qnwfa1,qnifa1,qnbca1,          &
+               &ex1, Vt, Vq,                            &
                &ust(i),flt,fltv,flq,flqv,                &
-               &PBLH(i),KPBL_cc(i),DX(i),                &
+               &PBLH(i),KPBL(i),DX(i),                &
                &xland(i),th_sfc,                         &
             ! now outputs - tendencies
             ! &,dth1mf,dqv1mf,dqc1mf,du1mf,dv1mf         &
@@ -1727,30 +1726,36 @@ CONTAINS
                &s_awqnc1,s_awqni1,                       &
                &s_awqnwfa1,s_awqnifa1,s_awqnbca1,        &
                & sub_thl,sub_sqv,sub_u,sub_v,            &
-               & det_thl,det_sqv,det_u,det_v,            &
+               & det_thl,det_sqv,det_sqc,det_u,det_v,    &
             ! chem/smoke mixing
                &nchem,chem1,s_awchem1,                   &
                &mix_chem_i,                              &
-               &qc_bl1D,cldfra_bl1D,                     &
-               &qc_bl1D_old,cldfra_bl1D_old,             &
-               &Psig_shcu(i),                            &               
+               &qc_bl1d,cldfra_bl1d,                     &
+               &psig_shcu(i),                            &               
                &maxwidth(i),ktop_plume(i),               &
                &maxmf(i),ztop_plume(i),                  &
-               &spp_pbl,rstoch_col, grav, gtr, p608,     &
-               &p1000mb,rcp,xlvcp,rvovrd)
+               &spp_pbl,rstoch_col, grav, gtr, p608,             &
+               &p1000mb,rcp,xlvcp,rvovrd, onethird,tv0,  &
+               &cpv,ep_2,ep_3,r_v,tliq,cice,xlv,xls,     &
+               &cp,cliq )
        endif
 #else
        if (bl_mynn_edmf > 0) then
+          if(mix_chem .eqv. .true.) then
+              mix_chem_i=1
+          else
+              mix_chem_i=0
+          endif
           !PRINT*,"Calling DMP Mass-Flux: i= ",i
-          call DMP_mf(                                   &
+          call dmp_mf_cc(                                &
                &kts,kte,delt,zw,dz1,p1,rho1,             &
                &bl_mynn_edmf_mom,                        &
                &bl_mynn_edmf_tke,                        &
                &bl_mynn_mixscalars,                      &
                &u1,v1,w1,th1,thl,thetav,tk1,             &
-               &sqw,sqv2,sqc,qke1,                        &
+               &sqw,sqv2,sqc,qke1,                       &
                &qnc1,qni1,qnwfa1,qnifa1,qnbca1,          &
-               &ex1,Vt,Vq,sgm,                           &
+               &ex1,Vt,Vq,                               &
                &ust(i),flt,fltv,flq,flqv,                &
                &PBLH(i),KPBL(i),DX(i),                   &
                &xland(i),th_sfc,                         &
@@ -1771,16 +1776,15 @@ CONTAINS
                &det_u,det_v,                             &
             ! chem/smoke mixing
                &nchem,chem1,s_awchem1,                   &
-               &mix_chem,                                &
+               &mix_chem_i,                              &
                &qc_bl1D,cldfra_bl1D,                     &
-               &qc_bl1D_old,cldfra_bl1D_old,             &
-               &FLAG_QC,FLAG_QI,                         &
-               &FLAG_QNC,FLAG_QNI,                       &
-               &FLAG_QNWFA,FLAG_QNIFA,FLAG_QNBCA,        &
-               &Psig_shcu(i),                            &
+               &psig_shcu(i),                            &
                &maxwidth(i),ktop_plume(i),               &
                &maxmf(i),ztop_plume(i),                  &
-               &spp_pbl,rstoch_col                       )
+               &spp_pbl,rstoch_col, grav, gtr, p608,             &
+               &p1000mb,rcp,xlvcp,rvovrd,onethird,tv0,   &
+               &cpv,ep_2,ep_3,r_v,tliq,cice,xlv,xls,  &
+               &cp,cliq                )
        endif
 #endif
 !       write(10,'(7(I6))'),kts,kte,               &
@@ -1821,7 +1825,7 @@ CONTAINS
 !               &chem1,s_awchem1,                   &
 !               &qc_bl1D,cldfra_bl1D,                     &
 !               &qc_bl1D_old,cldfra_bl1D_old,             &
-!               &Psig_shcu(i),                            &
+!               &psig_shcu(i),                            &
 !               &maxwidth(i),                             &
 !               &maxmf(i),                  &
 !               &rstoch_col
@@ -1829,7 +1833,7 @@ CONTAINS
 #ifdef WRF_TEST_CC_1
        KPBL_cc(i)=KPBL(i) - 1
        if (bl_mynn_edmf_dd == 1) then
-          call DDMF_JPL_cc(kts_cc,kte_cc,delt,zw,dz1,p1,       &
+          call DDMF_JPL_cc(kts,kte,delt,zw,dz1,p1,       &
                &u1,v1,th1,thl,thetav,tk1,                &
                &sqw,sqv2,sqc,rho1,ex1,                    &
                &ust(i),flt,flq,                          &
@@ -1887,7 +1891,7 @@ CONTAINS
 ! some possibly significant differences in the arguments remain
 #ifdef WRF_TEST_CC_FLOAT
        call mym_turbulence_cc(                              & 
-               &kts_cc,kte_cc,xland(i),closure,                &
+               &kts,kte,xland(i),closure,                &
                &dz1, DX(i), zw,                          &
                &u1, v1, thl, thetav, sqc, sqw,           &
                &qke1, tsq1, qsq1, cov1,                  &
@@ -1900,7 +1904,7 @@ CONTAINS
                &Pdt,Pdq,Pdc,                             &
                &qWT1,qSHEAR1,qBUOY1,qDISS1,              &
                &tke_budget,                              &
-               &Psig_bl(i),Psig_shcu(i),                 &
+               &psig_bl(i),psig_shcu(i),                 &
                &cldfra_bl1D,bl_mynn_mixlength,           &
                &edmf_w1,edmf_a1,                         &
                &TKEprodTD,                               &
@@ -1921,7 +1925,7 @@ CONTAINS
                &Pdt,Pdq,Pdc,                             &
                &qWT1,qSHEAR1,qBUOY1,qDISS1,              &
                &tke_budget,                              &
-               &Psig_bl(i),Psig_shcu(i),                 &
+               &psig_bl(i),psig_shcu(i),                 &
                &cldfra_bl1D,bl_mynn_mixlength,           &
                &edmf_w1,edmf_a1,                         &
                &TKEprodTD,                               &
@@ -1953,7 +1957,7 @@ CONTAINS
 !               write(10,*), "tkebudget",                 &
 !               &tke_budget
 !               write(10,'(34(F25.16))'), &
-!               &Psig_bl(i),Psig_shcu(i),                 &
+!               &psig_bl(i),psig_shcu(i),                 &
 !               &cldfra_bl1D
 !               write(10,*), "mixlength",bl_mynn_mixlength
 !               write(10,'(34(F25.16))'), &
@@ -1968,7 +1972,7 @@ CONTAINS
 !>  - Call mym_predict() to solve TKE and 
 !! \f$\theta^{'2}, q^{'2}, and \theta^{'}q^{'}\f$
 !! for the following time step.
-       call mym_predict_cc(kts_cc,kte_cc,closure,                 &
+       call mym_predict_cc(kts,kte,closure,                 &
                &delt2, dz1,                              &
                &ust(i), flt, flq, pmz, phh,              &
                &el, dfq, rho1, pdk, pdt, pdq, pdc,       &
@@ -2012,7 +2016,7 @@ CONTAINS
 #ifdef WRF_TEST_CC_1
 !>  - Call mynn_tendencies() to solve for tendencies of 
 !     ! \f$U, V, \theta, q_{v}, q_{c}, and q_{i}\f$.
-       call mynn_tendencies_cc(kts_cc,kte_cc,delt, dz1, rho1,    &
+       call mynn_tendencies_cc(kts,kte,delt, dz1, rho1,    &
        &u1,v1,th1,tk1,qv1,qc1,qi1,kzero,qnc1,qni1,&
        &ps(i),p1,ex1,thl,sqv2,sqc,sqi2,kzero,sqw,&
        &qnwfa1, qnifa1, qnbca1, ozone1,          &
@@ -2137,7 +2141,7 @@ CONTAINS
                   enh_mix_in=0
           endif
           if ( rrfs_sd ) then 
-             call mynn_mix_chem_cc(kts_cc,kte_cc,i,               &
+             call mynn_mix_chem_cc(kts,kte_cc,i,               &
                   &delt, dz1, pblh(i),                   &
                   &nchem, kdvel, ndvel,                  &
                   &chem1, vd1,                           &
@@ -2149,7 +2153,7 @@ CONTAINS
                   &frp(i), 1,                            & !//rrfs_sd passed as integer
                   &enh_mix_in                            )
           else
-             call mynn_mix_chem_cc(kts_cc,kte_cc,i,               &
+             call mynn_mix_chem_cc(kts,kte,i,            &
                   &delt, dz1, pblh(i),                   &
                   &nchem, kdvel, ndvel,                  &
                   &chem1, vd1,                           &
@@ -2215,7 +2219,7 @@ CONTAINS
 !      STOP
 !! matches output
 #ifdef WRF_TEST_CC_1
-       call retrieve_exchange_coeffs_cc(kts_cc,kte_cc,            &
+       call retrieve_exchange_coeffs_cc(kts,kte,            &
             &dfm, dfh, dz1, k_m1, K_h1                   )
 #else
        call retrieve_exchange_coeffs(kts,kte,            &
@@ -2438,7 +2442,7 @@ CONTAINS
 !       &            ust, rmo, pmz, phh, flt, flq,             &
        &            zi, theta, thetav, sh, sm,                &
        &            ust, rmo, el,                             &
-       &            Qke, Tsq, Qsq, Cov, Psig_bl, cldfra_bl1D, &
+       &            Qke, Tsq, Qsq, Cov, psig_bl, cldfra_bl1D, &
        &            bl_mynn_mixlength,                        &
        &            edmf_w1,edmf_a1,                          &
        &            INITIALIZE_QKE,                           &
@@ -2450,7 +2454,7 @@ CONTAINS
     integer, intent(in)           :: bl_mynn_mixlength
     logical, intent(in)           :: INITIALIZE_QKE
 !    real(kind_phys), intent(in)   :: ust, rmo, pmz, phh, flt, flq
-    real(kind_phys), intent(in)   :: rmo, Psig_bl, xland
+    real(kind_phys), intent(in)   :: rmo, psig_bl, xland
     real(kind_phys), intent(in)   :: dx, ust, zi
     real(kind_phys), dimension(kts:kte),   intent(in) :: dz
     real(kind_phys), dimension(kts:kte+1), intent(in) :: zw
@@ -2526,7 +2530,7 @@ CONTAINS
             &            dtv,                     &
             &            el,                      &
             &            zi,theta,                &
-            &            qkw,Psig_bl,cldfra_bl1D, &
+            &            qkw,psig_bl,cldfra_bl1D, &
             &            bl_mynn_mixlength,       &
             &            edmf_w1,edmf_a1          )
        DO k = kts+1,kte
@@ -2781,7 +2785,7 @@ CONTAINS
     &            dtv,                          &
     &            el,                           &
     &            zi, theta, qkw,               &
-    &            Psig_bl, cldfra_bl1D,         &
+    &            psig_bl, cldfra_bl1D,         &
     &            bl_mynn_mixlength,            &
     &            edmf_w1,edmf_a1               )
     
@@ -2797,7 +2801,7 @@ CONTAINS
     integer, intent(in)   :: bl_mynn_mixlength
     real(kind_phys), dimension(kts:kte), intent(in)   :: dz
     real(kind_phys), dimension(kts:kte+1), intent(in) :: zw
-    real(kind_phys), intent(in) :: rmo,flt,fltv,flq,Psig_bl,xland
+    real(kind_phys), intent(in) :: rmo,flt,fltv,flq,psig_bl,xland
     real(kind_phys), intent(in) :: dx,zi
     real(kind_phys), dimension(kts:kte), intent(in)   :: u1,v1,  &
          &qke,vt,vq,cldfra_bl1D,edmf_w1,edmf_a1
@@ -3015,7 +3019,7 @@ CONTAINS
            el(k) = min(el(k), elf)
            el(k) = el(k)*(1.-wt) + alp5*elBLavg(k)*wt
            ! include scale-awareness, except for original MYNN
-           el(k) = el(k)*Psig_bl
+           el(k) = el(k)*psig_bl
          END DO
       CASE (2) !Local (mostly) mixing length formulation
 
@@ -3148,7 +3152,7 @@ CONTAINS
 
          ! include scale-awareness. For now, use simple asymptotic kz -> 12 m (should be ~dz).
          el_les= MIN(els/(1. + (els/12.)), elb_mf)
-         el(k) = el(k)*Psig_bl + (1.-Psig_bl)*el_les
+         el(k) = el(k)*psig_bl + (1.-psig_bl)*el_les
 
        END DO
 
@@ -3549,7 +3553,7 @@ CONTAINS
     &            Dfm, Dfh, Dfq, Tcd, Qcd, Pdk, Pdt, Pdq, Pdc, &
     &		 qWT1D,qSHEAR1D,qBUOY1D,qDISS1D,              &
     &            tke_budget,                                  &
-    &            Psig_bl,Psig_shcu,cldfra_bl1D,               &
+    &            psig_bl,psig_shcu,cldfra_bl1D,               &
     &            bl_mynn_mixlength,                           &
     &            edmf_w1,edmf_a1,                             &
     &            TKEprodTD,                                   &
@@ -3569,7 +3573,7 @@ CONTAINS
     real(kind_phys), dimension(kts:kte),   intent(in) :: dz
     real(kind_phys), dimension(kts:kte+1), intent(in) :: zw
     real(kind_phys), intent(in)       :: rmo,flt,fltv,flq,                 &
-         &Psig_bl,Psig_shcu,xland,dx,zi
+         &psig_bl,psig_shcu,xland,dx,zi
     real(kind_phys), dimension(kts:kte), intent(in) :: u,v,thl,thetav,qw,  & 
          &ql,vt,vq,qke,tsq,qsq,cov,cldfra_bl1D,edmf_w1,edmf_a1,            &
          &TKEprodTD
@@ -3636,7 +3640,7 @@ CONTAINS
     &            dtv,                           &
     &            el,                            &
     &            zi,theta,                      &
-    &            qkw,Psig_bl,cldfra_bl1D,       &
+    &            qkw,psig_bl,cldfra_bl1D,       &
     &            bl_mynn_mixlength,             &
     &            edmf_w1,edmf_a1                )
 !
@@ -6630,19 +6634,18 @@ ENDIF
                  & mix_chem,                    &
             ! in/outputs - subgrid scale clouds
                  & qc_bl1d,cldfra_bl1d,         &
-                 & qc_bl1D_old,cldfra_bl1D_old, &
             ! inputs - flags for moist arrays
                  & F_QC,F_QI,                   &
                  & F_QNC,F_QNI,                 &
                  & F_QNWFA,F_QNIFA,F_QNBCA,     &
-                 & Psig_shcu,                   &
+                 & psig_shcu,                   &
             ! output info
                  & maxwidth,ktop,maxmf,ztop,    &
             ! inputs for stochastic perturbations
-                 & spp_pbl,rstoch_col,
+                 & spp_pbl,rstoch_col,          &
             ! Constants
                  & grav,gtr,p608,p1000mb,rcp,   &
-                 &xlvcp,rvovrd,onethird, tv0) 
+                 & xlvcp,rvovrd,onethird, tv0) bind(c) 
 
   ! inputs:
      integer, intent(in) :: KTS,KTE,KPBL,momentum_opt,tke_opt,scalar_opt
@@ -6654,13 +6657,14 @@ ENDIF
 
 ! Stochastic 
      integer,  intent(in)                 :: spp_pbl
+     real(kind_phys) :: grav,gtr,p608,p1000mb,rcp,xlvcp,rvovrd,onethird,tv0
      real(kind_phys), dimension(kts:kte)  :: rstoch_col
 
      real(kind_phys),dimension(kts:kte), intent(in) ::                 &
           &U,V,W,TH,THL,TK,QT,QV,QC,                                   &
           &exner,dz,THV,P,rho,qke,qnc,qni,qnwfa,qnifa,qnbca
      real(kind_phys),dimension(kts:kte+1), intent(in) :: zw    !height at full-sigma
-     real(kind_phys), intent(in) :: flt,fltv,flq,flqv,Psig_shcu,       &
+     real(kind_phys), intent(in) :: flt,fltv,flq,flqv,psig_shcu,       &
           &landsea,ts,dx,dt,ust,pblh
      logical, optional :: F_QC,F_QI,F_QNC,F_QNI,F_QNWFA,F_QNIFA,F_QNBCA
 
@@ -6679,7 +6683,7 @@ ENDIF
           &s_awqke,s_aw2
 
      real(kind_phys),dimension(kts:kte), intent(inout) ::              &
-          &qc_bl1d,cldfra_bl1d,qc_bl1d_old,cldfra_bl1d_old
+          &qc_bl1d,cldfra_bl1d
 
     integer, parameter :: nup=8, debug_mf=0
     real(kind_phys)    :: nup2
@@ -6884,7 +6888,7 @@ ENDIF
   !do nothing for small w (< 1 m/s), but linearly taper off for w > 1.0 m/s
   maxw = max(0.,maxw - 1.0)
   Psig_w = max(0.0, 1.0 - maxw)
-  Psig_w = min(Psig_w, Psig_shcu)
+  Psig_w = min(Psig_w, psig_shcu)
 
   !Completely shut off MF scheme for strong resolved-scale vertical velocities.
   fltv2 = fltv
@@ -8229,7 +8233,7 @@ END SUBROUTINE DDMF_JPL
 !===============================================================
 
 
-SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
+SUBROUTINE SCALE_AWARE(dx,PBL1,psig_bl,psig_shcu)
 
     !---------------------------------------------------------------
     !             NOTES ON SCALE-AWARE FORMULATION
@@ -8237,29 +8241,29 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
     !JOE: add scale-aware factor (Psig) here, taken from Honnert et al. (2011,
     !     JAS) and/or from Hyeyum Hailey Shin and Song-You Hong (2013, JAS)
     !
-    ! Psig_bl tapers local mixing
-    ! Psig_shcu tapers nonlocal mixing
+    ! psig_bl tapers local mixing
+    ! psig_shcu tapers nonlocal mixing
 
     real(kind_phys), intent(in)  :: dx,pbl1
-    real(kind_phys), intent(out) :: Psig_bl,Psig_shcu
+    real(kind_phys), intent(out) :: psig_bl,psig_shcu
     real(kind_phys)              :: dxdh
 
-    Psig_bl=1.0
-    Psig_shcu=1.0
+    psig_bl=1.0
+    psig_shcu=1.0
     dxdh=MAX(2.5*dx,10.)/MIN(PBL1,3000.)
     ! Honnert et al. 2011, TKE in PBL  *** original form used until 201605
-    !Psig_bl= ((dxdh**2) + 0.07*(dxdh**0.667))/((dxdh**2) + &
+    !psig_bl= ((dxdh**2) + 0.07*(dxdh**0.667))/((dxdh**2) + &
     !         (3./21.)*(dxdh**0.67) + (3./42.))
     ! Honnert et al. 2011, TKE in entrainment layer
-    !Psig_bl= ((dxdh**2) + (4./21.)*(dxdh**0.667))/((dxdh**2) + &
+    !psig_bl= ((dxdh**2) + (4./21.)*(dxdh**0.667))/((dxdh**2) + &
      !        (3./20.)*(dxdh**0.67) + (7./21.))
     ! New form to preseve parameterized mixing - only down 5% at dx = 750 m
-     Psig_bl= ((dxdh**2) + 0.106*(dxdh**0.667))/((dxdh**2) +0.066*(dxdh**0.667) + 0.071)
+     psig_bl= ((dxdh**2) + 0.106*(dxdh**0.667))/((dxdh**2) +0.066*(dxdh**0.667) + 0.071)
 
     !assume a 500 m cloud depth for shallow-cu clods
     dxdh=MAX(2.5*dx,10.)/MIN(PBL1+500.,3500.)
     ! Honnert et al. 2011, TKE in entrainment layer *** original form used until 201605
-    !Psig_shcu= ((dxdh**2) + (4./21.)*(dxdh**0.667))/((dxdh**2) + &
+    !psig_shcu= ((dxdh**2) + (4./21.)*(dxdh**0.667))/((dxdh**2) + &
     !         (3./20.)*(dxdh**0.67) + (7./21.))
 
     ! Honnert et al. 2011, TKE in cumulus
@@ -8281,10 +8285,10 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
     !+ 0.37)
 
     ! Hyeyum Hailey Shin and Song-You Hong 2013, TKE in PBL (same as Honnert's above)
-    !Psig_shcu= ((dxdh**2) + 0.070*(dxdh**0.667))/((dxdh**2)
+    !psig_shcu= ((dxdh**2) + 0.070*(dxdh**0.667))/((dxdh**2)
     !+0.142*(dxdh**0.667) + 0.071)
     ! Hyeyum Hailey Shin and Song-You Hong 2013, TKE in entrainment zone  *** switch to this form 201605
-    Psig_shcu= ((dxdh**2) + 0.145*(dxdh**0.667))/((dxdh**2) +0.172*(dxdh**0.667) + 0.170)
+    psig_shcu= ((dxdh**2) + 0.145*(dxdh**0.667))/((dxdh**2) +0.172*(dxdh**0.667) + 0.170)
 
     ! Hyeyum Hailey Shin and Song-You Hong 2013, w'theta' in PBL
     !Psig(i)= 0.5 + 0.5*((dxdh**2) -0.098)/((dxdh**2) + 0.106) 
@@ -8293,12 +8297,12 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
     !+ 0.054*(dxdh**0.25) + 0.10)
 
     !print*,"in scale_aware; dx, dxdh, Psig(i)=",dx,dxdh,Psig(i)
-    !If(Psig_bl(i) < 0.0 .OR. Psig(i) > 1.)print*,"dx, dxdh, Psig(i)=",dx,dxdh,Psig_bl(i) 
-    If(Psig_bl > 1.0) Psig_bl=1.0
-    If(Psig_bl < 0.0) Psig_bl=0.0
+    !If(psig_bl(i) < 0.0 .OR. Psig(i) > 1.)print*,"dx, dxdh, Psig(i)=",dx,dxdh,psig_bl(i) 
+    If(psig_bl > 1.0) psig_bl=1.0
+    If(psig_bl < 0.0) psig_bl=0.0
 
-    If(Psig_shcu > 1.0) Psig_shcu=1.0
-    If(Psig_shcu < 0.0) Psig_shcu=0.0
+    If(psig_shcu > 1.0) psig_shcu=1.0
+    If(psig_shcu < 0.0) psig_shcu=0.0
 !      print*,dx,psig_bl, psig_shcu
   END SUBROUTINE SCALE_AWARE
 

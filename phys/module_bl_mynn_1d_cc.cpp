@@ -72,11 +72,43 @@ extern "C" void get_pblh_cc(int &kts, int &kte, float &zi, float *thetav1d, floa
 
 extern "C" void retrieve_exchange_coeffs_cc(int& kts, int& kte, float* dfm, float* dfh, const float* dz, float* k_m, float* k_h);
 
-extern "C" void dmp_mf_cc(const int& kts, const int& kte, float& dt, float* zw, float* dz, float* p, float* rho, int& momentum_opt, int& tke_opt, int& scalar_opt, float* u, float* v, float* w, float* th, float* thl, float* thv, float* tk, float* qt, float* qv, float* qc, float* qke, float* qnc, float* qni, float* qnwfa, float* qnifa, float* qnbca, float* exner, float *vt, float* vq, float& ust, float& flt, float& fltv, float& flq, float& flqv, float& pblh, int& kpbl, float& dx, float& landsea, float& ts, float* edmf_a, float* edmf_w, float* edmf_qt, float* edmf_thl, float* edmf_ent, float* edmf_qc, float* s_aw, float* s_awthl, float* s_awqt, float* s_awqv, float* s_awqc, float* s_awu, float* s_awv, float* s_awqke, float* s_awqnc, float* s_awqni, float* s_awqnwfa, float* s_awqnifa, float* s_awqnbca, float* sub_thl, float *sub_sqv, float * sub_u, float * sub_v, float det_thl, float * det_sqv, float * det_sqc, float* det_u, float* det_v, int& nchem, float** chem1, float** s_awchem, bool& mix_chem, float* qc_bl1d, float* cldfra_bl1d, float* qc_bl1d_old, float* cldfra_bl1d_old, float& psig_shcu, float& maxwidth, int& ktop, float& maxmf, float& ztop, float* rstoch_col, const float grav, float gtr, float p608, float onethird, float tv0, float cpv, float ep_2, float ep_3, float r_v,  float xl, float tliq, float cice, float xlv, float xls, float cp, float cliq);
+extern "C" void dmp_mf_cc(const int& kts, const int& kte, float& dt, float* zw, float* dz, float* p, float* rho, 
+		int& momentum_opt, int& tke_opt, int& scalar_opt, 
+		float* u, float* v, float* w, float* th, float* thl, float* thv, float* tk, 
+		float* qt, float* qv, float* qc, float* qke, 
+		float* qnc, float* qni, float* qnwfa, float* qnifa, float* qnbca, 
+		float* exner, float *vt, float* vq, 
+		float& ust, float& flt, float& fltv, float& flq, float& flqv, 
+		float& pblh, int& kpbl, float& dx, float& landsea, float& ts, 
+		//outputs - updraft properties
+		float* edmf_a, float* edmf_w, float* edmf_qt, 
+		float* edmf_thl, float* edmf_ent, float* edmf_qc, 
+		//for the solver
+		float* s_aw, float* s_awthl, float* s_awqt, 
+		float* s_awqv, float* s_awqc, 
+		float* s_awu, float* s_awv, float* s_awqke, 
+		float* s_awqnc, float* s_awqni, 
+		float* s_awqnwfa, float* s_awqnifa, float* s_awqnbca, 
+		float* sub_thl, float *sub_sqv, float * sub_u, float * sub_v, 
+		float* det_thl, float * det_sqv, float * det_sqc, float* det_u, float* det_v, 
+		//chem/smoke mixing
+		int& nchem, float** chem1, float** s_awchem, 
+		int& mix_chem,
+	        // in/outputs - subgrid scale clouds	
+		float* qc_bl1d, float* cldfra_bl1d, 
+		float& psig_shcu, 
+		// output info
+		float& maxwidth, int& ktop, 
+		float& maxmf, float& ztop,
+		// inputs for stochastic perturbations
+		int& spp_pbl, float* rstoch_col, const float grav, float gtr, float p608, 
+		float p1000mb, float rcp, float xlvcp, float rvovrd, float onethird, float tv0, 
+		float cpv, float ep_2, float ep_3, float r_v, float tliq, float cice, float xlv, float xls, 
+		float cp, float cliq);
 
-extern "C" void mym_turbulence_cc(int& kts, int& kte, float& xland, float& closure, float* dz, float* dx, float* zw, float* u, float* v, float* thl, float* thetav, float* ql, float* qw, float* qke, float* tsq, float* qsq, float* cov, float* vt, float* vq, float& rmo, float& flt, float& fltv, float& flq, float& zi, float* theta, float* sh, float* sm, float* el, float* dfm, float* dfh, float* dfq, float* tcd, float* qcd, float* pdk, float* pdt, float* pdq, float* pdc, float* qWT1D, float* qSHEAR1D, float* qBUOY1D, float* qDISS1D, int& tke_budget, float& Psig_bl, float& Psig_shcu, float* cldfra_bl1D, int& bl_mynn_mixlength, float* edmf_w1, float* edmf_a1, float* TKEprodTD, int& spp_pbl, float* rstoch_col, int& debug_code, float& gtr, float& tv0);
+extern "C" void mym_turbulence_cc(int& kts, int& kte, float& xland, float& closure, float* dz, float* dx, float* zw, float* u, float* v, float* thl, float* thetav, float* ql, float* qw, float* qke, float* tsq, float* qsq, float* cov, float* vt, float* vq, float& rmo, float& flt, float& fltv, float& flq, float& zi, float* theta, float* sh, float* sm, float* el, float* dfm, float* dfh, float* dfq, float* tcd, float* qcd, float* pdk, float* pdt, float* pdq, float* pdc, float* qWT1D, float* qSHEAR1D, float* qBUOY1D, float* qDISS1D, int& tke_budget, float& psig_bl, float& psig_shcu, float* cldfra_bl1D, int& bl_mynn_mixlength, float* edmf_w1, float* edmf_a1, float* TKEprodTD, int& spp_pbl, float* rstoch_col, int& debug_code, float& gtr, float& tv0);
 
-extern "C" void mym_initialize_cc(const int &kts,const int &kte,const float &xland, float *dz, float &dx, float *zw, float *u, float *v, float *thl, float *qw,const float &zi, float *theta, float *thetav, float *sh, float *sm,const float& ust, const float &rmo, float* el, float *qke, float* tsq, float* qsa, float* cov, const float& Psig_bl, float *cldfra_bl1D, int &bl_mynn_mixlength, float *edmf_w1, float *edmf_a1, int &INITIALIZE_QKE, int &spp_pbl, float *rstoch_col,const float& karman,const float& tv0,const float& gtr);
+extern "C" void mym_initialize_cc(const int &kts,const int &kte,const float &xland, float *dz, float &dx, float *zw, float *u, float *v, float *thl, float *qw,const float &zi, float *theta, float *thetav, float *sh, float *sm,const float& ust, const float &rmo, float* el, float *qke, float* tsq, float* qsa, float* cov, const float& psig_bl, float *cldfra_bl1D, int &bl_mynn_mixlength, float *edmf_w1, float *edmf_a1, int &INITIALIZE_QKE, int &spp_pbl, float *rstoch_col,const float& karman,const float& tv0,const float& gtr);
 //----------------------------------------contstants-------------------------------------------
 
 // constants
@@ -2614,7 +2646,7 @@ void mym_condensation_cc(const int& kts,const int& kte, const float& dx, float* 
                 //qsl=ep_2*esat/(p(k)-ep_3*esat)
                 qsl = ep_2 * esat / std::max(1e-4f, (p[k] - ep_3 * esat));
 		// dqw/dT: Clausius-Clapeyron
-                dqsl = qsl * ep_2 * xlv / (r_d * pow(t, 2));
+                dqsl = qsl * ep_2 * xlv / (r_d * t* t);
                 alp[k] = 1.0f / (1.0f + dqsl * xlvcp);
                 bet[k] = dqsl * exner[k];
 
@@ -2671,7 +2703,7 @@ void mym_condensation_cc(const int& kts,const int& kte, const float& dx, float* 
 		// SATURATED SPECIFIC HUMIDITY
 		// qsl=ep_2*esat/(p(k)-ep_3*esat)
                 qsl = ep_2 * esat / std::max(1e-4f, (p[k] - ep_3 * esat));
-                dqsl = qsl * ep_2 * xlv / (r_d * pow(t, 2));
+                dqsl = qsl * ep_2 * xlv / (r_d * t * t);
 
                 alp[k] = 1.0f / (1.0f + dqsl * xlvcp);
                 bet[k] = dqsl * exner[k];
@@ -2683,7 +2715,7 @@ void mym_condensation_cc(const int& kts,const int& kte, const float& dx, float* 
                 }
                 dth = 0.5f * (thl[k + 1] + thl[k]) - 0.5f * (thl[k] + thl[std::max(k - 1, kts)]);
                 dqw = 0.5f * (qw[k + 1] + qw[k]) - 0.5f * (qw[k] + qw[std::max(k - 1, kts)]);
-                sgm[k] = std::sqrt(std::max(float((pow(alp[k], 2) * std::max(pow(el[k], 2), 0.1) * b2 * std::max(sh[k], 0.03f)) / 4.0f * pow((dqw / dzk - bet[k] * (dth / dzk)), 2)), 1.0e-10f));
+		sgm[k] = std::sqrt(std::max(float((pow(alp[k], 2) * std::max(pow(el[k], 2), 0.1) * b2 * std::max(sh[k], 0.03f)) / 4.0f * pow((dqw / dzk - bet[k] * (dth / dzk)), 2)), 1.0e-10f));
                 qmq = qw[k] - qsl;
                 q1[k] = qmq / sgm[k];
                 cldfra_bl1d[k] = 0.5f * (1.0f + std::erf(q1[k] * rr2));
@@ -3960,18 +3992,18 @@ void dmp_mf_cc(const int& kts,const int& kte, float& dt, float* zw, float* dz, f
 		float* sub_thl, float *sub_sqv, float * sub_u, float * sub_v, float * det_thl, float * det_sqv, 
 		float* det_sqc, float* det_u, float* det_v,
 		// chem/smoke
-		int& nchem, float** chem1, float** s_awchem, bool& mix_chem, 
+		int& nchem, float** chem1, float** s_awchem, int& mix_chem, 
 		// in/outputs - subgrid scale clouds
-		float* qc_bl1d, float* cldfra_bl1d, float* qc_bl1d_old, float* cldfra_bl1d_old, 
+		float* qc_bl1d, float* cldfra_bl1d, 
 		// inputs - flags for moist arrays
 		float& psig_shcu, 
 		//  output info
 		float& maxwidth, int& ktop, float& maxmf, float& ztop, 
 		// inputs for stochastic perturbations
-		float* rstoch_col, 
+		int& spp_pbl, float* rstoch_col, 
 		// constants passed from Fortran
 		const float grav, float gtr, float p608, float p1000mb, float rcp, float xlvcp, float rvovrd, 
-		float onethird, float tv0, float cpv, float ep_2, float ep_3, float r_v, float xl, float tliq, 
+		float onethird, float tv0, float cpv, float ep_2, float ep_3, float r_v, float tliq, 
 		float cice, float xlv, float xls, float cp, float cliq) {
 
 // this subroutine is the dynamic multi-plume (dmp) mass-flux scheme.
@@ -4908,7 +4940,7 @@ void dmp_mf_cc(const int& kts,const int& kte, float& dt, float* zw, float* dz, f
             }
 
             // COMPUTE CLDFRA & QC_BL FROM MASS-FLUX SCHEME
-            xl = xl_blend_cc(tk[k],xlv,xls,cpv,cliq,cice); // obtain blended heat capacity
+            float xl = xl_blend_cc(tk[k],xlv,xls,cpv,cliq,cice); // obtain blended heat capacity
             float qsat_tk = qsat_blend_cc(tk[k], p[k]); // get saturation water vapor mixing ratio
             float rsl = xl * qsat_tk / (r_v * tk[k] * tk[k]); // slope of C-C curve at t (abs temp)
             float cpm = cp + qt[k] * cpv; // CB02, sec. 2, para. 1
@@ -5025,7 +5057,7 @@ void dmp_mf_cc(const int& kts,const int& kte, float& dt, float* zw, float* dz, f
 
 
 //\ingroup gsd_mynn_edmf
-void mym_turbulence_cc(int& kts, int& kte, float& xland, float& closure, float* dz, float* dx, float* zw, float* u, float* v, float* thl, float* thetav, float* ql, float* qw, float* qke, float* tsq, float* qsq, float* cov, float* vt, float* vq, float& rmo, float& flt, float& fltv, float& flq, float& zi, float* theta, float* sh, float* sm, float* el, float* dfm, float* dfh, float* dfq, float* tcd, float* qcd, float* pdk, float* pdt, float* pdq, float* pdc, float* qWT1D, float* qSHEAR1D, float* qBUOY1D, float* qDISS1D, int& tke_budget, float& Psig_bl, float& Psig_shcu, float* cldfra_bl1D, int& bl_mynn_mixlength, float* edmf_w1, float* edmf_a1, float* TKEprodTD, int& spp_pbl, float* rstoch_col, int& debug_code, float& gtr, float& tv0) {
+void mym_turbulence_cc(int& kts, int& kte, float& xland, float& closure, float* dz, float* dx, float* zw, float* u, float* v, float* thl, float* thetav, float* ql, float* qw, float* qke, float* tsq, float* qsq, float* cov, float* vt, float* vq, float& rmo, float& flt, float& fltv, float& flq, float& zi, float* theta, float* sh, float* sm, float* el, float* dfm, float* dfh, float* dfq, float* tcd, float* qcd, float* pdk, float* pdt, float* pdq, float* pdc, float* qWT1D, float* qSHEAR1D, float* qBUOY1D, float* qDISS1D, int& tke_budget, float& psig_bl, float& psig_shcu, float* cldfra_bl1D, int& bl_mynn_mixlength, float* edmf_w1, float* edmf_a1, float* TKEprodTD, int& spp_pbl, float* rstoch_col, int& debug_code, float& gtr, float& tv0) {
 // ==================================================================
 //     SUBROUTINE  mym_turbulence:
 //
@@ -5108,7 +5140,7 @@ void mym_turbulence_cc(int& kts, int& kte, float& xland, float& closure, float* 
 
     mym_level2_cc(kts, kte, dz, u, v, thl, thetav, qw, ql, vt, vq, dtl, dqw, dtv, gm, gh, sm, sh, tv0, gtr);
 
-    mym_length_cc(kts, kte, xland, dz, zw, rmo, flt, fltv, flq, vt, vq, u, v, qke, dtv, el, zi, theta, qkw, Psig_bl, cldfra_bl1D, bl_mynn_mixlength, edmf_w1, edmf_a1, tv0, gtr);
+    mym_length_cc(kts, kte, xland, dz, zw, rmo, flt, fltv, flq, vt, vq, u, v, qke, dtv, el, zi, theta, qkw, psig_bl, cldfra_bl1D, bl_mynn_mixlength, edmf_w1, edmf_a1, tv0, gtr);
 
     for (int k = kts + 1; k <= kte; k++) {
         dzk = 0.5f * (dz[k] + dz[k - 1]);
@@ -5506,7 +5538,7 @@ void mym_turbulence_cc(int& kts, int& kte, float& xland, float& closure, float* 
 
 
 //>\ingroup gsd_mynn_edmf
-void mym_initialize_cc(const int &kts,const int &kte,const float &xland, float *dz, float &dx, float *zw, float *u, float *v, float *thl, float *qw,const float &zi, float *theta, float *thetav, float *sh, float *sm, const float& ust, const float &rmo, float* el, float *qke, float* tsq, float* qsq, float* cov, const float& Psig_bl, float *cldfra_bl1D, int &bl_mynn_mixlength, float *edmf_w1, float *edmf_a1, int &INITIALIZE_QKE, int &spp_pbl, float *rstoch_col,const float & karman,const float& tv0,const float& gtr) {
+void mym_initialize_cc(const int &kts,const int &kte,const float &xland, float *dz, float &dx, float *zw, float *u, float *v, float *thl, float *qw,const float &zi, float *theta, float *thetav, float *sh, float *sm, const float& ust, const float &rmo, float* el, float *qke, float* tsq, float* qsq, float* cov, const float& psig_bl, float *cldfra_bl1D, int &bl_mynn_mixlength, float *edmf_w1, float *edmf_a1, int &INITIALIZE_QKE, int &spp_pbl, float *rstoch_col,const float & karman,const float& tv0,const float& gtr) {
 //!=======================================================================
 //     SUBROUTINE  mym_initialize:
 //
@@ -5611,7 +5643,7 @@ void mym_initialize_cc(const int &kts,const int &kte,const float &xland, float *
     lmax = 5;
     for (l = 1; l <= lmax; l++) {
         // Call mym_length() to calculate the master length scale.
-      mym_length_cc(kts, kte, xland, dz, zw, rmo, flt, fltv, flq, vt, vq, u, v, qke, dtv, el, zi, theta, qkw, Psig_bl, cldfra_bl1D, bl_mynn_mixlength, edmf_w1, edmf_a1, tv0, gtr);
+      mym_length_cc(kts, kte, xland, dz, zw, rmo, flt, fltv, flq, vt, vq, u, v, qke, dtv, el, zi, theta, qkw, psig_bl, cldfra_bl1D, bl_mynn_mixlength, edmf_w1, edmf_a1, tv0, gtr);
 
         for (k = kts + 1; k <= kte; k++) {
             elq = el[k] * qkw[k];
