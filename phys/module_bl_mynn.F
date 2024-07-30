@@ -10,11 +10,13 @@
 ! *                 Joseph Olson, Jaymes Kenyon (NOAA/GSL),            *
 ! *                 Wayne Angevine (NOAA/CSL), Kay Suselj (NASA/JPL),  *
 ! *                 Franciano Puhales (UFSM), Laura Fowler (NCAR),     *
-! *                 Elynn Wu (UCSD), and Jordan Schnell (NOAA/GSL)     *
+! *                 Elynn Wu (UCSD), and Jordan Schnell (NOAA/GSL),    *
+! *                 Tiziani Cherubin (MKWC, Univ. Hawaii),             *
+! *                 Xia Sun (NOAA/GSL/CIRES)                           *
 ! *                                                                    *
 ! *   Contents:                                                        *
 ! *                                                                    *
-! *   mynn_bl_driver - main subroutine which calls all other routines  *
+! *   mynnedmf - the main subroutine which calls all other routines    *
 ! *   --------------                                                   *
 ! *     1. mym_initialize  (to be called once initially)               *
 ! *        gives the closure constants and initializes the turbulent   *
@@ -28,7 +30,7 @@
 ! *        diagnostically.                                             *
 ! *     5. dmp_mf                                                      *
 ! *        Calls the (nonlocal) mass-flux component                    *
-! *     6. ddmf_jpl                                                    *
+! *     6. ddmp_mf                                                     *
 ! *        Calls the downdraft mass-flux component                     *
 ! *    (-) mym_level2      (called in the other subroutines)           *
 ! *        calculates the stability functions at Level 2.              *
@@ -48,7 +50,7 @@
 ! *             call scale_aware       |                               *
 ! *             call mym_condensation  |                               *
 ! *             call dmp_mf            |                               *
-! *             call ddmf_jpl          |                               *
+! *             call ddmp_mf           |                               *
 ! *             call mym_turbulence    |                               *
 ! *             call mym_predict       |                               *
 ! *                  |                 |                               *
@@ -99,7 +101,8 @@
 ! *     6. Puhales, Franciano S. and coauthors, 2020: Turbulent        *
 ! *        Kinetic Energy Budget for MYNN-EDMF PBL Scheme in WRF model.*
 ! *        Universidade Federal de Santa Maria Technical Note. 9 pp.   *
-! **********************************************************************
+! *        https://repositorio.ufsm.br/handle/1/28327                  *
+!***********************************************************************
 ! ==================================================================
 ! Notes on original implementation into WRF-ARW
 ! changes to original code:
@@ -251,22 +254,21 @@
 
 MODULE module_bl_mynn
 
-  use module_bl_mynn_common,only:                        &
-        cp        , cpv       , cliq       , cice      , &
-        p608      , ep_2      , ep_3       , gtr       , &
-        grav      , g_inv     , karman     , p1000mb   , &
-        rcp       , r_d       , r_v        , rk        , &
-        rvovrd    , svp1      , svp2       , svp3      , &
-        xlf       , xlv       , xls        , xlscp     , &
-        xlvcp     , tv0       , tv1        , tref      , &
-        zero      , half      , one        , two       , &
-        onethird  , twothirds , tkmin      , t0c       , &
-        tice      , kind_phys
+ use module_bl_mynn_common,only:                        &
+       cp        , cpv       , cliq       , cice      , &
+       p608      , ep_2      , ep_3       , gtr       , &
+       grav      , g_inv     , karman     , p1000mb   , &
+       rcp       , r_d       , r_v        , rk        , &
+       rvovrd    , svp1      , svp2       , svp3      , &
+       xlf       , xlv       , xls        , xlscp     , &
+       xlvcp     , tv0       , tv1        , tref      , &
+       zero      , half      , one        , two       , &
+       onethird  , twothirds , tkmin      , t0c       , &
+       tice      , kind_phys
 
-  !!use module_bl_mynn_1d
   use iso_c_binding !, only: c_double, c_int, c_float 
 
-  IMPLICIT NONE
+ IMPLICIT NONE
 
 !!===============================================INTERFACE_TO_C++====================================================
 
@@ -652,444 +654,345 @@ SUBROUTINE  mym_initialize_cc (                                &
 
 ! From here on, these are MYNN-specific parameters:
 ! The parameters below depend on stability functions of module_sf_mynn.
-  real(kind_phys), parameter :: cphm_st=5.0, cphm_unst=16.0, &
-                                cphh_st=5.0, cphh_unst=16.0
+ real(kind_phys), parameter :: cphm_st=5.0, cphm_unst=16.0, &
+                               cphh_st=5.0, cphh_unst=16.0
 
 ! Closure constants
-  real(kind_phys), parameter ::  &
-       &pr  =  0.74,             &
-       &g1  =  0.235,            &  ! NN2009 = 0.235
-       &b1  = 24.0,              &
-       &b2  = 15.0,              &  ! CKmod     NN2009
-       &c2  =  0.729,            &  ! 0.729, & !0.75, &
-       &c3  =  0.340,            &  ! 0.340, & !0.352, &
-       &c4  =  0.0,              &
-       &c5  =  0.2,              &
-       &a1  = b1*( 1.0-3.0*g1 )/6.0, &
-!       &c1  = g1 -1.0/( 3.0*a1*b1**(1.0/3.0) ), &
-       &c1  = g1 -1.0/( 3.0*a1*2.88449914061481660), &
-       &a2  = a1*( g1-c1 )/( g1*pr ), &
-       &g2  = b2/b1*( 1.0-c3 ) +2.0*a1/b1*( 3.0-2.0*c2 )
+ real(kind_phys), parameter ::  &
+      &pr  =  0.74,             &
+      &g1  =  0.235,            &  ! NN2009 = 0.235
+      &b1  = 24.0,              &
+      &b2  = 15.0,              &  ! CKmod     NN2009
+      &c2  =  0.729,            &  ! 0.729, & !0.75, &
+      &c3  =  0.340,            &  ! 0.340, & !0.352, &
+      &c4  =  0.0,              &
+      &c5  =  0.2,              &
+      &a1  = b1*( 1.0-3.0*g1 )/6.0, &
+!      &c1  = g1 -1.0/( 3.0*a1*b1**(1.0/3.0) ), &
+      &c1  = g1 -1.0/( 3.0*a1*2.88449914061481660), &
+      &a2  = a1*( g1-c1 )/( g1*pr ), &
+      &g2  = b2/b1*( 1.0-c3 ) +2.0*a1/b1*( 3.0-2.0*c2 )
 
-  real(kind_phys), parameter ::  &
-       &cc2 =  1.0-c2,           &
-       &cc3 =  1.0-c3,           &
-       &e1c =  3.0*a2*b2*cc3,    &
-       &e2c =  9.0*a1*a2*cc2,    &
-       &e3c =  9.0*a2*a2*cc2*( 1.0-c5 ), &
-       &e4c = 12.0*a1*a2*cc2,    &
-       &e5c =  6.0*a1*a1
+ real(kind_phys), parameter ::  &
+      &cc2 =  1.0-c2,           &
+      &cc3 =  1.0-c3,           &
+      &e1c =  3.0*a2*b2*cc3,    &
+      &e2c =  9.0*a1*a2*cc2,    &
+      &e3c =  9.0*a2*a2*cc2*( 1.0-c5 ), &
+      &e4c = 12.0*a1*a2*cc2,    &
+      &e5c =  6.0*a1*a1
 
 ! Constants for min tke in elt integration (qmin), max z/L in els (zmax), 
 ! and factor for eddy viscosity for TKE (Kq = Sqfac*Km):
-  real(kind_phys), parameter :: qmin=0.0, zmax=1.0, Sqfac=3.0
+ real(kind_phys), parameter :: qmin=0.0, zmax=1.0, Sqfac=3.0
 ! Note that the following mixing-length constants are now specified in mym_length
-!      &cns=3.5, alp1=0.23, alp2=0.3, alp3=3.0, alp4=10.0, alp5=0.2
+!     &cns=3.5, alp1=0.23, alp2=0.3, alp3=3.0, alp4=10.0, alp5=0.2
 
-  real(kind_phys), parameter :: gpw=5./3., qcgmin=1.e-8, qkemin=1.e-3
-  real(kind_phys), parameter :: tliq = 269. !all hydrometeors are liquid when T > tliq
+ real(kind_phys), parameter :: qkemin=1.e-5
+ real(kind_phys), parameter :: tliq = 269. !all hydrometeors are liquid when T > tliq
 
 ! Constants for cloud PDF (mym_condensation)
-  real(kind_phys), parameter :: rr2=0.7071068, rrp=0.3989423
+ real(kind_phys), parameter :: rr2=0.7071068, rrp=0.3989423
 
-  !>Use Canuto/Kitamura mod (remove Ric and negative TKE) (1:yes, 0:no)
-  !!For more info, see Canuto et al. (2008 JAS) and Kitamura (Journal of the 
-  !!Meteorological Society of Japan, Vol. 88, No. 5, pp. 857-864, 2010).
-  !!Note that this change required further modification of other parameters
-  !!above (c2, c3). If you want to remove this option, set c2 and c3 constants 
-  !!(above) back to NN2009 values (see commented out lines next to the
-  !!parameters above). This only removes the negative TKE problem
-  !!but does not necessarily improve performance - neutral impact.
-  real(kind_phys), parameter :: CKmod=1.
+!>Use Canuto/Kitamura mod (remove Ric and negative TKE) (1:yes, 0:no)
+!!For more info, see Canuto et al. (2008 JAS) and Kitamura (Journal of the 
+!!Meteorological Society of Japan, Vol. 88, No. 5, pp. 857-864, 2010).
+!!Note that this change required further modification of other parameters
+!!above (c2, c3). If you want to remove this option, set c2 and c3 constants 
+!!(above) back to NN2009 values (see commented out lines next to the
+!!parameters above). This only removes the negative TKE problem
+!!but does not necessarily improve performance - neutral impact.
+ real(kind_phys), parameter :: CKmod=1.
 
-  !>Use Ito et al. (2015, BLM) scale-aware (0: no, 1: yes). Note that this also has impacts
-  !!on the cloud PDF and mass-flux scheme, using LES-derived similarity function.
-  real(kind_phys), parameter :: scaleaware=1.
+!For calculating the b-f freq and Ri, either use the buoyancy flux functions
+!(true) or use the direct calc of thlv with resolved and sgs clouds (false).  
+ logical, parameter :: use_buoy=.false.
 
-  !>Of the following the options, use one OR the other, not both.
-  !>Adding top-down diffusion driven by cloud-top radiative cooling
-  integer, parameter :: bl_mynn_topdown = 0
-  !>Option to activate downdrafts, from Elynn Wu (0: deactive, 1: active)
-  integer, parameter :: bl_mynn_edmf_dd = 0
+!>Use Ito et al. (2015, BLM) scale-aware (0: no, 1: yes). Note that this also has impacts
+!!on the cloud PDF and mass-flux scheme, using LES-derived similarity function.
+ real(kind_phys), parameter :: scaleaware=1.
 
-  !>Option to activate heating due to dissipation of TKE (to activate, set to 1.0)
-  integer, parameter :: dheat_opt = 1
+!>Of the following the options, use one OR the other, not both.
+!>Adding top-down diffusion driven by cloud-top radiative cooling
+ integer, parameter :: bl_mynn_topdown = 0
+!>Option to activate downdrafts, from Elynn Wu (0: deactive, 1: active)
+ integer, parameter :: bl_mynn_edmf_dd = 0
 
-  !Option to activate environmental subsidence in mass-flux scheme
-  logical, parameter :: env_subs = .false.
+!>Option to activate heating due to dissipation of TKE (1: active, 0: off)
+ integer, parameter :: dheat_opt = 1
 
-  !Option to switch flux-profile relationship for surface (from Puhales et al. 2020)
-  !0: use original Dyer-Hicks, 1: use Cheng-Brustaert and Blended COARE
-  integer, parameter :: bl_mynn_stfunc = 1
+!Option to activate environmental subsidence in mass-flux scheme
+ logical, parameter :: env_subs = .false.
 
-  !option to print out more stuff for debugging purposes
-  logical, parameter :: debug_code = .false.
+!Option to switch flux-profile relationship for surface (from Puhales et al. 2020)
+!0: use original Dyer-Hicks, 1: use Cheng-Brustaert and Blended COARE
+ integer, parameter :: bl_mynn_stfunc = 1
+
+!option to print out more stuff for debugging purposes
+ logical, parameter :: debug_code = .false.
   integer, parameter :: debug_code_i = 0
-  integer, parameter :: idbg = 23 !specific i-point to write out
 
-  ! Used in WRF-ARW module_physics_init.F
-  integer :: mynn_level
+ integer, parameter :: idbg = 452 !specific i-point to write out
+ integer, parameter :: jdbg = 272 !specific i-point to write out
+
+!Used in WRF-ARW module_physics_init.F
+ integer :: mynn_level
 
 
 CONTAINS
 
 ! ==================================================================
 !>\ingroup gsd_mynn_edmf
-!! This subroutine is the GSD MYNN-EDNF PBL driver routine,which
+!! This subroutine is the MYNN-EDMF PBL driver routine, which
 !! encompassed the majority of the subroutines that comprise the 
 !! procedures that ultimately solve for tendencies of 
 !! \f$U, V, \theta, q_v, q_c, and q_i\f$.
-!!\section gen_mynn_bl_driver GSD mynn_bl_driver General Algorithm
+!!\section gen_mynnedmf_driver mynnedmf_driver General Algorithm
 !> @{
-  SUBROUTINE mynn_bl_driver(            &
-       &initflag,restart,cycling,       &
-       &delt,dz,dx,znt,                 &
-       &u,v,w,th,sqv3d,sqc3d,sqi3d,     &
-       &sqs3d,qnc,qni,                  &
-       &qnwfa,qnifa,qnbca,ozone,        &
-       &p,exner,rho,t3d,                &
-       &xland,ts,qsfc,ps,               &
-       &ust,ch,hfx,qfx,rmol,wspd,       &
-       &uoce,voce,                      & !ocean current
-       &qke,qke_adv,                    &
-       &sh3d,sm3d,                      &
-       &nchem,kdvel,ndvel,              & !smoke/chem variables
-       &chem3d,vdep,                    &
-       &frp,emis_ant_no,                &
-       &mix_chem,enh_mix,               & !note: these arrays/flags are still under development
-       &rrfs_sd,smoke_dbg,              & !end smoke/chem variables
-       &tsq,qsq,cov,                    &
-       &rublten,rvblten,rthblten,       &
-       &rqvblten,rqcblten,rqiblten,     &
-       &rqncblten,rqniblten,rqsblten,   &
-       &rqnwfablten,rqnifablten,        &
-       &rqnbcablten,dozone,             &
-       &exch_h,exch_m,                  &
-       &pblh,kpbl,                      & 
-       &el_pbl,                         &
-       &dqke,qwt,qshear,qbuoy,qdiss,    &
-       &qc_bl,qi_bl,cldfra_bl,          &
-       &bl_mynn_tkeadvect,              &
-       &tke_budget,                     &
-       &bl_mynn_cloudpdf,               &
-       &bl_mynn_mixlength,              &
-       &icloud_bl,                      &
-       &closure,                        &
-       &bl_mynn_edmf,                   &
-       &bl_mynn_edmf_mom,               &
-       &bl_mynn_edmf_tke,               &
-       &bl_mynn_mixscalars,             &
-       &bl_mynn_output,                 &
-       &bl_mynn_cloudmix,bl_mynn_mixqt, &
-       &edmf_a,edmf_w,edmf_qt,          &
-       &edmf_thl,edmf_ent,edmf_qc,      &
-       &sub_thl3D,sub_sqv3D,            &
-       &det_thl3D,det_sqv3D,            &
-       &maxwidth,maxMF,ztop_plume,      &
-       &ktop_plume,                     &
-       &spp_pbl,pattern_spp_pbl,        &
-       &rthraten,                       &
-       &FLAG_QC,FLAG_QI,FLAG_QNC,       &
-       &FLAG_QNI,FLAG_QS,               &
-       &FLAG_QNWFA,FLAG_QNIFA,          &
-       &FLAG_QNBCA,FLAG_OZONE,          &
-       &IDS,IDE,JDS,JDE,KDS,KDE,        &
-       &IMS,IME,JMS,JME,KMS,KME,        &
-       &ITS,ITE,JTS,JTE,KTS,KTE         )
-    
+  subroutine mynnedmf(            i                 , j                 , &
+             initflag           , restart           , cycling           , &
+             delt               , dz1               , dx                , &
+             !3d state variables
+             u1                 , v1                , w1                , &
+             th1                , sqv1              , sqc1              , &
+             sqi1               , sqs1              , qnc1              , &
+             qni1               , qnwfa1            , qnifa1            , &
+             qnbca1             , ozone1            , p1                , &
+             ex1                , rho1              , tk1               , &
+             !2d surface fields
+             xland              , ts                , qsfc              , &
+             ps                 , ust               , ch                , &
+             hfx                , qfx               , znt               , &
+             wspd               , uoce              , voce              , &
+             !eddy-diffusivity
+             qke1               , qke_adv1          , el1               , &
+             sh1                , sm1               , kh1               , &
+             km1                ,                                         &
+             !smoke variables
+             nchem              , kdvel             , ndvel             , &
+             chem               , vdep              , frp               , &
+             emis_ant_no        , mix_chem,enh_mix  , rrfs_sd           , &
+             smoke_dbg          ,                                         &
+             !higher-order moments
+             tsq1               , qsq1              , cov1              , &
+             !tendencies
+             du1                , dv1               , dth1              , &
+             dqv1               , dqc1              , dqi1              , &
+             dqnc1              , dqni1             , dqs1              , &
+             dqnwfa1            , dqnifa1           , dqnbca1           , &
+             dozone1            , rthraten1         ,                     &
+             !2d output
+             pblh               , kpbl              ,                     &
+             maxwidth           , maxmf             , ztop_plume        , &
+             !tke budget arrays
+             dqke1              , qwt1              , qshear1           , &
+             qbuoy1             , qdiss1            ,                     &
+             !subgrid clouds
+             qc_bl1             , qi_bl1            , cldfra_bl1        , &
+             !namelist configurations option
+             bl_mynn_tkeadvect  , tke_budget        , bl_mynn_cloudpdf  , &
+             bl_mynn_mixlength  , icloud_bl         , closure           , &
+             bl_mynn_edmf       , bl_mynn_edmf_mom  , bl_mynn_edmf_tke  , &
+             bl_mynn_mixscalars , bl_mynn_output    , bl_mynn_cloudmix  , &
+             bl_mynn_mixqt      ,                                         &
+             !3d emdf output
+             edmf_a1            , edmf_w1           , edmf_qt1          , &
+             edmf_thl1          , edmf_ent1         , edmf_qc1          , &
+             sub_thl1           , sub_sqv1          , det_thl1          , &
+             det_sqv1           ,                                         &
+             !spp
+             spp_pbl            , pattern_spp_pbl1  ,                     &
+             !check flags
+             FLAG_QC            , FLAG_QI           , FLAG_QNC          , &
+             FLAG_QNI           , FLAG_QS           , FLAG_QNWFA        , &
+             FLAG_QNIFA         , FLAG_QNBCA        , FLAG_OZONE        , &
+             KTS                , KTE               , errmsg, errflg      )
+
 !-------------------------------------------------------------------
 
-    integer, intent(in) :: initflag
-    !INPUT NAMELIST OPTIONS:
-    logical, intent(in) :: restart,cycling
-    integer, intent(in) :: tke_budget
-    integer, intent(in) :: bl_mynn_cloudpdf
-    integer, intent(in) :: bl_mynn_mixlength
-    integer, intent(in) :: bl_mynn_edmf
-    logical, intent(in) :: bl_mynn_tkeadvect
-    integer, intent(in) :: bl_mynn_edmf_mom
-    integer, intent(in) :: bl_mynn_edmf_tke
-    integer, intent(in) :: bl_mynn_mixscalars
-    integer, intent(in) :: bl_mynn_output
-    integer, intent(in) :: bl_mynn_cloudmix
-    integer, intent(in) :: bl_mynn_mixqt
-    integer, intent(in) :: icloud_bl
-    real(kind_phys), intent(in) :: closure
+ integer, intent(in) :: initflag
+ logical, intent(in) :: restart,cycling
+ integer, intent(in) :: tke_budget
+ integer, intent(in) :: bl_mynn_cloudpdf
+ integer, intent(in) :: bl_mynn_mixlength
+ integer, intent(in) :: bl_mynn_edmf
+ logical, intent(in) :: bl_mynn_tkeadvect
+ integer, intent(in) :: bl_mynn_edmf_mom
+ integer, intent(in) :: bl_mynn_edmf_tke
+ integer, intent(in) :: bl_mynn_mixscalars
+ integer, intent(in) :: bl_mynn_output
+ integer, intent(in) :: bl_mynn_cloudmix
+ integer, intent(in) :: bl_mynn_mixqt
+ integer, intent(in) :: icloud_bl
+ real(kind_phys), intent(in) :: closure
 
-    logical, intent(in) :: FLAG_QI,FLAG_QNI,FLAG_QC,FLAG_QNC,&
-                           FLAG_QNWFA,FLAG_QNIFA,FLAG_QNBCA, &
-                           FLAG_OZONE,FLAG_QS
+ logical, intent(in) :: FLAG_QI,FLAG_QNI,FLAG_QC,FLAG_QNC,&
+                        FLAG_QNWFA,FLAG_QNIFA,FLAG_QNBCA, &
+                        FLAG_OZONE,FLAG_QS
 
-    logical, intent(in) :: mix_chem,enh_mix,rrfs_sd,smoke_dbg
+ logical, intent(in) :: mix_chem,enh_mix,rrfs_sd,smoke_dbg
 
-    integer, intent(in) ::                                   &
-                         & IDS,IDE,JDS,JDE,KDS,KDE           &
-                         &,IMS,IME,JMS,JME,KMS,KME           &
-                         &,ITS,ITE,JTS,JTE,KTS,KTE
+ integer, intent(in) :: KTS,KTE
 
-!    real :: start, finish
-
-#define WRF_TEST_CC_1 1
-#define WRF_TEST_CC_2
-#define WRF_TEST_CC
-#define WRF_TEST_CC_FLOAT
-#undef WRF_TEST_CC_FLOAT
-#undef WRF_TEST_CC_1
-#undef WRF_TEST_CC
+ character(len=*),intent(out):: &
+    errmsg        ! output error message (-).
+ integer,intent(out):: &
+    errflg        ! output error flag (-).
 
 #ifdef HARDCODE_VERTICAL
 # define kts 1
 # define kte HARDCODE_VERTICAL
 #endif
 
+!scalar variables
+ real(kind_phys), intent(in)    :: delt
+ real(kind_phys), intent(in)    :: dx
+ real(kind_phys), intent(in)    :: ust,ch,qsfc,ps,wspd,xland
+ real(kind_phys), intent(in)    :: ts,znt,hfx,qfx,uoce,voce
+ real(kind_phys), intent(inout) :: pblh
+ real(kind_phys), intent(inout) :: maxmf,maxwidth,ztop_plume
+ integer,         intent(in)    :: i,j
+ integer,         intent(inout) :: kpbl
+!local
+ real(kind_phys) :: psig_bl,psig_shcu,rmol
+ integer :: imd,jmd
+ integer :: k,kproblem
 
-! initflag > 0  for TRUE
-! else        for FALSE
-!       closure       : <= 2.5;  Level 2.5
-!                  2.5< and <3;  Level 2.6
-!                        =   3;  Level 3
-
-! SGT: Changed this to use assumed shape arrays (dimension(:,:,:)) with no "optional" arguments
-!      to prevent a crash on Cheyenne. Do not change it back without testing if the code runs
-!      on Cheyenne with the GNU compiler.
-    integer :: enh_mix_in, mix_chem_i
-    real(kind_phys), intent(in) :: delt
-    real(kind_phys), dimension(ims:ime),   intent(in) :: dx
-    real(kind_phys), dimension(ims:ime,kms:kme), intent(in) :: dz,              &
-         &u,v,w,th,sqv3D,p,exner,rho,T3D
-    real(kind_phys), dimension(ims:ime,kms:kme), optional, intent(in) ::        &
-         &sqc3D,sqi3D,sqs3D,qni,qnc,qnwfa,qnifa,qnbca
-    real(kind_phys), dimension(ims:ime,kms:kme), optional,intent(in):: ozone
-    real(kind_phys), dimension(ims:ime),   intent(in):: ust,                    &
-         &ch,qsfc,ps,wspd
-    real(kind_phys), dimension(ims:ime,kms:kme), intent(inout) ::               &
-         &Qke,Tsq,Qsq,Cov,qke_adv
-    real(kind_phys), dimension(ims:ime,kms:kme), intent(inout) ::               &
-         &rublten,rvblten,rthblten,rqvblten,rqcblten,                           &
-         &rqiblten,rqsblten,rqniblten,rqncblten,                                &
-         &rqnwfablten,rqnifablten,rqnbcablten
-    real(kind_phys), dimension(ims:ime,kms:kme), intent(inout) :: dozone
-    real(kind_phys), dimension(ims:ime,kms:kme), intent(in)    :: rthraten
-
-    real(kind_phys), dimension(ims:ime,kms:kme), intent(out)   :: exch_h,exch_m
-    real(kind_phys), dimension(ims:ime),   intent(in)    :: xland,              &
-         &ts,znt,hfx,qfx,uoce,voce
-
-   !These 10 arrays are only allocated when bl_mynn_output > 0
-   real(kind_phys), dimension(ims:ime,kms:kme), optional, intent(inout) ::      &
-         & edmf_a,edmf_w,edmf_qt,edmf_thl,edmf_ent,edmf_qc,                     &
-         & sub_thl3D,sub_sqv3D,det_thl3D,det_sqv3D
-
-!   real, dimension(ims:ime,kms:kme)   ::                                       &
-!         & edmf_a_dd,edmf_w_dd,edmf_qt_dd,edmf_thl_dd,edmf_ent_dd,edmf_qc_dd
-
-    real(kind_phys), dimension(ims:ime), intent(inout) :: pblh
-    real(kind_phys), dimension(ims:ime), intent(inout) :: rmol
-
-    real(kind_phys), dimension(ims:ime) :: psig_bl,psig_shcu
-
-    integer,dimension(ims:ime),intent(inout) ::                                 &
-         &KPBL,ktop_plume
-
-    real(kind_phys), dimension(ims:ime), intent(out) ::                         &
-         &maxmf,maxwidth,ztop_plume
-
-    real(kind_phys), dimension(ims:ime,kms:kme), intent(inout) :: el_pbl
-
-    real(kind_phys), dimension(ims:ime,kms:kme), optional, intent(inout) ::     &
-         &qWT,qSHEAR,qBUOY,qDISS,dqke
-    ! 3D budget arrays are not allocated when tke_budget == 0
-    ! 1D (local) budget arrays are used for passing between subroutines.
-    real(kind_phys), dimension(kts:kte) ::                                      &
-         &qwt1,qshear1,qbuoy1,qdiss1,dqke1,diss_heat
-
-    real(kind_phys), dimension(ims:ime,kms:kme), intent(out) :: Sh3D,Sm3D
-
-    real(kind_phys), dimension(ims:ime,kms:kme), intent(inout) ::               &
-         &qc_bl,qi_bl,cldfra_bl
-    real(kind_phys), dimension(kts:kte) :: qc_bl1D,qi_bl1D,                     &
-         &cldfra_bl1D,qc_bl1D_old,qi_bl1D_old,cldfra_bl1D_old
+!column variables (all end with a "1")
+ real(kind_phys), dimension(kts:kte), intent(in)      ::            &
+       dz1,u1,v1,w1,th1,p1,ex1,rho1,tk1,rthraten1
+ real(kind_phys), dimension(kts:kte), intent(inout)   ::            &
+       sqv1,sqc1,sqi1,sqs1,qni1,qnc1,qnwfa1,qnifa1,qnbca1,ozone1,   &
+       qke1,tsq1,qsq1,cov1,qke_adv1,                                &
+       sh1,sm1,el1,                                                 & !interface, but kte+1 not included
+       du1,dv1,dth1,dqv1,dqc1,dqi1,dqs1,                            &
+       dqni1,dqnc1,dqnwfa1,dqnifa1,dqnbca1,dozone1,                 &
+       qc_bl1,qi_bl1,cldfra_bl1,edmf_a1,edmf_w1,                    &
+       edmf_qt1,edmf_thl1,edmf_ent1,edmf_qc1,                       &
+       sub_thl1,sub_sqv1,det_thl1,det_sqv1
+ real(kind_phys), dimension(kts:kte), intent(inout)   ::            &
+       qwt1,qshear1,qbuoy1,qdiss1,dqke1
+ real(kind_phys), dimension(kts:kte), intent(out)     ::            & !interface
+       kh1,km1
+!local
+ real(kind_phys), dimension(kts:kte)                  ::            &
+       qc_bl1_old,qi_bl1_old,cldfra_bl1_old,dummy1,dummy2,          &
+       diss_heat1,                                                  &
+       thl1,thv1,thlv1,qv1,qc1,qi1,qs1,sqw1,                        &
+       dfm1, dfh1, dfq1, tcd1, qcd1,                                &
+       pdk1, pdt1, pdq1, pdc1,                                      &
+       vt1, vq1, sgm1, kzero1
 
 ! smoke/chemical arrays
-    integer, intent(IN   ) ::   nchem, kdvel, ndvel
-    real(kind_phys), dimension(ims:ime,kms:kme,nchem), optional, intent(inout) :: chem3d
-    real(kind_phys), dimension(ims:ime, ndvel), optional,  intent(in)    :: vdep
-    real(kind_phys), dimension(ims:ime),   optional,   intent(in)    :: frp,EMIS_ANT_NO
-    !local
-    real(kind_phys), dimension(kts:kte  ,nchem)      :: chem1
-    real(kind_phys), dimension(kts:kte+1,nchem)      :: s_awchem1
-    real(kind_phys), dimension(ndvel)                :: vd1
-    integer :: ic
+ integer, intent(in) ::   nchem, kdvel, ndvel
+ real(kind_phys), dimension(kts:kte,nchem), intent(inout) :: chem
+ real(kind_phys), dimension(ndvel), intent(in)    :: vdep
+ real(kind_phys),                   intent(in)    :: frp,emis_ant_no
+ real(kind_phys), dimension(kts:kte+1,nchem)      :: s_awchem1
+ integer :: ic
 
 !local vars
-    integer :: ITF,JTF,KTF, IMD,JMD
-    integer :: i,j,k,kproblem
-    integer,dimension(ims:ime) ::                           &
-         &KPBL_cc
-    real(kind_phys), dimension(kts:kte) ::                  &
-         &thl,tl,qv1,qc1,qi1,qs1,sqw,                       &
-         &el, dfm, dfh, dfq, tcd, qcd, pdk, pdt, pdq, pdc,  &
-         &sgm, kzero, vq, vt
-    real(kind_phys), dimension(kts:kte) ::                  &
-         &thetav,sh,sm,u1,v1,w1,p1,                         &
-         &ex1,dz1,th1,tk1,rho1,qke1,tsq1,qsq1,cov1,         &
-         &sqv2,sqi2,sqc,sqs2,                               &
-         &du1,dv1,dth1,dqv1,dqc1,dqi1,dqs1,ozone1,          &
-         &k_m1,k_h1,qni1,dqni1,qnc1,dqnc1,qnwfa1,qnifa1,    &
-         &qnbca1,dqnwfa1,dqnifa1,dqnbca1,dozone1
+!mass-flux variables
+ real(kind_phys), dimension(kts:kte) ::                             &
+       dth1mf,dqv1mf,dqc1mf,du1mf,dv1mf
+ real(kind_phys), dimension(kts:kte) ::                             &
+       edmf_a_dd1,edmf_w_dd1,edmf_qt_dd1,edmf_thl_dd1,              &
+       edmf_ent_dd1,edmf_qc_dd1
+ real(kind_phys), dimension(kts:kte) ::                             &
+       sub_u1,sub_v1,det_sqc1,det_u1,det_v1
+ real(kind_phys), dimension(kts:kte+1) ::                           & !interface
+       s_aw1,s_awthl1,s_awqt1,                                      &
+       s_awqv1,s_awqc1,s_awu1,s_awv1,s_awqke1,                      &
+       s_awqnc1,s_awqni1,s_awqnwfa1,s_awqnifa1,                     &
+       s_awqnbca1
+ real(kind_phys), dimension(kts:kte+1) ::                           & !interface
+       sd_aw1,sd_awthl1,sd_awqt1,                                   &
+       sd_awqv1,sd_awqc1,sd_awu1,sd_awv1,sd_awqke1,                 &
+       sd_awqi1,sd_awqnc1,sd_awqni1,                                &
+       sd_awqnwfa1,sd_awqnifa1
+ real(kind_phys), dimension(kts:kte+1) :: zw1              !interface
+ real(kind_phys) :: cpm,sqcg,flt,fltv,flq,flqv,flqc,                &
+       pmz,phh,exnerg,zet,phi_m,                                    &
+       afk,abk,ts_decay, qc_bl2, qi_bl2,                            &
+       th_sfc,wsp
+ integer:: ktop_plume
 
-    !mass-flux variables
-    real(kind_phys), dimension(kts:kte) ::                  &
-         &dth1mf,dqv1mf,dqc1mf,du1mf,dv1mf
-    real(kind_phys), dimension(kts:kte) ::                  &
-         &edmf_a1,edmf_w1,edmf_qt1,edmf_thl1,               &
-         &edmf_ent1,edmf_qc1
-    real(kind_phys), dimension(kts:kte) ::                  &
-         &edmf_a_dd1,edmf_w_dd1,edmf_qt_dd1,edmf_thl_dd1,   &
-         &edmf_ent_dd1,edmf_qc_dd1
-    real(kind_phys), dimension(kts:kte) ::                  &
-         &sub_thl,sub_sqv,sub_u,sub_v,                      &
-         &det_thl,det_sqv,det_sqc,det_u,det_v
-    real(kind_phys), dimension(kts:kte+1) ::                &
-         &s_aw1,s_awthl1,s_awqt1,                           &
-         &s_awqv1,s_awqc1,s_awu1,s_awv1,s_awqke1,           &
-         &s_awqnc1,s_awqni1,s_awqnwfa1,s_awqnifa1,          &
-         &s_awqnbca1
-    real(kind_phys), dimension(kts:kte+1) ::                &
-         &sd_aw1,sd_awthl1,sd_awqt1,                        &
-         &sd_awqv1,sd_awqc1,sd_awu1,sd_awv1,sd_awqke1
+!top-down diffusion
+ real(kind_phys) :: maxKHtopdown
+ real(kind_phys), dimension(kts:kte) :: KHtopdown
+!mass flux tke production
+ real(kind_phys), dimension(kts:kte) :: TKEprod_dn,TKEprod_up
 
-    real(kind_phys), dimension(kts:kte+1) :: zw
-    real(kind_phys) :: cpm,sqcg,flt,fltv,flq,flqv,flqc,     &
-         &pmz,phh,exnerg,zet,phi_m,                         &
-         &afk,abk,ts_decay, qc_bl2, qi_bl2,                 &
-         &th_sfc,wsp
+ logical :: INITIALIZE_QKE,problem
 
-    !top-down diffusion
-    real(kind_phys), dimension(ITS:ITE) :: maxKHtopdown
-    real(kind_phys), dimension(kts:kte) :: KHtopdown,TKEprodTD
+!stochastic fields
+ integer,  intent(in)                             :: spp_pbl
+ real(kind_phys), dimension(kts:kte), intent(in)  :: pattern_spp_pbl1
 
-    logical :: INITIALIZE_QKE,problem
-    integer :: INITIALIZE_QKE_I
+!substepping TKE
+ integer :: nsub
+ real(kind_phys) :: delt2
 
-    ! Stochastic fields 
-    integer,  intent(in)                         :: spp_pbl
-    real(kind_phys), dimension(ims:ime,kms:kme), optional, intent(in)  :: pattern_spp_pbl
-    real(kind_phys), dimension(kts:kte)          :: rstoch_col
-
-
-    ! Substepping TKE
-    integer :: nsub
-    real(kind_phys) :: delt2
-    integer, dimension(1:9)          :: flags_integer
-    logical, dimension(1:9)          :: flags_logical
-      
-    integer :: FLAG_QC_I,FLAG_QI_I,FLAG_QNC_I,       &
-       &FLAG_QNI_I,FLAG_QS_I,               &
-       &FLAG_QNWFA_I,FLAG_QNIFA_I,          &
-       &FLAG_QNBCA_I,FLAG_OZONE_I
-
-!      call cpu_time(start)
-
-#ifdef WRF_TEST_CC_2
-      CLOSE(10)
-      OPEN(10, file='output_cc.txt', status='replace')
-#else
-      CLOSE(10)
-      OPEN(10, file='output_F.txt', status='replace')
-#endif
-!      flags_logical = (/ FLAG_QI,FLAG_QNI,FLAG_QC,FLAG_QNC,FLAG_QNWFA,FLAG_QNIFA,FLAG_QNBCA, FLAG_OZONE,FLAG_QS /)
-
-!      do i = 1, size(flags_logical)
-!         if(flags_logical(i) .eqv. .true.) then
-!            flags_integer(i)=1
-!         else
-!            flags_integer(i)=0
-!         endif
-!      end do
-
-      FLAG_QC_I=FLAG_QC
-      FLAG_QI_I=FLAG_QI
-      FLAG_QNC_I=FLAG_QNC
-      FLAG_QNI_I=FLAG_QNI
-      FLAG_QS_I=FLAG_QS_I
-      FLAG_QNWFA_I=FLAG_QNWFA
-      FLAG_QNIFA_I=FLAG_QNIFA
-      FLAG_QNBCA_I=FLAG_QNBCA
-      FLAG_OZONE_I=FLAG_OZONE
-      
-
-    if (FLAG_QC .eqv. .true.) then
-      FLAG_QC_I=1
-    else
-      FLAG_QC_I=0
-    endif
+    errmsg = " "
+    errflg = 0
 
     if (debug_code) then !check incoming values
-      do i=its,ite
-        problem = .false.
-        do k=kts,kte
-          wsp  = sqrt(u(i,k)**2 + v(i,k)**2)
-          if (abs(hfx(i)) > 1200. .or. abs(qfx(i)) > 0.001 .or.         &
-              wsp > 200. .or. t3d(i,k) > 360. .or. t3d(i,k) < 160. .or. &
-              sqv3d(i,k)< 0.0 .or. sqc3d(i,k)< 0.0 ) then
+       problem = .false.
+       do k=kts,kte
+          wsp  = sqrt(u1(k)**2 + v1(k)**2)
+          if (abs(hfx) > 1200. .or. abs(qfx) > 0.001 .or.           &
+              wsp > 270. .or. tk1(k) > 380. .or. tk1(k) < 160. .or. &
+              sqv1(k) < zero .or. sqc1(k) < zero .or.               &
+              (ps-p1(kts)) < zero) then
              kproblem = k
              problem = .true.
-             print*,"Incoming problem at: i=",i," k=1"
-             print*," QFX=",qfx(i)," HFX=",hfx(i)
-             print*," wsp=",wsp," T=",t3d(i,k)
-             print*," qv=",sqv3d(i,k)," qc=",sqc3d(i,k)
-             print*," u*=",ust(i)," wspd=",wspd(i)
-             print*," xland=",xland(i)," ts=",ts(i)
-             print*," z/L=",0.5*dz(i,1)*rmol(i)," ps=",ps(i)
-             print*," znt=",znt(i)," dx=",dx(i)
+             print*,"Incoming problem at: i=",i," j=",j," k=",k
+             print*," QFX=",qfx," HFX=",hfx
+             print*," wsp=",wsp," T=",tk1(k)
+             print*," qv=",sqv1(k)," qc=",sqc1(k)
+             print*," u*=",ust," wspd=",wspd
+             print*," xland=",xland," ts=",ts
+             print*," z/L=",half*dz1(1)*rmol," ps=",ps,"delp1=",ps-p1(kts)
+             print*," znt=",znt," dx=",dx," dz(1)=",dz1(1)
           endif
-        enddo
-        if (problem) then
-          print*,"===tk:",t3d(i,max(kproblem-3,1):min(kproblem+3,kte))
-          print*,"===qv:",sqv3d(i,max(kproblem-3,1):min(kproblem+3,kte))
-          print*,"===qc:",sqc3d(i,max(kproblem-3,1):min(kproblem+3,kte))
-          print*,"===qi:",sqi3d(i,max(kproblem-3,1):min(kproblem+3,kte))
-          print*,"====u:",u(i,max(kproblem-3,1):min(kproblem+3,kte))
-          print*,"====v:",v(i,max(kproblem-3,1):min(kproblem+3,kte))
-        endif
-      enddo
+       enddo
+       if (problem) then
+          print*,"===tk:",tk1(max(kproblem-3,1):min(kproblem+3,kte))
+          print*,"===qv:",sqv1(max(kproblem-3,1):min(kproblem+3,kte))
+          print*,"===qc:",sqc1(max(kproblem-3,1):min(kproblem+3,kte))
+          print*,"===qi:",sqi1(max(kproblem-3,1):min(kproblem+3,kte))
+          print*,"====u:",u1(max(kproblem-3,1):min(kproblem+3,kte))
+          print*,"====v:",v1(max(kproblem-3,1):min(kproblem+3,kte))
+          print*,"====p:",p1(max(kproblem-3,1):min(kproblem+3,kte))
+       endif
     endif
 
 !***  Begin debugging
-    IMD=(IMS+IME)/2
-    JMD=(JMS+JME)/2
+    IMD=10
+    JMD=10
 !***  End debugging
 
-    JTF=JTE
-    ITF=ITE
-    KTF=KTE
-
-    IF (bl_mynn_output > 0) THEN !research mode
-       edmf_a(its:ite,kts:kte)=0.
-       edmf_w(its:ite,kts:kte)=0.
-       edmf_qt(its:ite,kts:kte)=0.
-       edmf_thl(its:ite,kts:kte)=0.
-       edmf_ent(its:ite,kts:kte)=0.
-       edmf_qc(its:ite,kts:kte)=0.
-       sub_thl3D(its:ite,kts:kte)=0.
-       sub_sqv3D(its:ite,kts:kte)=0.
-       det_thl3D(its:ite,kts:kte)=0.
-       det_sqv3D(its:ite,kts:kte)=0.
-
-       !edmf_a_dd(its:ite,kts:kte)=0.
-       !edmf_w_dd(its:ite,kts:kte)=0.
-       !edmf_qt_dd(its:ite,kts:kte)=0.
-       !edmf_thl_dd(its:ite,kts:kte)=0.
-       !edmf_ent_dd(its:ite,kts:kte)=0.
-       !edmf_qc_dd(its:ite,kts:kte)=0.
-    ENDIF
-    ktop_plume(its:ite)=0   !int
-    ztop_plume(its:ite)=0.
-    maxwidth(its:ite)=0.
-    maxmf(its:ite)=0.
-    maxKHtopdown(its:ite)=0.
-    kzero(kts:kte)=0.
+    !initialize 3d output arrays
+    edmf_a1      =zero
+    edmf_w1      =zero
+    edmf_qt1     =zero
+    edmf_thl1    =zero
+    edmf_ent1    =zero
+    edmf_qc1     =zero
+    sub_thl1     =zero
+    sub_sqv1     =zero
+    det_thl1     =zero
+    det_sqv1     =zero
+    edmf_a_dd1   =zero
+    edmf_w_dd1   =zero
+    edmf_qc_dd1  =zero
+    !initialize 2d fields
+    ktop_plume   =0    !int
+    ztop_plume   =zero
+    maxwidth     =zero
+    maxmf        =zero
+    maxKHtopdown =zero
+    kzero1       =zero
 
     ! DH* CHECK HOW MUCH OF THIS INIT IF-BLOCK IS ACTUALLY NEEDED FOR RESTARTS
 !> - Within the MYNN-EDMF, there is a dependecy check for the first time step,
@@ -1100,7 +1003,7 @@ CONTAINS
 
        !Test to see if we want to initialize qke
        IF ( (restart .or. cycling)) THEN
-          IF (MAXVAL(QKE(its:ite,kts)) < 0.0002) THEN
+          IF (MAXVAL(qke1(:)) < 0.0002) THEN
              INITIALIZE_QKE = .TRUE.
              !print*,"QKE is too small, must initialize"
           ELSE
@@ -1113,152 +1016,80 @@ CONTAINS
        ENDIF
  
        if (.not.restart .or. .not.cycling) THEN
-         Sh3D(its:ite,kts:kte)=0.
-         Sm3D(its:ite,kts:kte)=0.
-         el_pbl(its:ite,kts:kte)=0.
-         tsq(its:ite,kts:kte)=0.
-         qsq(its:ite,kts:kte)=0.
-         cov(its:ite,kts:kte)=0.
-         cldfra_bl(its:ite,kts:kte)=0.
-         qc_bl(its:ite,kts:kte)=0.
-         qke(its:ite,kts:kte)=0.
-       else
-         qc_bl1D(kts:kte)=0.0
-         qi_bl1D(kts:kte)=0.0
-         cldfra_bl1D(kts:kte)=0.0
+          sh1         =zero
+          sm1         =zero
+          el1         =zero
+          tsq1        =zero
+          qsq1        =zero
+          cov1        =zero
+          cldfra_bl1  =zero
+          qc_bl1      =zero
+          qi_bl1      =zero
+          qke1        =zero
+          qke_adv1    =zero
        end if
-       dqc1(kts:kte)=0.0
-       dqi1(kts:kte)=0.0
-       dqni1(kts:kte)=0.0
-       dqnc1(kts:kte)=0.0
-       dqnwfa1(kts:kte)=0.0
-       dqnifa1(kts:kte)=0.0
-       dqnbca1(kts:kte)=0.0
-       dozone1(kts:kte)=0.0
-       qc_bl1D_old(kts:kte)=0.0
-       cldfra_bl1D_old(kts:kte)=0.0
-       edmf_a1(kts:kte)=0.0
-       edmf_w1(kts:kte)=0.0
-       edmf_qc1(kts:kte)=0.0
-       edmf_a_dd1(kts:kte)=0.0
-       edmf_w_dd1(kts:kte)=0.0
-       edmf_qc_dd1(kts:kte)=0.0
-       sgm(kts:kte)=0.0
-       vt(kts:kte)=0.0
-       vq(kts:kte)=0.0
+       dqc1           =zero
+       dqi1           =zero
+       dqni1          =zero
+       dqnc1          =zero
+       dqnwfa1        =zero
+       dqnifa1        =zero
+       dqnbca1        =zero
+       dozone1        =zero
+       qc_bl1_old     =zero
+       cldfra_bl1_old =zero
+       sgm1           =zero
+       vt1            =zero
+       vq1            =zero
+       km1            =zero
+       kh1            =zero
 
-       DO k=KTS,KTE
-          DO i=ITS,ITF
-             exch_m(i,k)=0.
-             exch_h(i,k)=0.
-          ENDDO
-       ENDDO
+       if (tke_budget .eq. 1) then
+          qwt1        =zero
+          qshear1     =zero
+          qbuoy1      =zero
+          qdiss1      =zero
+          dqke1       =zero
+       endif
 
-       IF (tke_budget .eq. 1) THEN
-          DO k=KTS,KTE
-             DO i=ITS,ITF
-                qWT(i,k)=0.
-                qSHEAR(i,k)=0.
-                qBUOY(i,k)=0.
-                qDISS(i,k)=0.
-                dqke(i,k)=0.
-             ENDDO
-          ENDDO
-       ENDIF
+       zw1(kts)=zero
+       do k=kts,kte
+          thv1(k)=th1(k)*(one+p608*sqv1(k))
+          !keep snow out for now - increases ceiling bias
+          sqw1(k)=sqv1(k)+sqc1(k)+sqi1(k)!+sqs1(k)
+          thl1(k)=th1(k) - xlvcp/ex1(k)*sqc1(k) &
+               &         - xlscp/ex1(k)*(sqi1(k))!+sqs1(k))
+          !Use form from Tripoli and Cotton (1981) with their
+          !suggested min temperature to improve accuracy.
+          !thl1(k)=th1(k)*(1.- xlvcp/MAX(tk1(k),TKmin)*sqc1(k) &
+          !    &             - xlscp/MAX(tk1(k),TKmin)*sqi1(k))
+          thlv1(k)=thl1(k)*(one+p608*sqv1(k))
+          zw1(k+1)=zw1(k)+dz1(k)
+       enddo
 
-       DO i=ITS,ITF !this is where we go from 2d to 1d
-          if (FLAG_QI ) then
-             sqi2(kts:kte)=sqi3D(i,kts:kte)
-          else
-             sqi2 = 0.0
-          endif
-          if (FLAG_QS ) then
-             sqs2(kts:kte)=sqs3D(i,kts:kte)
-          else
-             sqs2 = 0.0
-          endif
-          if (icloud_bl > 0) then
-             cldfra_bl1d(kts:kte)=cldfra_bl(i,kts:kte)
-             qc_bl1d(kts:kte)=qc_bl(i,kts:kte)
-             qi_bl1d(kts:kte)=qi_bl(i,kts:kte)
-          endif
+       if (INITIALIZE_QKE) then
+          !Initialize tke for initial PBLH calc only - using
+          !simple PBLH form of Koracin and Berkowicz (1988, BLM)
+          !to linearly taper off tke towards top of PBL.
+          do k=kts,kte
+             qke1(k)=5.*ust * MAX((ust*700. - zw1(k))/(MAX(ust,0.01)*700.), 0.01)
+          enddo
+       endif
 
-          do k=KTS,KTE !KTF
-                dz1(k)=dz(i,k)
-                u1(k) = u(i,k)
-                v1(k) = v(i,k)
-                w1(k) = w(i,k)
-                th1(k)=th(i,k)
-                tk1(k)=T3D(i,k)
-                ex1(k)=exner(i,k)
-                rho1(k)=rho(i,k)
-                sqc(k)=sqc3D(i,k) !/(1.+qv(i,k))
-                sqv2(k)=sqv3D(i,k) !/(1.+qv(i,k))
-                thetav(k)=th(i,k)*(1.+p608*sqv2(k))
-                !keep snow out for now - increases ceiling bias
-                sqw(k)=sqv2(k)+sqc(k)+sqi2(k)!+sqs2(k)
-                thl(k)=th1(k) - xlvcp/ex1(k)*sqc(k) &
-                    &         - xlscp/ex1(k)*(sqi2(k))!+sqs2(k))
-                !Use form from Tripoli and Cotton (1981) with their
-                !suggested min temperature to improve accuracy.
-                !thl(k)=th(i,k)*(1.- xlvcp/MAX(tk1(k),TKmin)*sqc(k) &
-                !    &               - xlscp/MAX(tk1(k),TKmin)*sqi(k))
-
-                IF (k==kts) THEN
-                   zw(k)=0.
-                ELSE
-                   zw(k)=zw(k-1)+dz(i,k-1)
-                ENDIF
-                IF (INITIALIZE_QKE) THEN
-                   !Initialize tke for initial PBLH calc only - using 
-                   !simple PBLH form of Koracin and Berkowicz (1988, BLM)
-                   !to linearly taper off tke towards top of PBL.
-                   qke1(k)=5.*ust(i) * MAX((ust(i)*700. - zw(k))/(MAX(ust(i),0.01)*700.), 0.01)
-                ELSE
-                   qke1(k)=qke(i,k)
-                ENDIF
-                el(k)=el_pbl(i,k)
-                sh(k)=Sh3D(i,k)
-                sm(k)=Sm3D(i,k)
-                tsq1(k)=tsq(i,k)
-                qsq1(k)=qsq(i,k)
-                cov1(k)=cov(i,k)
-                if (spp_pbl==1) then
-                    rstoch_col(k)=pattern_spp_pbl(i,k)
-                else
-                    rstoch_col(k)=0.0
-                endif
-
-             ENDDO
-
-             zw(kte+1)=zw(kte)+dz(i,kte)
 
 !>  - Call get_pblh() to calculate hybrid (\f$\theta_{v}-TKE\f$) PBL height.
-#ifdef WRF_TEST_CC
-             CALL get_pblh_cc(KTS_cc,KTE_cc,PBLH(i),thetav,Qke1,zw,dz1,xland(i),KPBL_cc(i))
-             KPBL(i)=KPBL_cc(i)+1
-#else
-             CALL GET_PBLH(KTS,KTE,PBLH(i),thetav,&
-               &  Qke1,zw,dz1,xland(i),KPBL(i))
-#endif
-!             write(10,*),KTS,KTE,PBLH(i),thetav,&
-!             &  Qke1,zw,dz1,xland(i),KPBL(i)
-!             STOP
+       CALL get_pblh_cc(KTS,KTE,PBLH,thv1,qke1,zw1,dz1,xland,kpbl)
+             
 !>  - Call scale_aware() to calculate similarity functions for scale-adaptive control
 !! (\f$P_{\sigma-PBL}\f$ and \f$P_{\sigma-shcu}\f$).
-             IF (scaleaware > 0.) THEN
-#ifdef WRF_TEST_CC
-                CALL scale_aware_cc(dx(i),PBLH(i),psig_bl(i),psig_shcu(i))
-#else
-                CALL SCALE_AWARE(dx(i),PBLH(i),psig_bl(i),psig_shcu(i))
-#endif
-             ELSE
-                psig_bl(i)=1.0
-                psig_shcu(i)=1.0
-             ENDIF
-!             write(10,*),dx(i),PBLH(i),psig_bl(i),psig_shcu(i)
-!             STOP
-             ! DH* CHECK IF WE CAN DO WITHOUT CALLING THIS ROUTINE FOR RESTARTS
+       IF (scaleaware > zero) THEN
+          CALL SCALE_AWARE(dx,PBLH,Psig_bl,Psig_shcu)
+       ELSE
+          Psig_bl   = one
+          Psig_shcu = one
+       ENDIF
+
+       ! DH* CHECK IF WE CAN DO WITHOUT CALLING THIS ROUTINE FOR RESTARTS
 !>  - Call mym_initialize() to initializes the mixing length, TKE, \f$\theta^{'2}\f$,
 !! \f$q^{'2}\f$, and \f$\theta^{'}q^{'}\f$. These variables are calculated after 
 !! obtaining prerequisite variables by calling the following subroutines from 
@@ -1268,1112 +1099,521 @@ CONTAINS
              else
                  INITIALIZE_QKE_I=0
               endif
-!! differences like 2e-9 in qke and identical in T, U, V, W
-!     #ifdef WRF_TEST_CC_FLOAT
-#ifdef WRF_TEST_CC_1
-             CALL mym_initialize_cc (             & 
-                  &kts,kte,xland(i),              &
-                  &dz1, dx(i), zw,                &
-                  &u1, v1, thl, sqv2,             &
-                  &PBLH(i), th1, thetav, sh, sm,  &
-                  &ust(i), rmol(i),               &
-                  &el, Qke1, Tsq1, Qsq1, Cov1,    &
-                  &psig_bl(i),                    &
-                  &cldfra_bl1D,                   &
-                  &bl_mynn_mixlength,             &
-                  &edmf_w1,edmf_a1,               &
-                  &INITIALIZE_QKE_I,              &
-                  &spp_pbl,rstoch_col,            &
-                  &karman, tv0, gtr               )
-#else
-             CALL mym_initialize (                & 
-                  &kts,kte,xland(i),              &
-                  &dz1, dx(i), zw,                &
-                  &u1, v1, thl, sqv2,              &
-                  &PBLH(i), th1, thetav, sh, sm,  &
-                  &ust(i), rmol(i),               &
-                  &el, Qke1, Tsq1, Qsq1, Cov1,    &
-                  &psig_bl(i), cldfra_bl1D,       &
-                  &bl_mynn_mixlength,             &
-                  &edmf_w1,edmf_a1,               &
-                  &INITIALIZE_QKE,                &
-                  &spp_pbl,rstoch_col             )
-#endif
-!write(*,'(12(F25.16))'),pr ,g1,             &  ! NN2009 = 0.235
-!       &b1  ,              &
-!       &b2  ,              &  ! CKmod     NN2009
-!       &c2  ,              &  ! 0.729, & !0.75, &
-!       &c3  ,              &  ! 0.340, & !0.352, &
-!       &c4  ,              &
-!       &c5  ,              &
-!       &a1  , &
-!!       &c1  = g1 -1.0/( 3.0*a1*b1**(1.0/3.0) ), &
-!       &c1  , &
-!       &a2  , &
-!       &g2  
 
-!write(*,'(7(F25.16))'),  &
-!       &cc2 ,           &
-!       &cc3 ,           &
-!       &e1c ,    &
-!       &e2c ,    &
-!       &e3c , &
-!       &e4c ,    &
-!       &e5c 
+       CALL mym_initialize_cc (             &
+               &kts,kte,xland,                 &
+            &dz1, dx, zw1,                  &
+            &u1, v1, thl1, sqv1,            &
+            &PBLH, th1, thv1, thlv1,        &
+            &sh1, sm1,                      &
+            &ust, rmol,                     &
+            &el1, qke1, tsq1, qsq1, cov1,   &
+            &Psig_bl, cldfra_bl1,           &
+            &bl_mynn_mixlength,             &
+            &edmf_w1,edmf_a1,               &
+            &edmf_w_dd1,edmf_a_dd1,         &
+            &INITIALIZE_QKE,                &
+            &spp_pbl,pattern_spp_pbl1       )
 
-!                  write(10,*),                    &
-!                  &kts,kte,xland(i),              &
-!                  &dz1, dx(i), zw,                &
-!                  &u1, v1, thl, sqv2,              &
-!                  &PBLH(i), th1, "thetav", thetav, "sh", sh,"sm", sm,  &
-!                  &"ust",ust(i), rmol(i),               &
-!                  &el, Qke1, Tsq1, Qsq1, Cov1,    &
-!                  &psig_bl(i), cldfra_bl1D,       &
-!                  &bl_mynn_mixlength,             &
-!                  &edmf_w1,edmf_a1,               &
-!                  &INITIALIZE_QKE,                &
-!                  &spp_pbl,rstoch_col
-!                  STOP
-             IF (.not.restart) THEN
-                !UPDATE 3D VARIABLES
-                DO k=KTS,KTE !KTF
-                   el_pbl(i,k)=el(k)
-                   sh3d(i,k)=sh(k)
-                   sm3d(i,k)=sm(k)
-                   qke(i,k)=qke1(k)
-                   tsq(i,k)=tsq1(k)
-                   qsq(i,k)=qsq1(k)
-                   cov(i,k)=cov1(k)
-                ENDDO
-                !initialize qke_adv array if using advection
-                IF (bl_mynn_tkeadvect) THEN
-                   DO k=KTS,KTE
-                      qke_adv(i,k)=qke1(k)
-                   ENDDO
-                ENDIF
-             ENDIF
+
+
+       IF (.not.restart) THEN
+          !initialize qke_adv array if using advection
+          IF (bl_mynn_tkeadvect) THEN
+             DO k=KTS,KTE
+                qke_adv1(k)=qke1(k)
+             ENDDO
+          ENDIF
+       ENDIF
 
 !***  Begin debugging
-!             IF(I==IMD .AND. J==JMD)THEN
-!               PRINT*,"MYNN DRIVER INIT: k=",1," sh=",sh(k)
-!               PRINT*," sqw=",sqw(k)," thl=",thl(k)," k_m=",exch_m(i,k)
-!               PRINT*," xland=",xland(i)," rmol=",rmol(i)," ust=",ust(i)
-!               PRINT*," qke=",qke(i,k)," el=",el_pbl(i,k)," tsq=",Tsq(i,k)
-!               PRINT*," PBLH=",PBLH(i)," u=",u(i,k)," v=",v(i,k)
-!             ENDIF
+!       IF (I==IMD .AND. J==JMD) THEN
+!          PRINT*,"MYNN DRIVER INIT: k=",1," sh=",sh1(k)
+!          PRINT*," sqw=",sqw1(k)," thl=",thl1(k)," k_m=",km1(k)
+!          PRINT*," xland=",xland," rmol=",rmol," ust=",ust
+!          PRINT*," qke=",qke1(k)," el=",el1(k)," tsq=",tsq1(k)
+!          PRINT*," PBLH=",PBLH," u=",u1(k)," v=",v1(k)
+!       ENDIF
 !***  End debugging
-
-       ENDDO !end i-loop
 
     ENDIF ! end initflag
 
 !> - After initializing all required variables, the regular procedures 
 !! performed at every time step are ready for execution.
-    !ACF- copy qke_adv array into qke if using advection
     IF (bl_mynn_tkeadvect) THEN
-       qke=qke_adv
+       qke1(kts:kte)=qke_adv1(kts:kte)
     ENDIF
 
-    DO i=ITS,ITF
-       !Initialize some arrays
-       if (tke_budget .eq. 1) then
-          dqke(i,:)=qke(i,:)
-       endif
-       if (FLAG_QI ) then
-          sqi2(kts:kte)=sqi3D(i,kts:kte)
-       else
-          sqi2 = 0.0
-       endif
-       if (FLAG_QS ) then
-          sqs2(kts:kte)=sqs3D(i,kts:kte)
-       else
-          sqs2 = 0.0
-       endif
-       if (icloud_bl > 0) then
-          CLDFRA_BL1D(kts:kte)=CLDFRA_BL(i,kts:kte)
-          QC_BL1D(kts:kte)   =QC_BL(i,kts:kte)
-          QI_BL1D(kts:kte)   =QI_BL(i,kts:kte)
-          cldfra_bl1D_old(kts:kte)=cldfra_bl(i,kts:kte)
-          qc_bl1D_old(kts:kte)=qc_bl(i,kts:kte)
-          qi_bl1D_old(kts:kte)=qi_bl(i,kts:kte)
-       else
-          CLDFRA_BL1D  =0.0
-          QC_BL1D      =0.0
-          QI_BL1D      =0.0
-          cldfra_bl1D_old=0.0
-          qc_bl1D_old  =0.0
-          qi_bl1D_old  =0.0
-       endif
-       dz1(kts:kte)    =dz(i,kts:kte)
-       u1(kts:kte)     =u(i,kts:kte)
-       v1(kts:kte)     =v(i,kts:kte)
-       w1(kts:kte)     =w(i,kts:kte)
-       th1(kts:kte)    =th(i,kts:kte)
-       tk1(kts:kte)    =T3D(i,kts:kte)
-       p1(kts:kte)     =p(i,kts:kte)
-       ex1(kts:kte)    =exner(i,kts:kte)
-       rho1(kts:kte)   =rho(i,kts:kte)
-       sqv2(kts:kte)    =sqv3D(i,kts:kte) !/(1.+qv(i,kts:kte))
-       sqc(kts:kte)    =sqc3D(i,kts:kte) !/(1.+qv(i,kts:kte))
-       qv1(kts:kte)    =sqv2(kts:kte)/(1.-sqv2(kts:kte))
-       qc1(kts:kte)    =sqc(kts:kte)/(1.-sqv2(kts:kte))
-       qi1(kts:kte)    =sqi2(kts:kte)/(1.-sqv2(kts:kte))
-       qs1(kts:kte)    =sqs2(kts:kte)/(1.-sqv2(kts:kte))
-       dqc1(kts:kte)   =0.0
-       dqi1(kts:kte)   =0.0
-       dqs1(kts:kte)   =0.0
-       dqni1(kts:kte)  =0.0
-       dqnc1(kts:kte)  =0.0
-       dqnwfa1(kts:kte)=0.0
-       dqnifa1(kts:kte)=0.0
-       dqnbca1(kts:kte)=0.0
-       dozone1(kts:kte)=0.0
-       IF (FLAG_QNI ) THEN
-          qni1(kts:kte)=qni(i,kts:kte)
-       ELSE
-          qni1(kts:kte)=0.0
-       ENDIF
-       IF (FLAG_QNC ) THEN
-          qnc1(kts:kte)=qnc(i,kts:kte)
-       ELSE
-          qnc1(kts:kte)=0.0
-       ENDIF
-       IF (FLAG_QNWFA ) THEN
-          qnwfa1(kts:kte)=qnwfa(i,kts:kte)
-       ELSE
-          qnwfa1(kts:kte)=0.0
-       ENDIF
-       IF (FLAG_QNIFA ) THEN
-          qnifa1(kts:kte)=qnifa(i,kts:kte)
-       ELSE
-          qnifa1(kts:kte)=0.0
-       ENDIF
-       IF (FLAG_QNBCA ) THEN
-          qnbca1(kts:kte)=qnbca(i,kts:kte)
-       ELSE
-          qnbca1(kts:kte)=0.0
-       ENDIF
-       IF (FLAG_OZONE ) THEN
-          ozone1(kts:kte)=ozone(i,kts:kte)
-       ELSE
-          ozone1(kts:kte)=0.0
-       ENDIF
-       el(kts:kte)  =el_pbl(i,kts:kte)
-       qke1(kts:kte)=qke(i,kts:kte)
-       sh(kts:kte)  =sh3d(i,kts:kte)
-       sm(kts:kte)  =sm3d(i,kts:kte)
-       tsq1(kts:kte)=tsq(i,kts:kte)
-       qsq1(kts:kte)=qsq(i,kts:kte)
-       cov1(kts:kte)=cov(i,kts:kte)
-       if (spp_pbl==1) then
-          rstoch_col(kts:kte)=pattern_spp_pbl(i,kts:kte)
-       else
-          rstoch_col(kts:kte)=0.0
-       endif
-       !edmf
-       edmf_a1    =0.0
-       edmf_w1    =0.0
-       edmf_qc1   =0.0
-       s_aw1      =0.0
-       s_awthl1   =0.0
-       s_awqt1    =0.0
-       s_awqv1    =0.0
-       s_awqc1    =0.0
-       s_awu1     =0.0
-       s_awv1     =0.0
-       s_awqke1   =0.0
-       s_awqnc1   =0.0
-       s_awqni1   =0.0
-       s_awqnwfa1 =0.0
-       s_awqnifa1 =0.0
-       s_awqnbca1 =0.0
-       ![EWDD]
-       edmf_a_dd1 =0.0
-       edmf_w_dd1 =0.0
-       edmf_qc_dd1=0.0
-       sd_aw1     =0.0
-       sd_awthl1  =0.0
-       sd_awqt1   =0.0
-       sd_awqv1   =0.0
-       sd_awqc1   =0.0
-       sd_awu1    =0.0
-       sd_awv1    =0.0
-       sd_awqke1  =0.0
-       sub_thl    =0.0
-       sub_sqv    =0.0
-       sub_u      =0.0
-       sub_v      =0.0
-       det_thl    =0.0
-       det_sqv    =0.0
-       det_sqc    =0.0
-       det_u      =0.0
-       det_v      =0.0
+    !Initialize some arrays
+    if (tke_budget .eq. 1) then
+       dqke1(kts:kte)=qke1(kts:kte)
+    endif
+    if (icloud_bl > 0) then
+       cldfra_bl1_old(kts:kte)=cldfra_bl1(kts:kte)
+       qc_bl1_old(kts:kte)    =qc_bl1(kts:kte)
+       qi_bl1_old(kts:kte)    =qi_bl1(kts:kte)
+    else
+       cldfra_bl1    =zero
+       qc_bl1        =zero
+       qi_bl1        =zero
+       cldfra_bl1_old=zero
+       qc_bl1_old    =zero
+       qi_bl1_old    =zero
+    endif
+    dqc1       =zero
+    dqi1       =zero
+    dqs1       =zero
+    dqni1      =zero
+    dqnc1      =zero
+    dqnwfa1    =zero
+    dqnifa1    =zero
+    dqnbca1    =zero
+    dozone1    =zero
+    !edmf
+    edmf_a1    =zero
+    edmf_w1    =zero
+    edmf_qc1   =zero
+    s_aw1      =zero
+    s_awthl1   =zero
+    s_awqt1    =zero
+    s_awqv1    =zero
+    s_awqc1    =zero
+    s_awu1     =zero
+    s_awv1     =zero
+    s_awqke1   =zero
+    s_awqnc1   =zero
+    s_awqni1   =zero
+    s_awqnwfa1 =zero
+    s_awqnifa1 =zero
+    s_awqnbca1 =zero
+    s_awchem1(kts:kte+1,1:nchem) = zero
+    !edmf-downdraft
+    edmf_a_dd1 =zero
+    edmf_w_dd1 =zero
+    edmf_qc_dd1=zero
+    sd_aw1     =zero
+    sd_awthl1  =zero
+    sd_awqt1   =zero
+    sd_awqv1   =zero
+    sd_awqc1   =zero
+    sd_awqi1   =zero
+    sd_awqnc1  =zero
+    sd_awqni1  =zero
+    sd_awqnwfa1=zero
+    sd_awqnifa1=zero
+    sd_awu1    =zero
+    sd_awv1    =zero
+    sd_awqke1  =zero
+    sub_thl1   =zero
+    sub_sqv1   =zero
+    sub_u1     =zero
+    sub_v1     =zero
+    det_thl1   =zero
+    det_sqv1   =zero
+    det_sqc1   =zero
+    det_u1     =zero
+    det_v1     =zero
 
-       do k = kts,kte
-          if (k==kts) then
-             zw(k)=0.
-          else
-             zw(k)=zw(k-1)+dz(i,k-1)
-          endif
-          !keep snow out for now - increases ceiling bias
-          sqw(k)= sqv2(k)+sqc(k)+sqi2(k)!+sqs2(k)
-          thl(k)= th1(k) - xlvcp/ex1(k)*sqc(k) &
-               &         - xlscp/ex1(k)*(sqi2(k))!+sqs2(k))
-          !Use form from Tripoli and Cotton (1981) with their
-          !suggested min temperature to improve accuracy.
-          !thl(k)=th(i,k)*(1.- xlvcp/MAX(tk1(k),TKmin)*sqc(k) &
-          !    &               - xlscp/MAX(tk1(k),TKmin)*sqi(k))
-          thetav(k)=th1(k)*(1.+p608*sqv2(k))
-       enddo ! end k
-       zw(kte+1)=zw(kte)+dz(i,kte)
-
-       !initialize smoke/chem arrays (if used):
-       if ( mix_chem ) then
-          do ic = 1,ndvel
-             vd1(ic) = vdep(i,ic) ! dry deposition velocity
-          enddo
-          do k = kts,kte
-             do ic = 1,nchem
-                chem1(k,ic) = chem3d(i,k,ic)
-             enddo
-          enddo
-       else
-          do ic = 1,ndvel
-             vd1(ic) = 0. ! dry deposition velocity
-          enddo
-          do k = kts,kte
-             do ic = 1,nchem
-                chem1(k,ic) = 0.
-             enddo
-          enddo
-       endif
-       s_awchem1(kts:kte+1,1:nchem)   = 0.0
+    zw1(kts)=zero
+    do k = kts,kte
+       zw1(k+1)=zw1(k)+dz1(k)
+       qv1(k) = sqv1(k)/(one-sqv1(k))
+       qc1(k) =	sqc1(k)/(one-sqv1(k))
+       qi1(k) =	sqi1(k)/(one-sqv1(k))
+       qs1(k) =	sqs1(k)/(one-sqv1(k))
+       !keep snow out for now - increases ceiling bias
+       sqw1(k)= sqv1(k)+sqc1(k)+sqi1(k)!+sqs1(k)
+       thl1(k)= th1(k) - xlvcp/ex1(k)*sqc1(k) &
+             &         - xlscp/ex1(k)*(sqi1(k))!+sqs1(k))
+       !Use form from Tripoli and Cotton (1981) with their
+       !suggested min temperature to improve accuracy.
+       !thl1(k)=th1(i,k)*(one- xlvcp/MAX(tk1(k),TKmin)*sqc1(k) &
+       !    &               - xlscp/MAX(tk1(k),TKmin)*sqi1(k))
+       thv1(k)=th1(k)*(one+p608*sqv1(k))
+    enddo ! end k
 
 !>  - Call get_pblh() to calculate the hybrid \f$\theta_{v}-TKE\f$
 !! PBL height diagnostic.
-#ifdef WRF_TEST_CC_1
-       CALL get_pblh_cc(KTS_cc,KTE_cc,PBLH(i),thetav,Qke1,zw,dz1,xland(i),KPBL_cc(i))
-             KPBL(i)=KPBL_cc(i)+1
-#else
-       CALL GET_PBLH(KTS,KTE,PBLH(i),thetav,&
-       & Qke1,zw,dz1,xland(i),KPBL(i))
-#endif
-!             write(10,*),KTS,KTE,PBLH(i),thetav,&
-!             &  Qke1,zw,dz1,xland(i),KPBL(i)
-!             STOP
+    CALL GET_PBLH(KTS,KTE,PBLH,thv1,qke1,zw1,dz1,xland,KPBL)
 
 !>  - Call scale_aware() to calculate the similarity functions,
 !! \f$P_{\sigma-PBL}\f$ and \f$P_{\sigma-shcu}\f$, to control 
 !! the scale-adaptive behaviour for the local and nonlocal 
 !! components, respectively.
-       if (scaleaware > 0.) then
-#ifdef WRF_TEST_CC_1
-          call SCALE_AWARE_CC(dx(i),PBLH(i),psig_bl(i),psig_shcu(i))
-#else
-          call SCALE_AWARE(dx(i),PBLH(i),psig_bl(i),psig_shcu(i))
-#endif
+    if (scaleaware > 0.) then
+       call SCALE_AWARE(dx,PBLH,Psig_bl,Psig_shcu)
+    else
+       Psig_bl=one
+       Psig_shcu=one
+    endif
+
+    sqcg= zero   !ill-defined variable; qcg has been removed
+    cpm=cp*(one + 0.84*max(sqv1(kts),1e-8))
+    exnerg=(ps/p1000mb)**rcp
+
+
+  
+  !-----------------------------------------------------
+    !ORIGINAL CODE
+    !flt = hfx/( rho(i,kts)*cpm ) &
+    ! +xlvcp*ch(i)*(sqc(kts)/exner(i,kts) -sqcg/exnerg)
+    !flq = qfx/  rho(i,kts)       &
+    !    -ch(i)*(sqc(kts)   -sqcg )
+    !-----------------------------------------------------
+    flqv = qfx/rho1(kts)
+    flqc = zero !currently no sea-spray fluxes, fog settling handled elsewhere
+    th_sfc = ts/ex1(kts)
+
+
+    ! TURBULENT FLUX FOR TKE BOUNDARY CONDITIONS
+    flq =flqv+flqc                   !! LATENT
+    flt =hfx/(rho1(kts)*cpm )-xlvcp*flqc/ex1(kts)  !! Temperature flux
+    fltv=flt + flqv*p608*th_sfc      !! Virtual temperature flux
+ if (i==idbg .and. j==jdbg) then
+    print*,"===incoming forcing in mynn driver:"
+    print*,"fltv=",fltv,"flt=",flt,"hfx=",hfx
+    print*,"flqv=",flqv,"flq=",flq,"qfx=",qfx
+    print*,"cpm=",cpm,"rho=",rho1(kts),"ts=",ts
+    print*,"cp=",cp,"qv=",sqv1(kts),"th1=",th1(kts)
+ endif
+    ! Update 1/L using updated sfc heat flux and friction velocity
+    rmol = -karman*gtr*fltv/max(ust**3,1.0e-6_kind_phys)
+    zet = half*dz1(kts)*rmol
+    zet = max(zet, -20._kind_phys)
+    zet = min(zet,  20._kind_phys)
+    !if(i.eq.idbg)print*,"updated z/L=",zet
+    if (bl_mynn_stfunc == 0) then
+       !Original Kansas-type stability functions
+       if ( zet >= zero ) then
+          pmz = one + (cphm_st-one) * zet
+          phh = one +  cphh_st      * zet
        else
-          psig_bl(i)=1.0
-          psig_shcu(i)=1.0
-       endif
-!             write(10,'(4(F25.16))'),dx(i),PBLH(i),psig_bl(i),psig_shcu(i)
-!             STOP
-       sqcg= 0.0   !ill-defined variable; qcg has been removed
-       cpm=cp*(1.+0.84*qv1(kts))
-       exnerg=(ps(i)/p1000mb)**rcp
-
-       !-----------------------------------------------------
-       !ORIGINAL CODE
-       !flt = hfx(i)/( rho(i,kts)*cpm ) &
-       ! +xlvcp*ch(i)*(sqc(kts)/exner(i,kts) -sqcg/exnerg)
-       !flq = qfx(i)/  rho(i,kts)       &
-       !    -ch(i)*(sqc(kts)   -sqcg )
-       !-----------------------------------------------------
-       flqv = qfx(i)/rho1(kts)
-       flqc = 0.0 !currently no sea-spray fluxes, fog settling handled elsewhere
-       th_sfc = ts(i)/ex1(kts)
-
-       ! TURBULENT FLUX FOR TKE BOUNDARY CONDITIONS
-       flq =flqv+flqc                   !! LATENT
-       flt =hfx(i)/(rho1(kts)*cpm )-xlvcp*flqc/ex1(kts)  !! Temperature flux
-       fltv=flt + flqv*p608*th_sfc      !! Virtual temperature flux
-
-       ! Update 1/L using updated sfc heat flux and friction velocity
-       rmol(i) = -karman*gtr*fltv/max(ust(i)**3,1.0e-6)
-       zet = 0.5*dz(i,kts)*rmol(i)
-       zet = MAX(zet, -20.)
-       zet = MIN(zet,  20.)
-       !if(i.eq.idbg)print*,"updated z/L=",zet
-       if (bl_mynn_stfunc == 0) then
-          !Original Kansas-type stability functions
-          if ( zet >= 0.0 ) then
-             pmz = 1.0 + (cphm_st-1.0) * zet
-             phh = 1.0 +  cphh_st      * zet
-          else
-             pmz = 1.0/    (1.0-cphm_unst*zet)**0.25 - zet
-             phh = 1.0/SQRT(1.0-cphh_unst*zet)
-          end if
-       else
-          !Updated stability functions (Puhales, 2020)
-          phi_m = phim(zet)
-          pmz   = phi_m - zet
-          phh   = phih(zet)
+          pmz = one/    (one-cphm_unst*zet)**0.25 - zet
+          phh = one/sqrt(one-cphh_unst*zet)
        end if
+    else
+       !Updated stability functions (Puhales, 2020)
+       phi_m = phim(zet)
+       pmz   = phi_m - zet
+       phh   = phih(zet)
+    end if
 
 !>  - Call mym_condensation_cc() to calculate the nonconvective component
 !! of the subgrid cloud fraction and mixing ratio as well as the functions
 !! used to calculate the buoyancy flux. Different cloud PDFs can be
 !! selected by use of the namelist parameter \p bl_mynn_cloudpdf.
-!! differences like 4e-9 in qke and identical in T, U, V, W
-#ifdef WRF_TEST_CC_1
-       call mym_condensation_cc (kts,kte,          &
-            &dx(i),dz1,zw,xland(i),                      &
-            &thl,sqw,sqv2,sqc,sqi2,sqs2,                 &
-            &p1,ex1,tsq1,qsq1,cov1,                      &
-            &Sh,el,bl_mynn_cloudpdf,                     &
-            &qc_bl1D,qi_bl1D,cldfra_bl1D,                &
-            &PBLH(i),HFX(i),                             &
-            &Vt, Vq, th1, sgm, rmol(i),                  &
-            &spp_pbl,rstoch_col,ep_2,ep_3,xlv,r_d,xlvcp, &
-            &p608,tv0,r_v,cice,cliq,cpv,cp,xls,rcp)
-#else
-       call mym_condensation (kts,kte,                   &
-            &dx(i),dz1,zw,xland(i),                      &
-            &thl,sqw,sqv2,sqc,sqi2,sqs2,                    &
-            &p1,ex1,tsq1,qsq1,cov1,                      &
-            &Sh,el,bl_mynn_cloudpdf,                     &
-            &qc_bl1D,qi_bl1D,cldfra_bl1D,                &
-            &PBLH(i),HFX(i),                             &
-            &Vt, Vq, th1, sgm, rmol(i),                  &
-            &spp_pbl, rstoch_col                         )
-#endif
-!            write(10,'(28(F25.16))'),                   &
-!            &Vt, Vq, th1, sgm, rmol(i),                  &
-!            &rstoch_col
-!            STOP
-!>  - Add TKE source driven by cloud top cooling
-!!  Calculate the buoyancy production of TKE from cloud-top cooling when
-!! \p bl_mynn_topdown =1.
-#if WRF_TEST_CC_1
-       kpbl_cc(i) = kpbl(i) - 1
-       if (bl_mynn_topdown.eq.1) then
-          call topdown_cloudrad_cc(kts,kte,dz1,zw,fltv,     &
-               &xland(i),kpbl_cc(i),PBLH(i),                &
-               &sqc,sqi2,sqw,thl,th1,ex1,p1,rho1,thetav,  &
-               &cldfra_bl1D,rthraten(i,:),               &
-               &maxKHtopdown(i),KHtopdown,TKEprodTD      )
-       else
-          maxKHtopdown(i)  = 0.0
-          KHtopdown(kts:kte) = 0.0
-          TKEprodTD(kts:kte) = 0.0
-       endif
-#else
-!>  - Add TKE source driven by cloud top cooling
-!!  Calculate the buoyancy production of TKE from cloud-top cooling when
-!! \p bl_mynn_topdown =1.
-       if (bl_mynn_topdown.eq.1) then
-          call topdown_cloudrad(kts,kte,dz1,zw,fltv,     &
-               &xland(i),kpbl(i),PBLH(i),                &
-               &sqc,sqi2,sqw,thl,th1,ex1,p1,rho1,thetav,  &
-               &cldfra_bl1D,rthraten(i,:),               &
-               &maxKHtopdown(i),KHtopdown,TKEprodTD      )
-       else
-          maxKHtopdown(i)  = 0.0
-          KHtopdown(kts:kte) = 0.0
-          TKEprodTD(kts:kte) = 0.0
-       endif
 
-#endif
-!       write(10,'(3(I6))'),kts,kte,kpbl(i)
-!       write(10,'(28(F25.16))'),                   &
-!       dz1,zw,fltv,     &
-!               &xland(i),PBLH(i),                &
-!               &sqc,sqi2,sqw,thl,th1,ex1,p1,rho1,thetav,  &
-!               &cldfra_bl1D,rthraten(i,:),               &
-!               &maxKHtopdown(i),KHtopdown,TKEprodTD
-!               STOP
-!! matches when bl_mynn_edmf=1 but currently not updating sub_ variables in cc
-#ifdef WRF_TEST_CC_1
-       kpbl_cc(i) = kpbl(i) - 1
-       if (bl_mynn_edmf > 0) then
-          !PRINT*,"Calling DMP Mass-Flux: i= ",i
-          if(mix_chem .eqv. .true.) then
-              mix_chem_i=1
-          else
-              mix_chem_i=0
-          endif
-          call dmp_mf_cc(                                &
-               &kts,kte,delt,zw,dz1,p1,rho1,       &
-               &bl_mynn_edmf_mom,                        &
-               &bl_mynn_edmf_tke,                        &
-               &bl_mynn_mixscalars,                      &
-               &u1,v1,w1,th1,thl,thetav,tk1,             &
-               &sqw,sqv2,sqc,qke1,                       &
-               &qnc1,qni1,qnwfa1,qnifa1,qnbca1,          &
-               &ex1, Vt, Vq,                            &
-               &ust(i),flt,fltv,flq,flqv,                &
-               &PBLH(i),KPBL(i),DX(i),                &
-               &xland(i),th_sfc,                         &
+    call mym_condensation (kts,kte,                   &
+         &dx,dz1,zw1,xland,                           &
+         &thl1,sqw1,sqv1,sqc1,sqi1,sqs1,              &
+         &p1,ex1,tsq1,qsq1,cov1,                      &
+         &sh1,el1,bl_mynn_cloudpdf,                   &
+         &qc_bl1,qi_bl1,cldfra_bl1,                   &
+         &pblh,hfx,                                   &
+         &vt1, vq1, th1, sgm1,                        &
+         &spp_pbl, pattern_spp_pbl1                   )
+
+!>  - Add TKE source driven by cloud top cooling
+!!  Calculate the buoyancy production of TKE from cloud-top cooling when
+!! \p bl_mynn_topdown =1.
+    if (bl_mynn_topdown.eq.1) then
+       call topdown_cloudrad(kts,kte,dz1,zw1,fltv,     &
+            &xland,kpbl,PBLH,                          &
+            &sqc1,sqi1,sqw1,thl1,th1,ex1,p1,rho1,thv1, &
+            &cldfra_bl1,rthraten1,                     &
+            &maxKHtopdown,KHtopdown,TKEprod_dn         )
+    else
+       maxKHtopdown = zero
+       KHtopdown    = zero
+       TKEprod_dn   = zero
+    endif
+
+    if (bl_mynn_edmf > 0) then
+       call dmp_mf_cc(i,j                               &
+            &kts,kte,delt,zw1,dz1,p1,rho1,            &
+            &bl_mynn_edmf_mom,                        &
+            &bl_mynn_edmf_tke,                        &
+            &bl_mynn_mixscalars,                      &
+            &u1,v1,w1,th1,thl1,thv1,tk1,              &
+            &sqw1,sqv1,sqc1,qke1,                     &
+            &qnc1,qni1,qnwfa1,qnifa1,qnbca1,          &
+            &ex1,vt1,vq1,sgm1,                        &
+            &ust,flt,fltv,flq,flqv,                   &
+            &pblh,kpbl,dx,                            &
+            &xland,th_sfc,                            &
             ! now outputs - tendencies
             ! &,dth1mf,dqv1mf,dqc1mf,du1mf,dv1mf         &
             ! outputs - updraft properties
-               &edmf_a1,edmf_w1,edmf_qt1,                &
-               &edmf_thl1,edmf_ent1,edmf_qc1,            &
+            &edmf_a1,edmf_w1,edmf_qt1,                &
+            &edmf_thl1,edmf_ent1,edmf_qc1,            &
             ! for the solver
-               &s_aw1,s_awthl1,s_awqt1,                  &
-               &s_awqv1,s_awqc1,                         &
-               &s_awu1,s_awv1,s_awqke1,                  &
-               &s_awqnc1,s_awqni1,                       &
-               &s_awqnwfa1,s_awqnifa1,s_awqnbca1,        &
-               & sub_thl,sub_sqv,sub_u,sub_v,            &
-               & det_thl,det_sqv,det_sqc,det_u,det_v,    &
+            &s_aw1,s_awthl1,s_awqt1,                  &
+            &s_awqv1,s_awqc1,                         &
+            &s_awu1,s_awv1,s_awqke1,                  &
+            &s_awqnc1,s_awqni1,                       &
+            &s_awqnwfa1,s_awqnifa1,s_awqnbca1,        &
+            &sub_thl1,sub_sqv1,                       &
+            &sub_u1,sub_v1,                           &
+            &det_thl1,det_sqv1,det_sqc1,              &
+            &det_u1,det_v1,                           &
             ! chem/smoke mixing
-               &nchem,chem1,s_awchem1,                   &
-               &mix_chem_i,                              &
-               &qc_bl1d,cldfra_bl1d,                     &
-               &psig_shcu(i),                            &               
-               &maxwidth(i),ktop_plume(i),               &
-               &maxmf(i),ztop_plume(i),                  &
-               &spp_pbl,rstoch_col, grav, gtr, p608,             &
+            &nchem,chem,s_awchem1,                    &
+            &mix_chem_i,                                &
+            &qc_bl1,cldfra_bl1,                       &
+            &qc_bl1_old,cldfra_bl1_old,               &
+            &FLAG_QC,FLAG_QI,                         &
+            &FLAG_QNC,FLAG_QNI,                       &
+            &FLAG_QNWFA,FLAG_QNIFA,FLAG_QNBCA,        &
+            &Psig_shcu,                               &
+            &maxwidth,ktop_plume,                     &
+            &maxmf,ztop_plume,                        &
+            &spp_pbl,pattern_spp_pbl1,                &
+            &TKEprod_up,el1,grav, gtr, p608,             &
                &p1000mb,rcp,xlvcp,rvovrd, onethird,tv0,  &
                &cpv,ep_2,ep_3,r_v,tliq,cice,xlv,xls,     &
                &cp,cliq )
-       endif
-#else
-       if (bl_mynn_edmf > 0) then
-          if(mix_chem .eqv. .true.) then
-              mix_chem_i=1
-          else
-              mix_chem_i=0
-          endif
-          !PRINT*,"Calling DMP Mass-Flux: i= ",i
-          call dmp_mf_cc(                                &
-               &kts,kte,delt,zw,dz1,p1,rho1,             &
-               &bl_mynn_edmf_mom,                        &
-               &bl_mynn_edmf_tke,                        &
-               &bl_mynn_mixscalars,                      &
-               &u1,v1,w1,th1,thl,thetav,tk1,             &
-               &sqw,sqv2,sqc,qke1,                       &
-               &qnc1,qni1,qnwfa1,qnifa1,qnbca1,          &
-               &ex1,Vt,Vq,                               &
-               &ust(i),flt,fltv,flq,flqv,                &
-               &PBLH(i),KPBL(i),DX(i),                   &
-               &xland(i),th_sfc,                         &
-            ! now outputs - tendencies
-            ! &,dth1mf,dqv1mf,dqc1mf,du1mf,dv1mf         &
-            ! outputs - updraft properties
-               &edmf_a1,edmf_w1,edmf_qt1,                &
-               &edmf_thl1,edmf_ent1,edmf_qc1,            &
-            ! for the solver
-               &s_aw1,s_awthl1,s_awqt1,                  &
-               &s_awqv1,s_awqc1,                         &
-               &s_awu1,s_awv1,s_awqke1,                  &
-               &s_awqnc1,s_awqni1,                       &
-               &s_awqnwfa1,s_awqnifa1,s_awqnbca1,        &
-               &sub_thl,sub_sqv,                         &
-               &sub_u,sub_v,                             &
-               &det_thl,det_sqv,det_sqc,                 &
-               &det_u,det_v,                             &
-            ! chem/smoke mixing
-               &nchem,chem1,s_awchem1,                   &
-               &mix_chem_i,                              &
-               &qc_bl1D,cldfra_bl1D,                     &
-               &psig_shcu(i),                            &
-               &maxwidth(i),ktop_plume(i),               &
-               &maxmf(i),ztop_plume(i),                  &
-               &spp_pbl,rstoch_col, grav, gtr, p608,             &
-               &p1000mb,rcp,xlvcp,rvovrd,onethird,tv0,   &
-               &cpv,ep_2,ep_3,r_v,tliq,cice,xlv,xls,  &
-               &cp,cliq                )
-       endif
-#endif
-!       write(10,'(7(I6))'),kts,kte,               &
-!               &bl_mynn_edmf_mom,                        &
-!               &bl_mynn_edmf_tke,                        &
-!               &bl_mynn_mixscalars,nchem,ktop_plume(i),kpbl(i),spp_pbl
-!               write(10,*), mix_chem,                    &
-!               &FLAG_QC,FLAG_QI,                         &
-!               &FLAG_QNC,FLAG_QNI,                       &
-!               &FLAG_QNWFA,FLAG_QNIFA,FLAG_QNBCA
-!       write(10,'(28(F25.16))'),                   &
-!                      &delt,zw,dz1,p1,rho1,             &
-!               &u1,v1,w1,th1,thl,thetav,tk1,             &
-!               &sqw,sqv2,sqc,qke1,                        &
-!               &qnc1,qni1,qnwfa1,qnifa1,qnbca1,          &
-!               &ex1,Vt,Vq,sgm,                           &
-!               &ust(i),flt,fltv,flq,flqv,                &
-!               &PBLH(i),DX(i),                   &
-!               &xland(i),th_sfc                         
-            ! now outputs - tendencies
-            ! &,dth1mf,dqv1mf,dqc1mf,du1mf,dv1mf         &
-            ! outputs - updraft properties
-!               write(10,'(28(F25.16))'),                   &
-!               &edmf_a1,edmf_w1,edmf_qt1,                &
-!               &edmf_thl1,edmf_ent1,edmf_qc1,            &
-            ! for the solver
-!               &s_aw1,s_awthl1,s_awqt1,                  &
-!               &s_awqv1,s_awqc1,                         &
-!               &s_awu1,s_awv1,s_awqke1,                  &
-!               &s_awqnc1,s_awqni1,                       &
-!               &s_awqnwfa1,s_awqnifa1,s_awqnbca1,        &
-!               &sub_thl,sub_sqv,                         &
-!               &sub_u,sub_v,                             &
-!               &det_thl,det_sqv,det_sqc,                 &
-!               &det_u,det_v
-!               write(10,'(28(F25.16))'),                   &
-            ! chem/smoke mixing
-!               &chem1,s_awchem1,                   &
-!               &qc_bl1D,cldfra_bl1D,                     &
-!               &qc_bl1D_old,cldfra_bl1D_old,             &
-!               &psig_shcu(i),                            &
-!               &maxwidth(i),                             &
-!               &maxmf(i),                  &
-!               &rstoch_col
-!               STOP
-#ifdef WRF_TEST_CC_1
-       KPBL_cc(i)=KPBL(i) - 1
-       if (bl_mynn_edmf_dd == 1) then
-          call DDMF_JPL_cc(kts,kte,delt,zw,dz1,p1,       &
-               &u1,v1,th1,thl,thetav,tk1,                &
-               &sqw,sqv2,sqc,rho1,ex1,                    &
-               &ust(i),flt,flq,                          &
-               &PBLH(i),KPBL_cc(i),                         &
-               &edmf_a_dd1,edmf_w_dd1,edmf_qt_dd1,       &
-               &edmf_thl_dd1,edmf_ent_dd1,               &
-               &edmf_qc_dd1,                             &
-               &sd_aw1,sd_awthl1,sd_awqt1,               &
-               &sd_awqv1,sd_awqc1,sd_awu1,sd_awv1,       &
-               &sd_awqke1,qc_bl1d,cldfra_bl1d,           &
-               &rthraten(i,:),svp1,grav,onethird,        &
-               &p1000mb,rcp, xlvcp,cp,rvovrd             )
-       endif
+    else
+       TKEprod_up = zero
+    endif
 
-       !Capability to substep the eddy-diffusivity portion
-       !do nsub = 1,2
-       delt2 = delt !*0.5    !only works if topdown=0
-#else
-       if (bl_mynn_edmf_dd == 1) then
-          call DDMF_JPL(kts,kte,delt,zw,dz1,p1,          &
-               &u1,v1,th1,thl,thetav,tk1,                &
-               &sqw,sqv2,sqc,rho1,ex1,                    &
-               &ust(i),flt,flq,                          &
-               &PBLH(i),KPBL(i),                         &
-               &edmf_a_dd1,edmf_w_dd1,edmf_qt_dd1,       &
-               &edmf_thl_dd1,edmf_ent_dd1,               &
-               &edmf_qc_dd1,                             &
-               &sd_aw1,sd_awthl1,sd_awqt1,               &
-               &sd_awqv1,sd_awqc1,sd_awu1,sd_awv1,       &
-               &sd_awqke1,                               &
-               &qc_bl1d,cldfra_bl1d,                     &
-               &rthraten(i,:)                            )
-       endif
-       !Capability to substep the eddy-diffusivity portion
-       !do nsub = 1,2
-       delt2 = delt !*0.5    !only works if topdown=0
-#endif
-!       write(10,*),kts,kte,delt,zw,dz1,p1,          &
-!               &u1,v1,th1,thl,thetav,tk1,                &
-!               &sqw,sqv2,sqc,rho1,ex1,                    &
-!               &ust(i),flt,flq,                          &
-!               &PBLH(i),KPBL(i),                         &
-!               &edmf_a_dd1,edmf_w_dd1,edmf_qt_dd1,       &
-!               &edmf_thl_dd1,edmf_ent_dd1,               &
-!               &edmf_qc_dd1,                             &
-!               &sd_aw1,sd_awthl1,sd_awqt1,               &
-!               &sd_awqv1,sd_awqc1,sd_awu1,sd_awv1,       &
-!               &sd_awqke1,                               &
-!               &qc_bl1d,cldfra_bl1d,                     &
-!               &rthraten(i,:)
-!               STOP
-!! differences like 4e-9 in qke and identical in T, U, V, W
-!     #ifdef WRF_TEST_CC_FLOAT
-!     too many of the differences in the arguments are things that should be nans.
-! some possibly significant differences in the arguments remain
-#ifdef WRF_TEST_CC_FLOAT
-       call mym_turbulence_cc(                              & 
-               &kts,kte,xland(i),closure,                &
-               &dz1, DX(i), zw,                          &
-               &u1, v1, thl, thetav, sqc, sqw,           &
-               &qke1, tsq1, qsq1, cov1,                  &
-               &vt, vq,                                  &
-               &rmol(i), flt, fltv, flq,                 &
-               &PBLH(i),th1,                             &
-               &Sh,Sm,el,                                &
-               &Dfm,Dfh,Dfq,                             &
-               &Tcd,Qcd,Pdk,                             &
-               &Pdt,Pdq,Pdc,                             &
-               &qWT1,qSHEAR1,qBUOY1,qDISS1,              &
-               &tke_budget,                              &
-               &psig_bl(i),psig_shcu(i),                 &
-               &cldfra_bl1D,bl_mynn_mixlength,           &
-               &edmf_w1,edmf_a1,                         &
-               &TKEprodTD,                               &
-               &spp_pbl,rstoch_col,debug_code_i,           &
-               &gtr, tv0)
-#else
-       call mym_turbulence(                              & 
-               &kts,kte,xland(i),closure,                &
-               &dz1, DX(i), zw,                          &
-               &u1, v1, thl, thetav, sqc, sqw,           &
-               &qke1, tsq1, qsq1, cov1,                  &
-               &vt, vq,                                  &
-               &rmol(i), flt, fltv, flq,                 &
-               &PBLH(i),th1,                             &
-               &Sh,Sm,el,                                &
-               &Dfm,Dfh,Dfq,                             &
-               &Tcd,Qcd,Pdk,                             &
-               &Pdt,Pdq,Pdc,                             &
-               &qWT1,qSHEAR1,qBUOY1,qDISS1,              &
-               &tke_budget,                              &
-               &psig_bl(i),psig_shcu(i),                 &
-               &cldfra_bl1D,bl_mynn_mixlength,           &
-               &edmf_w1,edmf_a1,                         &
-               &TKEprodTD,                               &
-               &spp_pbl,rstoch_col                       )
-#endif
-!               write(10,*), &
-!                              &kts,kte,xland(i),closure,                &
-!               &dz1, DX(i), zw,                          &
-!               &u1, v1, thl, thetav, sqc, sqw,           &
-!               &qke1, tsq1, qsq1, cov1,                  &
-!               &vt, vq,                                  &
-!               &rmol(i), flt, fltv, flq,                 &
-!               &PBLH(i),th1,                             &
-!               &Sh,Sm,el,                                &
-!               &Dfm,Dfh,Dfq
-!               write(10,*), "tcd",                       &
-!               &Tcd,Qcd
-!               write(10,*), "pdk",                       &
-!               Pdk,                             &
-!               &Pdt,Pdq,Pdc
-!               write(10,*), "qwt1",                       &
-!               &qWT1
-!               write(10,*), "qshear1",                       &
-!               &qSHEAR1
-!               write(10,*), "qbuoy1",                       &
-!               &qBUOY1
-!               write(10,*), "qdiss1",                       &
-!               &qDISS1
-!               write(10,*), "tkebudget",                 &
-!               &tke_budget
-!               write(10,'(34(F25.16))'), &
-!               &psig_bl(i),psig_shcu(i),                 &
-!               &cldfra_bl1D
-!               write(10,*), "mixlength",bl_mynn_mixlength
-!               write(10,'(34(F25.16))'), &
-!               &edmf_w1,edmf_a1,                         &
-!               &TKEprodTD
-!               write(10,*),                               &
-!               &spp_pbl,rstoch_col                       
-!STOP
-!! differences like 2e-8 in qke and identical in T, U, V, W
-!#ifdef WRF_TEST_CC_FLOAT
-#ifdef WRF_TEST_CC_1
+    if (bl_mynn_edmf_dd == 1) then
+       call ddmp_mf(kts,kte,delt,dx,zw1,dz1,p1,       &
+            &u1,v1,th1,thl1,thv1,tk1,                 &
+            &sqw1,sqv1,sqc1,sqi1,qnc1,qni1,           &
+            &qnwfa1,qnifa1,                           &
+            &qke1,rho1,ex1,                           &
+            &qc_bl1,qi_bl1,cldfra_bl1,                &
+            &ust,flt,flq,fltv,                        &
+            &pblh,kpbl,                               &
+            &edmf_a_dd1,edmf_w_dd1,edmf_qt_dd1,       &
+            &edmf_thl_dd1,edmf_ent_dd1,               &
+            &edmf_qc_dd1,                             &
+            &sd_aw1,sd_awthl1,sd_awqt1,               &
+            &sd_awqv1,sd_awqc1,sd_awqi1,              &
+            &sd_awqnc1,sd_awqni1,                     &
+            &sd_awqnwfa1,sd_awqnifa1,                 &
+            &sd_awu1,sd_awv1,                         &
+            &sd_awqke1,                               &
+            &tkeprod_dn,el1,                          &
+            &rthraten1                                )
+    else
+       tkeprod_dn = zero
+    endif
+
+    !Capability to substep the eddy-diffusivity portion
+    !do nsub = 1,2
+    delt2 = delt !*0.5    !only works if topdown=0
+
+    !thlv with updated subgrid clouds
+    do k=kts,kte
+       thlv1(k)=(th1(k) - xlvcp/ex1(k)*max(qc_bl1(k),sqc1(k))          &
+                &       - xlscp/ex1(k)*max(qi_bl1(k),sqi1(k)+sqs1(k))) &
+                &       * (one+p608*sqv1(k))
+    enddo
+
+    call mym_turbulence(                                 &
+            &kts,kte,xland,closure,                      &
+            &dz1, dx, zw1,                               &
+            &u1, v1, thl1, thv1, thlv1,                  &
+            &sqc1, sqw1,                                 &
+            &qke1, tsq1, qsq1, cov1,                     &
+            &vt1, vq1,                                   &
+            &rmol, flt, fltv, flq,                       &
+            &pblh, th1,                                  &
+            &sh1,sm1,el1,                                &
+            &Dfm1,Dfh1,Dfq1,                             &
+            &Tcd1,Qcd1,Pdk1,                             &
+            &Pdt1,Pdq1,Pdc1,                             &
+            &qWT1,qSHEAR1,qBUOY1,qDISS1,                 &
+            &tke_budget,                                 &
+            &Psig_bl,Psig_shcu,                          &
+            &cldfra_bl1,bl_mynn_mixlength,               &
+            &edmf_w1,edmf_a1,                            &
+            &edmf_w_dd1,edmf_a_dd1,                      &
+            &TKEprod_dn,TKEprod_up,                      &
+            &spp_pbl,pattern_spp_pbl1                    )
+
 !>  - Call mym_predict() to solve TKE and 
 !! \f$\theta^{'2}, q^{'2}, and \theta^{'}q^{'}\f$
 !! for the following time step.
-       call mym_predict_cc(kts,kte,closure,                 &
-               &delt2, dz1,                              &
-               &ust(i), flt, flq, pmz, phh,              &
-               &el, dfq, rho1, pdk, pdt, pdq, pdc,       &
-               &Qke1, Tsq1, Qsq1, Cov1,                  &
-               &s_aw1, s_awqke1, bl_mynn_edmf_tke,       &
-               &qWT1, qDISS1, tke_budget,                &
+    call mym_predict_cc(kts,kte,closure,                 &
+            &delt2, dz1,                                 &
+            &ust, flt, flq, pmz, phh,                    &
+            &el1, dfq1, rho1, pdk1, pdt1, pdq1, pdc1,    &
+            &qke1, tsq1, qsq1, cov1,                     &
+            &s_aw1, s_awqke1, bl_mynn_edmf_tke,          &
+            &qWT1, qDISS1, tke_budget,                &
                xlvcp,xlscp, karman                       )
-#else
-!>  - Call mym_predict() to solve TKE and 
-!! \f$\theta^{'2}, q^{'2}, and \theta^{'}q^{'}\f$
-!! for the following time step.
-       call mym_predict(kts,kte,closure,                 &
-               &delt2, dz1,                              &
-               &ust(i), flt, flq, pmz, phh,              &
-               &el, dfq, rho1, pdk, pdt, pdq, pdc,       &
-               &Qke1, Tsq1, Qsq1, Cov1,                  &
-               &s_aw1, s_awqke1, bl_mynn_edmf_tke,       &
-               &qWT1, qDISS1, tke_budget                 )
-#endif
-!write(10,*),kts,kte,closure,                 &
-!               &delt2, dz1,                              &
-!               &ust(i), flt, flq, pmz, phh,              &
-!               &el, dfq, rho1, pdk, pdt, pdq, pdc,       &
-!               &Qke1, Tsq1, Qsq1, Cov1,                  &
-!               &s_aw1, s_awqke1, bl_mynn_edmf_tke,       &
-!               &qWT1, qDISS1, tke_budget
-!               STOP
-       if (dheat_opt > 0) then
-          do k=kts,kte-1
-             ! Set max dissipative heating rate to 7.2 K per hour
-             diss_heat(k) = MIN(MAX(1.0*(qke1(k)**1.5)/(b1*MAX(0.5*(el(k)+el(k+1)),1.))/cp, 0.0),0.002)
-             ! Limit heating above 100 mb:
-             diss_heat(k) = diss_heat(k) * exp(-10000./MAX(p1(k),1.)) 
-          enddo
-          diss_heat(kte) = 0.
-       else
-          diss_heat(1:kte) = 0.
-       endif
-!! binary diff identical
-!! matches exactly
-#ifdef WRF_TEST_CC_1
-!>  - Call mynn_tendencies() to solve for tendencies of 
-!     ! \f$U, V, \theta, q_{v}, q_{c}, and q_{i}\f$.
-       call mynn_tendencies_cc(kts,kte,delt, dz1, rho1,    &
-       &u1,v1,th1,tk1,qv1,qc1,qi1,kzero,qnc1,qni1,&
-       &ps(i),p1,ex1,thl,sqv2,sqc,sqi2,kzero,sqw,&
-       &qnwfa1, qnifa1, qnbca1, ozone1,          &
-       &ust(i),flt,   &
-               &flq,flqv,flqc,wspd(i),uoce(i),voce(i),tcd, & 
-               &qcd,dfm,dfh,Du1,Dv1,Dth1,Dqv1,            &
-               &Dqc1, Dqi1, Dqs1, Dqnc1, Dqni1,          &
-               &Dqnwfa1, Dqnifa1, Dqnbca1,               &
-               &Dozone1,                                 &
-               &diss_heat,        &
-               ! mass flux components
-               &s_aw1,s_awthl1,s_awqt1,s_awqv1,s_awqc1,    &
-               &s_awu1,s_awv1,&
-               &s_awqnc1,s_awqni1,                       &
-               &s_awqnwfa1,s_awqnifa1,s_awqnbca1,        &
-               &sd_aw1,sd_awthl1,sd_awqt1,               &
-               &sd_awqv1,sd_awqc1,                       &
-               &sd_awu1,sd_awv1,                         &
-               &sub_thl,                   &
-               &sub_sqv,sub_u,sub_v, &
-               &det_thl,det_sqv,det_sqc,det_u,det_v,       &      
-               &FLAG_QC_I,FLAG_QC_I,FLAG_QNC_I,                &
-               &FLAG_QNI_I,FLAG_QS_I,                        &
-               &FLAG_QNWFA_I,FLAG_QNIFA_I,                   &
-               &FLAG_QNBCA_I,FLAG_OZONE_I,                   &
-               &bl_mynn_cloudmix,bl_mynn_mixqt,  &
-               &bl_mynn_edmf_mom,bl_mynn_mixscalars,       &
-               &debug_code_i,r_d,p608,ep_2,ep_3,tv0,xlv,   &
-               &xlvcp,xlscp)
-#else
+
+    if (dheat_opt > 0) then
+       do k=kts,kte-1
+          ! Set max dissipative heating rate to 7.2 K per hour
+          diss_heat1(k) = MIN(MAX(1.0*(qke1(k)**1.5)/(b1*MAX(half*(el1(k)+el1(k+1)),one))/cp, 0.0),0.002)
+          ! Limit heating above 100 mb:
+          diss_heat1(k) = diss_heat1(k) * exp(-10000./MAX(p1(k),one)) 
+       enddo
+       diss_heat1(kte) = 0.
+    else
+       diss_heat1 = 0.
+    endif
+
 !>  - Call mynn_tendencies() to solve for tendencies of 
 !! \f$U, V, \theta, q_{v}, q_{c}, and q_{i}\f$.
-       call mynn_tendencies(kts,kte,i,                   &
-               &delt, dz1, rho1,                         &
-               &u1, v1, th1, tk1, qv1,                   &
-               &qc1, qi1, kzero, qnc1, qni1,             & !kzero replaces qs1 - not mixing snow
-               &ps(i), p1, ex1, thl,                     &
-               &sqv2, sqc, sqi2, kzero, sqw,               & !kzero replaces sqs - not mixing snow
-               &qnwfa1, qnifa1, qnbca1, ozone1,          &
-               &ust(i),flt,flq,flqv,flqc,                &
-               &wspd(i),uoce(i),voce(i),                 &
-               &tsq1, qsq1, cov1,                        &
-               &tcd, qcd,                                &
-               &dfm, dfh, dfq,                           &
-               &Du1, Dv1, Dth1, Dqv1,                    &
-               &Dqc1, Dqi1, Dqs1, Dqnc1, Dqni1,          &
-               &Dqnwfa1, Dqnifa1, Dqnbca1,               &
-               &Dozone1,                                 &
-               &diss_heat,                               &
-               ! mass flux components
-               &s_aw1,s_awthl1,s_awqt1,                  &
-               &s_awqv1,s_awqc1,s_awu1,s_awv1,           &
-               &s_awqnc1,s_awqni1,                       &
-               &s_awqnwfa1,s_awqnifa1,s_awqnbca1,        &
-               &sd_aw1,sd_awthl1,sd_awqt1,               &
-               &sd_awqv1,sd_awqc1,                       &
-               &sd_awu1,sd_awv1,                         &
-               &sub_thl,sub_sqv,                         &
-               &sub_u,sub_v,                             &
-               &det_thl,det_sqv,det_sqc,                 &
-               &det_u,det_v,                             &
-               &FLAG_QC,FLAG_QI,FLAG_QNC,                &
-               &FLAG_QNI,FLAG_QS,                        &
-               &FLAG_QNWFA,FLAG_QNIFA,                   &
-               &FLAG_QNBCA,FLAG_OZONE,                   &
-               &cldfra_bl1d,                             &
-               &bl_mynn_cloudmix,                        &
-               &bl_mynn_mixqt,                           &
-               &bl_mynn_edmf,                            &
-               &bl_mynn_edmf_mom,                        &
-               &bl_mynn_mixscalars                       )
-#endif
-!      write(10,'(7(I6))'),kts,kte,               &
-!      & i
-!      write(10,*),                                       &
-!               &FLAG_QC,FLAG_QI,FLAG_QNC,                &
-!               &FLAG_QNI,FLAG_QS,                        &
-!               &FLAG_QNWFA,FLAG_QNIFA,                   &
-!               &FLAG_QNBCA,FLAG_OZONE,                   &
-!               &bl_mynn_cloudmix,                        &
-!               &bl_mynn_mixqt,                           &
-!               &bl_mynn_edmf,                            &
-!               &bl_mynn_edmf_mom,                        &
-!               &bl_mynn_mixscalars                       
-!      write(10,'(28(F25.16))'),                   &
-!               &delt, dz1, rho1,                         &
-!               &u1, v1, th1, tk1, qv1,                   &
-!               &qc1, qi1, kzero, qnc1, qni1,             & !kzero replaces qs1 - not mixing snow
-!               &ps(i), p1, ex1, thl,                     &
-!               &sqv2, sqc, sqi2, kzero, sqw,               & !kzero replaces sqs - not mixing snow
-!               &qnwfa1, qnifa1, qnbca1, ozone1,          &
-!               &ust(i),flt,flq,flqv,flqc,                &
-!               &wspd(i),uoce(i),voce(i),                 &
-!               &tsq1, qsq1, cov1,                        &
-!               &tcd, qcd,                                &
-!               &dfm, dfh, dfq,                           &
-!               &Du1, Dv1, Dth1, Dqv1,                    &
-!               &Dqc1, Dqi1, Dqs1, Dqnc1, Dqni1,          &
-!               &Dqnwfa1, Dqnifa1, Dqnbca1,               &
-!               &Dozone1,                                 &
-!               &diss_heat,                               &
-!               ! mass flux components
-!               &s_aw1,s_awthl1,s_awqt1,                  &
-!               &s_awqv1,s_awqc1,s_awu1,s_awv1,           &
-!               &s_awqnc1,s_awqni1,                       &
-!               &s_awqnwfa1,s_awqnifa1,s_awqnbca1,        &
-!               &sd_aw1,sd_awthl1,sd_awqt1,               &
-!               &sd_awqv1,sd_awqc1,                       &
-!               &sd_awu1,sd_awv1,                         &
-!               &sub_thl,sub_sqv,                         &
-!               &sub_u,sub_v,                             &
-!               &det_thl,det_sqv,det_sqc,                 &
-!               &det_u,det_v,                             &
-!               &cldfra_bl1d
-!      STOP
-!! matches arguments first call, mostly zeros
-#ifdef WRF_TEST_CC_1
-       if ( mix_chem ) then
-          if (enh_mix) then
-                  enh_mix_in=1
-          else
-                  enh_mix_in=0
-          endif
-          if ( rrfs_sd ) then 
-             call mynn_mix_chem_cc(kts,kte_cc,i,               &
-                  &delt, dz1, pblh(i),                   &
-                  &nchem, kdvel, ndvel,                  &
-                  &chem1, vd1,                           &
-                  &rho1,flt,                             &
-                  &tcd, qcd,                             &
-                  &dfh,                                  &
-                  &s_aw1,s_awchem1,                      &
-                  &emis_ant_no(i),                       &
-                  &frp(i), 1,                            & !//rrfs_sd passed as integer
-                  &enh_mix_in                            )
-          else
-             call mynn_mix_chem_cc(kts,kte,i,            &
-                  &delt, dz1, pblh(i),                   &
-                  &nchem, kdvel, ndvel,                  &
-                  &chem1, vd1,                           &
-                  &rho1,flt,                             &
-                  &tcd, qcd,                             &
-                  &dfh,                                  &
-                  &s_aw1,s_awchem1,                      &
-                  &zero,                                 &
-                  &zero, 0,                              &
-                  &enh_mix_in                            )
-          endif
-          do ic = 1,nchem
-             do k = kts,kte
-                chem3d(i,k,ic) = max(1.e-12, chem1(k,ic))
-             enddo
-          enddo
-       endif
-#else
+    call mynn_tendencies(kts,kte,i,                      &
+            &delt, dz1, rho1,                            &
+            &u1, v1, th1, tk1, qv1,                      &
+            &qc1, qi1, kzero1, qnc1, qni1,               & !kzero replaces qs1 - not mixing snow
+            &ps, p1, ex1, thl1,                          &
+            &sqv1, sqc1, sqi1, kzero1, sqw1,             & !kzero replaces sqs - not mixing snow
+            &qnwfa1, qnifa1, qnbca1, ozone1,             &
+            &ust,flt,flq,flqv,flqc,                      &
+            &wspd,uoce,voce,                             &
+            &tsq1, qsq1, cov1,                           &
+            &tcd1, qcd1,                                 &
+            &dfm1, dfh1, dfq1,                           &
+            &Du1, Dv1, Dth1, Dqv1,                       &
+            &Dqc1, Dqi1, Dqs1, Dqnc1, Dqni1,             &
+            &Dqnwfa1, Dqnifa1, Dqnbca1,                  &
+            &Dozone1,                                    &
+            &diss_heat1,                                 &
+            ! mass flux components
+            &s_aw1,s_awthl1,s_awqt1,                     &
+            &s_awqv1,s_awqc1,s_awu1,s_awv1,              &
+            &s_awqnc1,s_awqni1,                          &
+            &s_awqnwfa1,s_awqnifa1,s_awqnbca1,           &
+            &sd_aw1,sd_awthl1,sd_awqt1,                  &
+            &sd_awqv1,sd_awqc1,sd_awqi1,                 &
+            &sd_awqnc1,sd_awqni1,                        &
+            &sd_awqnwfa1,sd_awqnifa1,                    &
+            &sd_awu1,sd_awv1,                            &
+            &sub_thl1,sub_sqv1,                          &
+            &sub_u1,sub_v1,                              &
+            &det_thl1,det_sqv1,det_sqc1,                 &
+            &det_u1,det_v1,                              &
+            &FLAG_QC,FLAG_QI,FLAG_QNC,                   &
+            &FLAG_QNI,FLAG_QS,                           &
+            &FLAG_QNWFA,FLAG_QNIFA,                      &
+            &FLAG_QNBCA,FLAG_OZONE,                      &
+            &cldfra_bl1,                                 &
+            &bl_mynn_cloudmix,                           &
+            &bl_mynn_mixqt,                              &
+            &bl_mynn_edmf,                               &
+            &bl_mynn_edmf_mom,                           &
+            &bl_mynn_mixscalars                          )
 
-       if ( mix_chem ) then
-          if ( rrfs_sd ) then 
-             call mynn_mix_chem(kts,kte,i,               &
-                  &delt, dz1, pblh(i),                   &
-                  &nchem, kdvel, ndvel,                  &
-                  &chem1, vd1,                           &
-                  &rho1,flt,                             &
-                  &tcd, qcd,                             &
-                  &dfh,                                  &
-                  &s_aw1,s_awchem1,                      &
-                  &emis_ant_no(i),                       &
-                  &frp(i), rrfs_sd,                      &
-                  &enh_mix, smoke_dbg                    )
-          else
-             call mynn_mix_chem(kts,kte,i,               &
-                  &delt, dz1, pblh(i),                   &
-                  &nchem, kdvel, ndvel,                  &
-                  &chem1, vd1,                           &
-                  &rho1,flt,                             &
-                  &tcd, qcd,                             &
-                  &dfh,                                  &
-                  &s_aw1,s_awchem1,                      &
-                  &zero,                                 &
-                  &zero, rrfs_sd,                        &
-                  &enh_mix, smoke_dbg                    )
-          endif
-          do ic = 1,nchem
-             do k = kts,kte
-                chem3d(i,k,ic) = max(1.e-12, chem1(k,ic))
-             enddo
-          enddo
-       endif
-#endif
-!       write(10,'(7(I6))'),kts,kte,i,nchem,kdvel,ndvel
-!       write(10,*),rrfs_sd,smoke_dbg,enh_mix
-
-!      write(10,'(28(F25.16))'),                   &
-!                  &delt, dz1, pblh(i),                   &
-!                  &chem1, vd1,                           &
-!                  &rho1,flt,                             &
-!                  &tcd, qcd,                             &
-!                  &dfh,                                  &
-!                  &s_aw1,s_awchem1,chem3d
-!      STOP
-!! matches output
-#ifdef WRF_TEST_CC_1
-       call retrieve_exchange_coeffs_cc(kts,kte,            &
-            &dfm, dfh, dz1, k_m1, K_h1                   )
-#else
-       call retrieve_exchange_coeffs(kts,kte,            &
-            &dfm, dfh, dz1, K_m1, K_h1                   )
-
-#endif
-!      write(10,'(7(I6))'),kts,kte
-!      write(10,'(34(F25.16))'),                   &
-!                  &dfm, dfh, dz1, K_m1, K_h1                   
-!      STOP       
-       !UPDATE 3D ARRAYS
-       exch_m(i,kts:kte)  =k_m1(kts:kte)
-       exch_h(i,kts:kte)  =k_h1(kts:kte)
-       rublten(i,kts:kte) =du1(kts:kte)
-       rvblten(i,kts:kte) =dv1(kts:kte)
-       rthblten(i,kts:kte)=dth1(kts:kte)
-       rqvblten(i,kts:kte)=dqv1(kts:kte)
-       if (bl_mynn_cloudmix > 0) then
-          if (flag_qc) rqcblten(i,kts:kte)=dqc1(kts:kte)
-          if (flag_qi) rqiblten(i,kts:kte)=dqi1(kts:kte)
-          if (flag_qs) rqsblten(i,kts:kte)=dqs1(kts:kte)
+    if ( mix_chem ) then
+       if ( rrfs_sd ) then 
+          call mynn_mix_chem(kts,kte,i,                  &
+               &delt, dz1, pblh,                         &
+               &nchem, kdvel, ndvel,                     &
+               &chem, vdep,                              &
+               &rho1, flt,                               &
+               &tcd1, qcd1,                              &
+               &dfh1,                                    &
+               &s_aw1,s_awchem1,                         &
+               &emis_ant_no,                             &
+               &frp, rrfs_sd,                            &
+               &enh_mix, smoke_dbg                       )
        else
-          if (flag_qc) rqcblten(i,:)=0.
-          if (flag_qi) rqiblten(i,:)=0.
-          if (flag_qs) rqsblten(i,:)=0.
-       endif
-       if (bl_mynn_cloudmix > 0 .and. bl_mynn_mixscalars > 0) then
-          if (flag_qnc) rqncblten(i,kts:kte)    =dqnc1(kts:kte)
-          if (flag_qni) rqniblten(i,kts:kte)    =dqni1(kts:kte)
-          if (flag_qnwfa) rqnwfablten(i,kts:kte)=dqnwfa1(kts:kte)
-          if (flag_qnifa) rqnifablten(i,kts:kte)=dqnifa1(kts:kte)
-          if (flag_qnbca) rqnbcablten(i,kts:kte)=dqnbca1(kts:kte)
-       else
-          if (flag_qnc) rqncblten(i,:)    =0.
-          if (flag_qni) rqniblten(i,:)    =0.
-          if (flag_qnwfa) rqnwfablten(i,:)=0.
-          if (flag_qnifa) rqnifablten(i,:)=0.
-          if (flag_qnbca) rqnbcablten(i,:)=0.
-       endif
-       dozone(i,kts:kte)=dozone1(kts:kte)
-       if (icloud_bl > 0) then
-          qc_bl(i,kts:kte)    =qc_bl1D(kts:kte)
-          qi_bl(i,kts:kte)    =qi_bl1D(kts:kte)
-          cldfra_bl(i,kts:kte)=cldfra_bl1D(kts:kte)
-       endif
-       el_pbl(i,kts:kte)=el(kts:kte)
-       qke(i,kts:kte)   =qke1(kts:kte)
-       tsq(i,kts:kte)   =tsq1(kts:kte)
-       qsq(i,kts:kte)   =qsq1(kts:kte)
-       cov(i,kts:kte)   =cov1(kts:kte)
-       sh3d(i,kts:kte)  =sh(kts:kte)
-       sm3d(i,kts:kte)  =sm(kts:kte)
-
-       if (tke_budget .eq. 1) then
-          !! TKE budget is now given in m**2/s**-3 (Puhales, 2020)
-          !! Lower boundary condtions (using similarity relationships such as the prognostic equation for Qke)
-          k=kts
-          qSHEAR1(k)    =4.*(ust(i)**3*phi_m/(karman*dz(i,k)))-qSHEAR1(k+1) !! staggered
-          qBUOY1(k)     =4.*(-ust(i)**3*zet/(karman*dz(i,k)))-qBUOY1(k+1) !! staggered
-          !! unstaggering SHEAR and BUOY and trasfering all TKE budget to 3D array               
-          do k = kts,kte-1
-             qSHEAR(i,k)=0.5*(qSHEAR1(k)+qSHEAR1(k+1)) !!! unstaggering in z
-             qBUOY(i,k) =0.5*(qBUOY1(k)+qBUOY1(k+1)) !!! unstaggering in z
-             qWT(i,k)   =qWT1(k)
-             qDISS(i,k) =qDISS1(k)
-             dqke(i,k)  =(qke1(k)-dqke(i,k))*0.5/delt
-          enddo
-          !! Upper boundary conditions               
-          k=kte
-          qSHEAR(i,k)   =0.
-          qBUOY(i,k)    =0.
-          qWT(i,k)      =0.
-          qDISS(i,k)    =0.
-          dqke(i,k)     =0.
+          call mynn_mix_chem(kts,kte,i,                  &
+               &delt, dz1, pblh,                         &
+               &nchem, kdvel, ndvel,                     &
+               &chem, vdep,                              &
+               &rho1, flt,                               &
+               &tcd1, qcd1,                              &
+               &dfh1,                                    &
+               &s_aw1,s_awchem1,                         &
+               &zero,                                    &
+               &zero, rrfs_sd,                           &
+               &enh_mix, smoke_dbg                       )
        endif
 
-       !update updraft/downdraft properties
-       if (bl_mynn_output > 0) then !research mode == 1
-          if (bl_mynn_edmf > 0) then
-             edmf_a(i,kts:kte)   =edmf_a1(kts:kte)
-             edmf_w(i,kts:kte)   =edmf_w1(kts:kte)
-             edmf_qt(i,kts:kte)  =edmf_qt1(kts:kte)
-             edmf_thl(i,kts:kte) =edmf_thl1(kts:kte)
-             edmf_ent(i,kts:kte) =edmf_ent1(kts:kte)
-             edmf_qc(i,kts:kte)  =edmf_qc1(kts:kte)
-             sub_thl3D(i,kts:kte)=sub_thl(kts:kte)
-             sub_sqv3D(i,kts:kte)=sub_sqv(kts:kte)
-             det_thl3D(i,kts:kte)=det_thl(kts:kte)
-             det_sqv3D(i,kts:kte)=det_sqv(kts:kte)
-          endif
-          !if (bl_mynn_edmf_dd > 0) THEN
-          !   edmf_a_dd(i,kts:kte)  =edmf_a_dd1(kts:kte)
-          !   edmf_w_dd(i,kts:kte)  =edmf_w_dd1(kts:kte)
-          !   edmf_qt_dd(i,kts:kte) =edmf_qt_dd1(kts:kte)
-          !   edmf_thl_dd(i,kts:kte)=edmf_thl_dd1(kts:kte)
-          !   edmf_ent_dd(i,kts:kte)=edmf_ent_dd1(kts:kte)
-          !   edmf_qc_dd(i,kts:kte) =edmf_qc_dd1(kts:kte)
-          !endif
-       endif
-
-       !***  Begin debug prints
-       if ( debug_code .and. (i .eq. idbg)) THEN
-          if ( ABS(QFX(i))>.001)print*,&
-             "SUSPICIOUS VALUES AT: i=",i," QFX=",QFX(i)
-          if ( ABS(HFX(i))>1100.)print*,&
-             "SUSPICIOUS VALUES AT: i=",i," HFX=",HFX(i)
+       do ic = 1,nchem
           do k = kts,kte
-             IF ( sh(k) < 0. .OR. sh(k)> 200.)print*,&
-                "SUSPICIOUS VALUES AT: i,k=",i,k," sh=",sh(k)
-             IF ( ABS(vt(k)) > 2.0 )print*,&
-                "SUSPICIOUS VALUES AT: i,k=",i,k," vt=",vt(k)
-             IF ( ABS(vq(k)) > 7000.)print*,&
-                "SUSPICIOUS VALUES AT: i,k=",i,k," vq=",vq(k)
-             IF ( qke(i,k) < -1. .OR. qke(i,k)> 200.)print*,&
-                "SUSPICIOUS VALUES AT: i,k=",i,k," qke=",qke(i,k)
-             IF ( el_pbl(i,k) < 0. .OR. el_pbl(i,k)> 1500.)print*,&
-                "SUSPICIOUS VALUES AT: i,k=",i,k," el_pbl=",el_pbl(i,k)
-             IF ( exch_m(i,k) < 0. .OR. exch_m(i,k)> 2000.)print*,&
-                "SUSPICIOUS VALUES AT: i,k=",i,k," exxch_m=",exch_m(i,k)
-             IF (icloud_bl > 0) then
-                IF ( cldfra_bl(i,k) < 0.0 .OR. cldfra_bl(i,k)> 1.)THEN
-                   PRINT*,"SUSPICIOUS VALUES: CLDFRA_BL=",cldfra_bl(i,k)," qc_bl=",QC_BL(i,k)
-                ENDIF
-             ENDIF
+             chem(k,ic) = max(1.e-12, chem(k,ic))
+          enddo
+       enddo
+    endif
+ 
+    call retrieve_exchange_coeffs(kts,kte,               &
+         dfm1, dfh1, dz1, km1, kh1                       )
 
-             !IF (I==IMD .AND. J==JMD) THEN
-             !   PRINT*,"MYNN DRIVER END: k=",k," sh=",sh(k)
-             !   PRINT*," sqw=",sqw(k)," thl=",thl(k)," exch_m=",exch_m(i,k)
-             !   PRINT*," xland=",xland(i)," rmol=",rmol(i)," ust=",ust(i)
-             !   PRINT*," qke=",qke(i,k)," el=",el_pbl(i,k)," tsq=",tsq(i,k)
-             !   PRINT*," PBLH=",PBLH(i)," u=",u(i,k)," v=",v(i,k)
-             !   PRINT*," vq=",vq(k)," vt=",vt(k)
-             !ENDIF
-          enddo !end-k
+
+
+    !update the TKE budget
+    if (tke_budget .eq. 1) then
+       !! TKE budget is now given in m**2/s**-3 (Puhales, 2020)
+       !! Lower boundary condtions (using similarity relationships such as the prognostic equation for Qke)
+       k=kts
+       qSHEAR1(k)   = 4.*(ust**3*phi_m/(karman*dz1(k)))-qSHEAR1(k+1) !! staggered
+       qBUOY1(k)    = 4.*(-ust**3*zet/(karman*dz1(k)))-qBUOY1(k+1) !! staggered
+       !! unstaggering SHEAR and BUOY and trasfering all TKE budget to 3D array               
+       do k = kts,kte-1
+          dummy1(k) = half*(qSHEAR1(k)+qSHEAR1(k+1)) !!! unstaggering in z
+          dummy2(k) = half*(qBUOY1(k)+qBUOY1(k+1)) !!! unstaggering in z
+          dqke1(k)  = half*(qke1(k)-dqke1(k))/delt
+       enddo
+       qSHEAR1      = dummy1
+       qBUOY1       = dummy2
+       !! Upper boundary conditions
+       k=kte
+       qSHEAR1(k)   = zero
+       qBUOY1(k)    = zero
+       qWT1(k)      = zero
+       qDISS1(k)    = zero
+       dqke1(k)     = zero
+    endif
+
+    !update updraft/downdraft properties
+    if (bl_mynn_output > 0) then !research mode == 1 or 2
+       !if mode 2, then overwrite updrafts with downdrafts
+       if (bl_mynn_output == 2 .and. bl_mynn_edmf_dd == 1) then
+          edmf_a1(kts:kte)   =edmf_a_dd1(kts:kte)
+          edmf_w1(kts:kte)   =edmf_w_dd1(kts:kte)
+          edmf_qt1(kts:kte)  =edmf_qt_dd1(kts:kte)
+          edmf_thl1(kts:kte) =edmf_thl_dd1(kts:kte)
+          edmf_ent1(kts:kte) =edmf_ent_dd1(kts:kte)
+          edmf_qc1(kts:kte)  =edmf_qc_dd1(kts:kte)
        endif
+    endif
 
-    enddo !end i-loop
+    !***  Begin debug prints
+    if ( debug_code .and. (i .eq. idbg)) THEN
+       if ( ABS(QFX)>.001)print*,&
+          "SUSPICIOUS VALUES AT: i=",i," QFX=",QFX
+       if ( ABS(HFX)>1100.)print*,&
+          "SUSPICIOUS VALUES AT: i=",i," HFX=",HFX
+       do k = kts,kte
+          IF ( sh1(k) < 0. .OR. sh1(k)> 200.)print*,&
+             "SUSPICIOUS VALUES AT: i,k=",i,k," sh=",sh1(k)
+          IF ( ABS(vt1(k)) > 2.0 )print*,&
+             "SUSPICIOUS VALUES AT: i,k=",i,k," vt=",vt1(k)
+          IF ( ABS(vq1(k)) > 7000.)print*,&
+             "SUSPICIOUS VALUES AT: i,k=",i,k," vq=",vq1(k)
+          IF ( qke1(k) < -1. .OR. qke1(k)> 200.)print*,&
+             "SUSPICIOUS VALUES AT: i,k=",i,k," qke=",qke1(k)
+          IF ( el1(k) < 0. .OR. el1(k)> 1500.)print*,&
+             "SUSPICIOUS VALUES AT: i,k=",i,k," el1=",el1(k)
+          IF ( km1(k) < 0. .OR. km1(k)> 2000.)print*,&
+             "SUSPICIOUS VALUES AT: i,k=",i,k," km=",km1(k)
+          IF (icloud_bl > 0) then
+             IF (cldfra_bl1(k) < zero .OR. cldfra_bl1(k)> one)THEN
+                PRINT*,"SUSPICIOUS VALUES: CLDFRA_BL=",cldfra_bl1(k),&
+                                             " qc_bl=",qc_bl1(k)
+             endif
+          endif
+       enddo !end-k
+    endif
 
-!ACF copy qke into qke_adv if using advection
-    IF (bl_mynn_tkeadvect) THEN
-       qke_adv=qke
-    ENDIF
-!ACF-end
+    !ACF copy qke into qke_adv if using advection
+    qke_adv1(kts:kte)=qke1(kts:kte)
 
 #ifdef HARDCODE_VERTICAL
 # undef kts
 # undef kte
 #endif
 
-    !call cpu_time(finish)
-    !print '("Time for MYNN driver (C++) = ",f6.3," seconds.")',finish-start
-
-
-    END SUBROUTINE mynn_bl_driver
+  END SUBROUTINE mynnedmf
 !> @}
 
 
@@ -2395,7 +1635,7 @@ CONTAINS
 !                         defined by c_p*( p_basic/1000hPa )^kappa
 !                         This is usually computed by integrating
 !                         d(pi0)/dz = -h*g/tref.
-!       rmo(nx)         : Inverse of the Obukhov length         (m^(-1))
+!       rmol(nx)        : Inverse of the Obukhov length         (m^(-1))
 !       flt, flq(nx)    : Turbulent fluxes of potential temperature and
 !                         total water, respectively:
 !                                    flt=-u_*Theta_*             (K m/s)
@@ -2779,12 +2019,12 @@ CONTAINS
   SUBROUTINE  mym_length (                     & 
     &            kts,kte,xland,                &
     &            dz, dx, zw,                   &
-    &            rmo, flt, fltv, flq,          &
+    &            rmo, flt, fltv, flq,         &
     &            vt, vq,                       &
     &            u1, v1, qke,                  &
     &            dtv,                          &
     &            el,                           &
-    &            zi, theta, qkw,               &
+    &            zi, theta, qkw,             &
     &            psig_bl, cldfra_bl1D,         &
     &            bl_mynn_mixlength,            &
     &            edmf_w1,edmf_a1               )
@@ -4277,8 +3517,10 @@ CONTAINS
     b(kte)=1.
     c(kte)=0.
     d(kte)=qke(kte)
+
 !    CALL tridiag(kte,a,b,c,d)
     CALL tridiag2(kte,a,b,c,d,x)
+
     DO k=kts,kte
 !       qke(k)=max(d(k-kts+1), qkemin)
        qke(k)=max(x(k), qkemin)

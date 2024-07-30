@@ -245,6 +245,7 @@ SUBROUTINE mynnedmf_wrapper_run(                 &
       real(kind_phys), dimension(ims:ime)                 :: dx
       logical, parameter                                  :: debug = .false.
       real(kind_phys), dimension(ims:ime,kms:kme,jms:jme) :: ozone,rO3blten
+!      real :: start, finish
 
    !write(0,*)"=============================================="
    !write(0,*)"in mynn wrapper..."
@@ -516,7 +517,7 @@ SUBROUTINE mynnedmf_wrapper_run(                 &
          print*,"max cf_bl:",maxval(cldfra_bl(its,:,j))
       endif
 
-!print*,"In mynn wrapper, calling mynn_bl_driver"
+!      call cpu_time(start)
               CALL  mynn_bl_driver(                                    &
      &        initflag=initflag,restart=restart,cycling=cycling,       &
      &        delt=delt,dz=dz(:,:,j),dx=dx,znt=znt(:,j),               &
@@ -583,6 +584,9 @@ SUBROUTINE mynnedmf_wrapper_run(                 &
      &        IMS=ims,IME=ime,JMS=jms,JME=jme,KMS=kms,KME=kme,         & !input
      &        ITS=its,ITE=itf,JTS=jts,JTE=jtf,KTS=kts,KTE=kte)           !input
 !print*,"In mynn wrapper, after bl_mynn"
+!     call cpu_time(finish)
+!     write(*,*) finish-start, "seconds in mynn driver (C++)"
+
 
      !- Convert spec hum to mixing ratio:
       do k=kts,ktf
